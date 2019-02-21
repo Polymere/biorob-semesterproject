@@ -14,7 +14,7 @@
 1. Determine which parameters to study (literature)
 
 	- Muscle reflex model :
-	
+
 	![Alt text](figures/musclereflexparam.svg)
 
 	- CPG + muscle reflex :
@@ -48,6 +48,3 @@ Once the best set of parameters to fit the data is found, evaluate :
 1. Gait similarity (parameters not considered in fitness function)
 2. EMG values
 3. Biological interpretation
-
-
-[musclereflexparam] : musclereflexparam.svg
