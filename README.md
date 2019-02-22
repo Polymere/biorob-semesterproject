@@ -14,10 +14,15 @@
 1. Determine which parameters to study (literature)
 
 	- Muscle reflex model :
+	![Muscle reflex model parameters](/media/shared/EPFL/MA3/BIOROB_project/myrepo/figures/reflex_params.png)
 
-	![Alt text](figures/musclereflexparam.svg)
+
 
 	- CPG + muscle reflex :
+	![Muscle reflex + CPG model parameters](/media/shared/EPFL/MA3/BIOROB_project/myrepo/figures/reflex_cpg_params.png)
+
+
+
 
 2. Simulate the model with these parameters set to zero (or minimal bound value)
 
