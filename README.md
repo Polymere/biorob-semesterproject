@@ -16,7 +16,7 @@
 	- Muscle reflex model :
 
 
-	![Muscle reflex model parameters](./figures/reflex_params.png)
+	![Muscle reflex model parameters [@Geyer2010AMM]](./figures/reflex_params.png)
 
 
 
