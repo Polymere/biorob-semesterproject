@@ -14,11 +14,15 @@
 1. Determine which parameters to study (literature)
 
 	- Muscle reflex model :
+
+
 	![Muscle reflex model parameters](./figures/reflex_params.png)
 
 
 
 	- CPG + muscle reflex :
+
+
 	![Muscle reflex + CPG model parameters](./figures/reflex_cpg_params.png)
 
 
