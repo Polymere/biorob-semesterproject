@@ -17,7 +17,7 @@
 
 
 	![Muscle reflex model parameters [@Geyer2010AMM]](./figures/reflex_params.png)
-
+	![Muscle reflex model parameters interpretation [@Geyer2010AMM]](./figures/table_muscle_params.dvi)
 
 
 	- CPG + muscle reflex :
