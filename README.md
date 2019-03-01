@@ -47,6 +47,7 @@
 		- Joint torques 
 		- stride
 4. Which GA (explore DEAP library (python))
+	- Multi-objective optimization algorithm (NSGA-II ?)
 5. Melt 3 clusters until good fit
 
 
