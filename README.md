@@ -51,7 +51,8 @@
 ### 3b. Alternative : Optimize model with pathological constraints
 
 Idea would be to remove some components of the model in order to characterize a pathology (eg. ankle angle feedback for diabetes), and evolve the model from there.
-The goal would be to see if we observe a similar gait (eg. flat footed for diabetes) 
+The goal would be to see if we observe a similar gait (eg. flat footed for diabetes).
+For the muscle-reflex model (FBL), this could correspond (?) of setting $G_{TA}$ to zero  (gain for TA length feedback)
 
 ### 4. Evaluate
 
