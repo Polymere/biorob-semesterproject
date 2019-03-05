@@ -16,7 +16,7 @@
 	- Muscle reflex model :
 
 
-	![Muscle reflex model parameters [@Geyer2010AMM]](./figures/reflex_params.png)
+	<!--![Muscle reflex model parameters [@Geyer2010AMM]](./figures/reflex_params.png)-->
 	![Muscle reflex model parameters interpretation [@Geyer2010AMM]](./figures/table_param_muscle.svg)
 
 
@@ -32,18 +32,29 @@
 
 	As the minimum bound value is not a mathematical constraint, it would be safe to test values below (test zeros), to see how the model behaves
 
+	> See how/which data is saved, and how I can import it with python
+
 	
 3. Compare with the optimized model, both visually (is it still working/stable) and numerically (similitudes on joint angles/position, muscle activations...) -> see what is applicable
+	- Energy (cost of travel)
+	- Similarity in angles, torques
+	- Stride lenght
+	- Stability (just binary or is there a metric ?)
+	- Speed
+	- Impact of terrain
+
+4. Implement result analysis/plotting functions
 
 ### 3. Fitting model to experimental data
 
 1. Select data (MOCAP) from a real subject (healthy/pathological)
 2. Pre-process (normalize stride lenght, maybe mean values)
-3. Fitness function (start with RMS error)
-	- What are we trying to fit ?
-		- Joint angles
-		- Joint torques 
-		- stride
+3. Fitness function
+	- Multi-objective optimization
+	 	- similarity in angles/torques
+	 	- maximize speed
+	 	- minimize energy
+	 	- maximize stability (worst measure with different terrains)
 4. Which GA (explore DEAP library (python))
 	- Multi-objective optimization algorithm (NSGA-II ?)
 5. Melt 3 clusters until good fit
