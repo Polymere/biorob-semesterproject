@@ -50,6 +50,10 @@
 	- Multi-objective optimization algorithm (NSGA-II ?)
 5. Melt 3 clusters until good fit
 
+### 3b. Alternative : Optimize model with pathological constraints
+
+Idea would be to remove some components of the model in order to characterize a pathology (eg. ankle angle feedback for diabetes), and evolve the model from there.
+The goal would be to see if we observe a similar gait (eg. flat footed for diabetes) 
 
 ### 4. Evaluate
 
