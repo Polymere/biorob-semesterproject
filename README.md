@@ -5,8 +5,8 @@
 ### 1. Setting up the environment for desktop + laptop
 - Webots -> OK
 - Matlab ?
-- Python 
-- Other ?
+- Python  -> OK, see ./config
+- Other : Mokka ?
 
 ### 2. Parameter influence
  Evaluate the influence of the tunable parameters on the gait, both for the muscle reflex model and CPG+reflex model.
@@ -30,10 +30,8 @@
 
 2. Simulate the model with these parameters set to zero (or minimal bound value)
 
-	> Is the minimal value a mathematical constraint or a physiological constraint ?
+	As the minimum bound value is not a mathematical constraint, it would be safe to test values below (test zeros), to see how the model behaves
 
-	In the first case, we should take it into account (avoid singularity), and use the minimal value instead of 0. In the second case, 
-	we should test both.
 	
 3. Compare with the optimized model, both visually (is it still working/stable) and numerically (similitudes on joint angles/position, muscle activations...) -> see what is applicable
 
