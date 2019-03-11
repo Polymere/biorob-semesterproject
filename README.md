@@ -74,3 +74,11 @@ Once the best set of parameters to fit the data is found, evaluate :
 3. Biological interpretation
 
 ![](./figures/biblio.svg)
+
+## Progress
+
+- Weeks 1-3 : litterature review, project organisation and environment setup
+- Week 4 : 
+	- Import a run result from raw files (maybe refactor a bit the logger to write in a single csv file)
+	- Launch a batch of runs with different parameters
+	- Plot the results
