@@ -13,8 +13,10 @@ def file_list(path,recursive=False,file_format="any_file"):
 		if len(path)==1:
 			is_file=True
 			path=path[0] # unfold path (result from filter was a list)
+			is_dir=False
 		elif len(path)==0:
 			print("No file with extension",file_format,"in",path)
+			is_dir=False
 		else:
 			is_dir=True
 	if is_dir:

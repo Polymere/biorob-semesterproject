@@ -9,13 +9,28 @@ Inputs :
 import utils.file_utils as fu
 import data_analysis.import_run as imp
 import sys
-from shutil import copy
+from shutil import copy,copyfile
 import os
-#def launch_run(fold_number,parameter_file,world_file):
+import subprocess
+"""
 
+"""
+H2D_SRC_DIR="/data/prevel/human_2d"
 
-CONTROLLERPATH="/data/prevel/human_2d/webots/controllers/GeyerReflex"
-STATIC_OUTPUT_DIRPATH=CONTROLLERPATH+"/Raw_files"
+CONTROLLER_RPATH="webots/controllers/GeyerReflex"
+
+PARAMFILE_RPATH="modeling/configFiles/current.yaml"
+WORLD_RPATH="webots/worlds/current.wbt"
+
+CONTROLLER_ABSPATH=os.path.join(H2D_SRC_DIR,CONTROLLER_RPATH)
+PARAMFILE_ABSPATH=os.path.join(H2D_SRC_DIR,PARAMFILE_RPATH)
+WORLD_ABSPATH=os.path.join(H2D_SRC_DIR,WORLD_RPATH)
+SIM_OUTPUTDIR_RPATH=os.path.join(CONTROLLER_ABSPATH,"Raw_files")
+
+def launch_run(parameter_file=None,world_file=None):
+
+	subprocess.run(["webots", "--mode=fast", "--batch", WORLD_ABSPATH])
+
 if __name__ == '__main__':
 	if len(sys.argv)==5:
 
@@ -37,18 +52,21 @@ if __name__ == '__main__':
 		world_counter=1
 
 		for parameter_file in parameter_files:
+			
 			param_filepath=os.path.join(parameter_dirpath,parameter_file)
 			param_dir=os.path.join(result_dir,("param"+str(param_counter)))
 			fu.assert_dir(param_dir)
 			copy(param_filepath, param_dir)
+			copyfile(param_filepath,PARAMFILE_ABSPATH)
 			for world_file in world_files:
 				world_filepath=os.path.join(world_dirpath,world_file)
 				world_dir=os.path.join(param_dir,("world"+str(world_counter)))
 				fu.assert_dir(world_dir)
 				copy(world_filepath, world_dir)
+				copyfile(world_filepath,WORLD_ABSPATH)
 				for fold in range(nfolds):
-					#launch_run(fold,param_filepath,world_filepath)
-					imp.import_run(STATIC_OUTPUT_DIRPATH,save_path=world_dir,save_name="run"+str(fold))
+					launch_run(param_filepath,world_filepath)
+					imp.import_run(SIM_OUTPUTDIR_RPATH,save_path=world_dir,save_name="run"+str(fold))
 				world_counter=world_counter+1
 			param_counter=param_counter+1
 
@@ -56,6 +74,7 @@ if __name__ == '__main__':
 
 
 	else:
+		launch_run()
 		print("Arguments should be param_file, nfolds,worlds,result_dir")
 		
 
