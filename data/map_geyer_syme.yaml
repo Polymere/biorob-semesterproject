@@ -4,8 +4,9 @@ G_SOL: {w_for_stance_soleus_r,w_for_stance_soleus_l}
 G_VAS: {w_for_stance_vas_int_r,w_for_stance_vas_int_}
 G_GAS: {w_for_stance_med_gas_r,w_for_stance_med_gas_l}
 
-G_TA: {w_len_stance_tib_ant_r,w_len_stance_tib_ant_l}
-l_off_TA: {l_off_stance_tib_ant_r,l_off_stance_tib_ant_l}
+# For both stance  and swing
+G_TA: {w_len_stance_tib_ant_r,w_len_stance_tib_ant_l,w_len_swing_tib_ant_r,w_len_swing_tib_ant_l}
+l_off_TA: {l_off_stance_tib_ant_r,l_off_stance_tib_ant_l,w_len_swing_tib_ant_l,w_len_swing_tib_ant_r}
 
 G_SOL_TA: {w_for_solta_stance_l,w_for_solta_stance_r}
 
@@ -23,9 +24,20 @@ phik_off: {phik_off_r,phik_off_l}
 
 S_0_VAS: {s0_vas_int_r,s0_vas_int_l}
 # Prestimulation for GAS,SOL and TA. Are not linked in default params ! 
+# Not a really important parameter afaik, is ok to have them linked (but if we observe big impact, test with unlinked)
 S_0_M: {s0_med_gas_r,s0_med_gas_l,s0_soleus_r,s0_soleus_l,s0_tib_ant_r,s0_tib_ant_l}
 # Prestimulations for GLU,HAM (bifem),HFL(psoas)
 S_0_BAL: {s0_glut_max_l,s0_glut_max_r,s0_psoas_l,s0_psoas_r,s0_bifemlh_l,s0_bifemlh_r}
+
+# Separated S_0_M
+S_0_GAS: {s0_med_gas_r,s0_med_gas_l}
+S_0_SOL: {s0_soleus_r,s0_soleus_l}
+S_0_TA: {s0_tib_ant_r,s0_tib_ant_l}
+# Separated S_0_BAL
+S_0_GLU: {s0_glut_max_l,s0_glut_max_r}
+S_0_HAM: {s0_bifemlh_l,s0_bifemlh_r}
+S_0_HFL: {s0_psoas_l,s0_psoas_r }
+
 
 #SWING
 
