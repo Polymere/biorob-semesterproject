@@ -3,13 +3,18 @@ import sys
 from shutil import rmtree
 
 def file_list(path,recursive=False,file_format="any_file"):
+	"""
+	Returns a list with absolute path to allfiles with 
+	extension file_format in directory path.
+	If path is not a directory (single file), returns the path to this file
+	"""
 	print("Listing files in",path)
 	print(os.listdir(path))
 	if file_format=="any_file":
 		is_file=os.path.isfile(path)
 		is_dir=os.path.isdir(path)
 	else:
-		path=[f for f in os.listdir(path) if f.endswith(file_format)]
+		path=[os.path.join(path,f) for f in os.listdir(path) if f.endswith(file_format)]
 		if len(path)==1:
 			is_file=True
 			path=path[0] # unfold path (result from filter was a list)
@@ -30,12 +35,18 @@ def file_list(path,recursive=False,file_format="any_file"):
 		print("Nothing in ", path)
 		return None
 def assert_dir(dir_path,should_be_empty=True):
+	"""
+	Checks if dir_path leads to an existing directory. 
+	If the directory already exist and should be empty, waits for input to clear it
+	Otherwise create the directory (and parents if nested)
+	"""
 	if os.path.isdir(dir_path):
-		if file_list(dir_path)is not None and should_be_empty:
+		if len(file_list(dir_path))>0 and should_be_empty:
 			msg="Directory:"+str(dir_path)+"is not empty. Remove files? Y/N \n"
 			remove=input(msg)
 			if remove=="Y":
 				rmtree(dir_path)
+				os.makedirs(dir_path)
 		return
 	else:
 		print("Creating directory",dir_path)

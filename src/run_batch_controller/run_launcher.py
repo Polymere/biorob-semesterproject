@@ -1,10 +1,39 @@
 """
 Launching a run with
+
+
 Inputs : 
 	Parameter file eg. '../../../modeling/configFiles/geyer-structured-ISB.yaml' or paramter files folder
 	Number of folds for each parameter set
 	Worlds to test (if we optimize of different terrain/slopes)
 	Run result output directory
+
+
+	The result directory structure is as follows
+	result_dir
+		/param1
+			param1_file.yaml
+			/world1
+				world1_file.wbt
+				run1.csv
+				run2.csv
+				...
+			/world2
+				...
+		/param2
+
+		...
+
+EXAMPLE:
+python run_launcher.py /data/prevel/trial/param_folder \
+4 \
+/data/prevel/trial/worlds_folder \
+/data/prevel/trial/result 
+
+python run_launcher.py /data/prevel/params/completed \
+1 \
+/data/prevel/trial/worlds_folder \
+/data/prevel/trial/result 
 """
 import utils.file_utils as fu
 import data_analysis.import_run as imp
@@ -52,21 +81,25 @@ if __name__ == '__main__':
 		world_counter=1
 
 		for parameter_file in parameter_files:
-			
+
 			param_filepath=os.path.join(parameter_dirpath,parameter_file)
 			param_dir=os.path.join(result_dir,("param"+str(param_counter)))
 			fu.assert_dir(param_dir)
-			copy(param_filepath, param_dir)
-			copyfile(param_filepath,PARAMFILE_ABSPATH)
+			copy(param_filepath, param_dir) 
+			# save current param file in result/param folder
+			copyfile(param_filepath,PARAMFILE_ABSPATH) 
+			# copy current  param file to PARAMFILE_ABSPATH (replace the file to change current run parameters)
 			for world_file in world_files:
 				world_filepath=os.path.join(world_dirpath,world_file)
 				world_dir=os.path.join(param_dir,("world"+str(world_counter)))
 				fu.assert_dir(world_dir)
 				copy(world_filepath, world_dir)
+				# save current world file in result/param/world folder
 				copyfile(world_filepath,WORLD_ABSPATH)
+				# copy current  world file to WORLD_ABSPATH (replace the file to change current run world)
 				for fold in range(nfolds):
 					launch_run(param_filepath,world_filepath)
-					imp.import_run(SIM_OUTPUTDIR_RPATH,save_path=world_dir,save_name="run"+str(fold))
+					imp.import_run(SIM_OUTPUTDIR_RPATH,save_path=world_dir,save_name="run"+str(fold+1))
 				world_counter=world_counter+1
 			param_counter=param_counter+1
 
