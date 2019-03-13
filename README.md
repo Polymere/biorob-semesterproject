@@ -82,6 +82,24 @@ Once the best set of parameters to fit the data is found, evaluate :
 	- Import a run result from raw files (maybe refactor a bit the logger to write in a single csv file) DONE
 	- Launch a batch of runs DONE
 	- Generated different parameters files, by modifying single parameters DONE
+	- Improve param file generations (bound parameters, aliases) DONE
 	- Write higher level script for param file generation
 	- Select parameters and values
 	- Plot the results
+
+## Running the code
+
+### Dependencies
+
+Additional python packages dependencies are :
+	- pandas (handling the data)
+These dependencies where installed in a conda environment, which can be installed with:
+  `conda create --name <env> --file config/biorob_proj.txt`
+
+### Environment
+
+The src folder should be added to the PYTHON_PATH
+`export PYTHONPATH=$PYTHONPATH:path/to/repo/src`
+
+### Scripts
+TODO
