@@ -107,7 +107,7 @@ if __name__ == '__main__':
 
 
 	else:
-		launch_run()
+		
 		print("Arguments should be param_file, nfolds,worlds,result_dir")
 		
 

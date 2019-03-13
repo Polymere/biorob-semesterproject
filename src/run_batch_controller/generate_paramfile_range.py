@@ -17,7 +17,7 @@ python generate_paramfile_range.py \
 phik_off \
 range \
 /data/prevel/params/gen_param \
-0 1 2
+0 1 2o
 """
 
 
@@ -26,8 +26,6 @@ def gen_file(file_path,param,value):
 	 	
 	with open(file_path, 'w') as outfile:
 		yaml.dump(result,outfile)
-
-
 
 if __name__ == '__main__':
 	if len(sys.argv)>1:
@@ -59,10 +57,3 @@ if __name__ == '__main__':
 				file_path=os.path.join(param_dir,(param_name+str(file_counter)+".yaml"))
 				gen_file(file_path,param_name,float(val))
 				file_counter+=1
-
-
-
-
-
-
-

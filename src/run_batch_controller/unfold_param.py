@@ -16,6 +16,28 @@ import copy
 import os
 import utils.file_utils as fu
 
+BOUND_VALUES_FILE="/data/prevel/params/bound_values1.yaml"
+
+MAP_VALUE_FILE="/data/prevel/params/map_geyer_syme.yaml"
+
+
+def complete_map_value(folded_file):
+	values=yaml.load(open(folded_file,'r'))
+
+	unfolded_values={}
+	map_file=yaml.load(open(MAP_VALUE_FILE,'r'))
+	for param_name,param_value in values.items():
+		try:
+			keys=map_file[param_name]
+		except KeyError:
+			print("Parameter \t",param_name,"not found in \t",MAP_VALUE_FILE)
+		for key in keys:
+			unfolded_values[key]=param_value
+		if param_name=="kp":
+			for key in map_file["063kp"]:
+				unfolded_values[key]=0.63*param_value
+	return unfolded_values
+
 def unfold(folded_file,complete_symmetry=True):
 	values=yaml.load(open(folded_file,'r'))
 	unfolded_values={}
@@ -58,8 +80,11 @@ def compare_files(reference_file,verbose=False,test_file=None,test_dict=None):
 def create_file(folded_file,reference_file,result_file,verbose=False):
 	if verbose:
 		print("Unfolding file",folded_file,"to",result_file,"\n")
-	unfolded=unfold(folded_file)
-	compare_files(reference_file,verbose=True,test_dict=unfolded)
+
+
+	#unfolded=unfold(folded_file)
+	unfolded=complete_map_value(folded_file)
+	compare_files(reference_file,verbose=False,test_dict=unfolded)
 
 	reference=yaml.load(open(reference_file,'r'))
 	result=copy.deepcopy(reference)
@@ -72,7 +97,7 @@ def create_file(folded_file,reference_file,result_file,verbose=False):
 			print("Unknown error ",e)
 			pass
 	with open(result_file, 'w') as outfile:
-		yaml.dump(result,outfile)
+		yaml.dump(result,outfile,default_flow_style=False)
 
 
 if __name__ == '__main__':
@@ -85,7 +110,7 @@ if __name__ == '__main__':
 		for folded_file in files:
 			file_name=os.path.basename(folded_file)
 			result_file=os.path.join(result_params_dir,file_name)
-			create_file(folded_file, reference_file, result_file,verbose=True)
+			create_file(folded_file, reference_file, result_file,verbose=False)
 
 
 		
