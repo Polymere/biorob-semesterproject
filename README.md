@@ -81,5 +81,7 @@ Once the best set of parameters to fit the data is found, evaluate :
 - Week 4 : 
 	- Import a run result from raw files (maybe refactor a bit the logger to write in a single csv file) DONE
 	- Launch a batch of runs DONE
-	-  Generated different parameters files, by modifying single parameters (test zero/min/max)
+	- Generated different parameters files, by modifying single parameters DONE
+	- Write higher level script for param file generation
+	- Select parameters and values
 	- Plot the results
