@@ -38,19 +38,23 @@ def assert_dir(dir_path,should_be_empty=True):
 	"""
 	Checks if dir_path leads to an existing directory. 
 	If the directory already exist and should be empty, waits for input to clear it
+	If the path syntax correspond to a file, extract the dir path and check if it exists (recursive)
 	Otherwise create the directory (and parents if nested)
 	"""
-	if os.path.isdir(dir_path):
+	#print("Asserting directory",dir_path)
+	#aaa=input("Proceed Y/N")
+	#if aaa!="Y":
+	#	return
+
+	if os.path.exists(dir_path):
 		if len(file_list(dir_path))>0 and should_be_empty:
-			msg="Directory:"+str(dir_path)+"is not empty. Remove files? Y/N \n"
+			msg="Directory:\t "+str(dir_path)+" \t is not empty. Remove files? Y/N \n"
 			remove=input(msg)
 			if remove=="Y":
 				rmtree(dir_path)
 				os.makedirs(dir_path)
-		return
-	elif os.path.basename(dir_path):
-		dir_path=os.path.dirname(dir_path)
-		assert_dir(dir_path,should_be_empty=True)
+			else:
+				return
 	else:
 		print("Creating directory",dir_path)
 		os.makedirs(dir_path) 
@@ -94,11 +98,9 @@ def concat_field(file_name,suffix):
 	concat_lst=[]
 	for field in suffix:
 
-		if field=="\n":
-		#	print("Removing line break")
-			pass
-		else:
+		if field!="\n":
 			field=field.replace('\n','')
 			#print(file_name)
 			concat_lst.append(file_name+"_"+field)
+			
 	return concat_lst
