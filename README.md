@@ -83,6 +83,7 @@ Once the best set of parameters to fit the data is found, evaluate :
 	- Launch a batch of runs DONE
 	- Generated different parameters files, by modifying single parameters DONE
 	- Improve param file generations (bound parameters, aliases) DONE
+	- Add reverse mapping (in order to have a cleaner param file to read)
 	- Write higher level script for param file generation
 	- Select parameters and values
 	- Plot the results
@@ -92,13 +93,17 @@ Once the best set of parameters to fit the data is found, evaluate :
 ### Dependencies
 
 Additional python packages dependencies are :
-	- pandas (handling the data)
+
+- pandas (handling the data)
+
 These dependencies where installed in a conda environment, which can be installed with:
-  `conda create --name <env> --file config/biorob_proj.txt`
+  
+`conda create --name <env> --file config/biorob_proj.txt`
 
 ### Environment
 
 The src folder should be added to the PYTHON_PATH
+
 `export PYTHONPATH=$PYTHONPATH:path/to/repo/src`
 
 ### Scripts
