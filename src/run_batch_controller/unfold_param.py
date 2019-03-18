@@ -5,9 +5,6 @@ python unfold_param.py \
 /data/prevel/params/gen_param \
 /data/prevel/params/completed
 
-
-
-
 """
 
 import yaml
@@ -16,9 +13,9 @@ import copy
 import os
 import utils.file_utils as fu
 
-BOUND_VALUES_FILE="/data/prevel/params/bound_values1.yaml"
 
-MAP_VALUE_FILE="/data/prevel/params/map_geyer_syme.yaml"
+
+MAP_VALUE_FILE="/data/prevel/repos/biorob-semesterproject/data/map_geyer_syme.yaml"
 
 
 def complete_map_value(folded_file):
@@ -38,15 +35,6 @@ def complete_map_value(folded_file):
 				unfolded_values[key]=0.63*param_value
 	return unfolded_values
 
-def unfold(folded_file,complete_symmetry=True):
-	values=yaml.load(open(folded_file,'r'))
-	unfolded_values={}
-	if complete_symmetry:
-		for param_name,param_value in values.items():
-			if param_name[-2:] !="_r" and param_name[-2:] !="_l":
-				unfolded_values[param_name+'_r']=param_value
-				unfolded_values[param_name+'_l']=param_value
-	return unfolded_values
 
 
 
@@ -81,8 +69,6 @@ def create_file(folded_file,reference_file,result_file,verbose=False):
 	if verbose:
 		print("Unfolding file",folded_file,"to",result_file,"\n")
 
-
-	#unfolded=unfold(folded_file)
 	unfolded=complete_map_value(folded_file)
 	compare_files(reference_file,verbose=False,test_dict=unfolded)
 
@@ -99,23 +85,21 @@ def create_file(folded_file,reference_file,result_file,verbose=False):
 	with open(result_file, 'w') as outfile:
 		yaml.dump(result,outfile,default_flow_style=False)
 
-
+def complete_files(folded_dir,reference_file,result_dir):
+	fu.assert_dir(folded_dir,should_be_empty=False)
+	fu.assert_dir(result_dir,should_be_empty=True)
+	for folded_file in fu.file_list(folded_dir,file_format=".yaml"):
+		file_name=os.path.basename(folded_file)
+		result_file=os.path.join(result_dir,file_name)
+		create_file(folded_file,reference_file,result_file,verbose=False)
+		
 if __name__ == '__main__':
 	if len(sys.argv)==4:
 		reference_file=sys.argv[1]
-		folded_file=sys.argv[2] # can be either file or dir
-		files=fu.file_list(folded_file,file_format=".yaml")
+		folded_path=sys.argv[2] # can be either file or dir
 		result_params_dir=sys.argv[3]
-		fu.assert_dir(result_params_dir,should_be_empty=True)
-		for folded_file in files:
-			file_name=os.path.basename(folded_file)
-			result_file=os.path.join(result_params_dir,file_name)
-			create_file(folded_file, reference_file, result_file,verbose=False)
+		complete_files(folded_path, reference_file, result_params_dir)
 
-
-		
-		
-		#unfolded=unfold(folded_file)
-		#print(unfolded.keys())
-		compare_files(reference_file,test_file=result_file,verbose=True)
+		for result_file in fu.file_list(result_params_dir,file_format=".yaml"):
+			compare_files(reference_file,test_file=result_file,verbose=True)
 
