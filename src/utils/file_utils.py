@@ -48,6 +48,9 @@ def assert_dir(dir_path,should_be_empty=True):
 				rmtree(dir_path)
 				os.makedirs(dir_path)
 		return
+	elif os.path.basename(dir_path):
+		dir_path=os.path.dirname(dir_path)
+		assert_dir(dir_path,should_be_empty=True)
 	else:
 		print("Creating directory",dir_path)
 		os.makedirs(dir_path) 
@@ -90,10 +93,12 @@ def assert_file_exists(file_path,should_exist):
 def concat_field(file_name,suffix):
 	concat_lst=[]
 	for field in suffix:
+
 		if field=="\n":
 		#	print("Removing line break")
 			pass
 		else:
-			print(file_name)
+			field=field.replace('\n','')
+			#print(file_name)
 			concat_lst.append(file_name+"_"+field)
 	return concat_lst
