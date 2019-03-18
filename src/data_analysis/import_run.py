@@ -13,6 +13,11 @@ CSV_SAVE_DIR="/data/prevel/repos/biorob-semesterproject/data"
 
 def import_run(path,verbose=False,save_to_single=True,save_name="default_name",save_path="."):
 	first_call=True
+	if verbose:
+		print("-------------------------------\n")
+		print ("Importing files in",path,"\n")
+		print("Saving as",save_name," in",save_path,"\n")
+		print("-------------------------------\n")
 	
 	for file_path in fu.file_list(path):
 
@@ -70,7 +75,35 @@ def export_single_file(data,fields,outputname,outputdir,first_call,verbose=False
 		df[fields[col]]=data[:,col]
 	df.to_csv(file_path,index=False)
 
+def parse_field(field):
+	if field[-2:]=="_r":
+		side="right"
+		metric=field[:-2]
+	elif field[-2:]=="_l":
+		side="left"
+		metric=field[:-2]
+	#elif fi
 
+def export_multi_index(data,fields,outputname,outputdir,first_call,verbose=False):
+	file_path=os.path.join(outputdir,outputname)
+	file_path=file_path+".csv"
+	if first_call:
+		fu.assert_file_exists(file_path, should_exist=False)
+		df=pd.DataFrame()
+	else:
+		fu.assert_file_exists(file_path, should_exist=True)
+		df=pd.read_csv(file_path)
+		length,width=data.shape
+	if width != len(fields):
+		print("Dimension mismatch", width,len(fields))
+		print ("--------------------------------------------")
+		print (data[:,0])
+		print ("--------------------------------------------")
+		print (fields)
+		print ("--------------------------------------------")
+		return
+	for col in range(width):
+		df[fields[col]]=data[:,col]
 
 
 if __name__=="__main__":

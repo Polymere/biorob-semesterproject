@@ -17,11 +17,17 @@ import pandas as pd
 import sys
 import utils.file_utils as fu
 
+TIME_STEP=1.0 #ms
 
 def compute_df(raw_file,process_params):
 
 	data_in=pd.read_csv(open(raw_file))
 	data_out=pd.DataFrame(data_in.index)
+	
+	data_out["time"]=data_in.index*TIME_STEP
+	activation=data_in.filter(like="act",axis=1)
+
+	data_out["energy"]=activation.sum(axis=1,skipna=True)
 	print (data_in)
 	print(data_out)
 if __name__ == '__main__':
