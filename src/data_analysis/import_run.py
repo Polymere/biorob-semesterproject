@@ -19,9 +19,9 @@ def import_run(path,verbose=False,save_to_single=True,save_name="default_name",s
 		print("Saving as",save_name," in",save_path,"\n")
 		print("-------------------------------\n")
 	
-	for file_path in fu.file_list(path):
+	for file_path in fu.file_list(path,file_format=".txt"):
 
-		array,header=import_file(file_path,verbose=False)
+		array,header=import_file(file_path,verbose=verbose)
 		if save_to_single:
 			file=os.path.basename(file_path) # just the file name
 			file=os.path.splitext(file)[0] # remove extension
@@ -108,14 +108,18 @@ def export_multi_index(data,fields,outputname,outputdir,first_call,verbose=False
 
 if __name__=="__main__":
 	if len(sys.argv)==2:
-		data=import_run(sys.argv[1], verbose=False, save_path=CSV_SAVE_DIR)
-		#length,width=data.shape
-		#for field in range(width):
-		#	plt.plot(data[:,field])
-		#plt.show()
+		import_run(sys.argv[1], verbose=False, save_path=CSV_SAVE_DIR)
+
+	if len(sys.argv)==3:
+		"""
+		python import_run.py /data/prevel/Raw_files_reference /data/prevel/runs/078_17:26/result/reference
+		
+		"""
+
+		import_run(sys.argv[1], verbose=True, save_path=sys.argv[2])
+
 	elif len(sys.argv)<2:
 		print("Not enough args, should have at least one run path", sys.argv)
 		
 	else:
 		print ("Args are ", sys.argv,"multiple run import not implemented yet")
-		
