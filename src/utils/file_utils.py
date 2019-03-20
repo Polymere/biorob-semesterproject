@@ -1,6 +1,7 @@
 import os
 import sys
 from shutil import rmtree
+from functools import reduce
 
 def file_list(path,recursive=False,file_format="any_file"):
 	"""
@@ -10,11 +11,16 @@ def file_list(path,recursive=False,file_format="any_file"):
 	"""
 	print("Listing files in",path)
 	print(os.listdir(path))
+
 	if file_format=="any_file":
 		is_file=os.path.isfile(path)
 		is_dir=os.path.isdir(path)
 	else:
-		path=[os.path.join(path,f) for f in os.listdir(path) if f.endswith(file_format)]
+		if recursive:
+			filenames = reduce(lambda x,y: x+y, [files for root, dirs, files in os.walk(path)])
+			path=[os.path.join(path,f) for f in filenames if f.endswith(file_format)]
+		else:
+			path=[os.path.join(path,f) for f in os.listdir(path) if f.endswith(file_format)]
 		if len(path)==1:
 			is_file=True
 			path=path[0] # unfold path (result from filter was a list)
@@ -26,7 +32,11 @@ def file_list(path,recursive=False,file_format="any_file"):
 			is_dir=True
 	if is_dir:
 		if file_format=="any_file":
-			return [os.path.join(path,f) for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))]
+			if recursive:
+				filenames = reduce(lambda x,y: x+y, [files for root, dirs, files in os.walk(path)])
+				return [os.path.join(path,f) for  f in filenames if os.path.isfile(os.path.join(path,f))]
+			else:
+				return [os.path.join(path,f) for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))]
 		else: # already listed
 			return path
 	elif is_file:
