@@ -56,8 +56,8 @@ ROOT_RESULT_DIR="/data/prevel/runs"
 
 # Path relative to H2D_SRC_DIR, only change if directory stucture is different
 CONTROLLER_RPATH="webots/controllers/GeyerReflex"
-PARAMFILE_RPATH="modeling/configFiles/current.yaml"
-REFERENCE_PARAMFILE_RPATH="modeling/configFiles/geyer-structured-ISB.yaml"
+PARAMFILE_RPATH="modeling/configFiles/Controllers/current.yaml"
+REFERENCE_PARAMFILE_RPATH="modeling/configFiles/Controllers/geyer-reflex1.yaml"
 WORLD_RPATH="webots/worlds/current.wbt"
 
 CONTROLLER_ABSPATH=os.path.join(H2D_SRC_DIR,CONTROLLER_RPATH)
@@ -68,7 +68,7 @@ SIM_OUTPUTDIR_RPATH=os.path.join(CONTROLLER_ABSPATH,"Raw_files")
 
 def launch_run(parameter_file=None,world_file=None):
 
-	subprocess.run(["webots", "--mode=fast", "--batch", WORLD_ABSPATH])
+	subprocess.run(["webots", "--mode=fast", "--batch","--minimize", WORLD_ABSPATH])
 	#print("RUUUNNN")
 
 def gen_param_and_launch(param_range_file,world_dirpath,run_dir):
