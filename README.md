@@ -79,14 +79,21 @@ Once the best set of parameters to fit the data is found, evaluate :
 
 - Weeks 1-3 : litterature review, project organisation and environment setup
 - Week 4 : 
-	- Import a run result from raw files (maybe refactor a bit the logger to write in a single csv file) DONE
+	- Import a run result from raw files DONE (maybe refactor a bit the logger to write in a single csv file) (not done for now)
 	- Launch a batch of runs DONE
 	- Generated different parameters files, by modifying single parameters DONE
 	- Improve param file generations (bound parameters, aliases) DONE
-	- Add reverse mapping (in order to have a cleaner param file to read)
-	- Write higher level script for param file generation
-	- Select parameters and values
-	- Plot the results
+	- Add reverse mapping (in order to have a cleaner param file to read) (not done for now)
+
+	
+- Week 5 
+	- Write higher level script for param file generation DONE
+	- Select parameters and values DONE
+	- Run (around 50 parameters sets, runtime 1h) DONE
+	- Evaluate the results
+		- Metric selection
+		- plot utils (versus reference run)
+	- 
 
 ## Running the code
 
@@ -95,6 +102,7 @@ Once the best set of parameters to fit the data is found, evaluate :
 Additional python packages dependencies are :
 
 - pandas (handling the data)
+- jupyter notebook (not required, used for prototyping)
 
 These dependencies where installed in a conda environment, which can be installed with:
   
