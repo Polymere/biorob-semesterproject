@@ -3,47 +3,69 @@ import sys
 from shutil import rmtree
 from functools import reduce
 
-def file_list(path,recursive=False,file_format="any_file"):
+def file_list(path,recursive=False,file_format="any_file",pattern="",verbose=True):
 	"""
 	Returns a list with absolute path to allfiles with 
 	extension file_format in directory path.
 	If path is not a directory (single file), returns the path to this file
+	UPDT
 	"""
-	print("Listing files in",path)
-	print(os.listdir(path))
-
+	if verbose:
+		print("Listing files in",path)
+		print(os.listdir(path))
+	path_lst=[]
 	if file_format=="any_file":
 		is_file=os.path.isfile(path)
 		is_dir=os.path.isdir(path)
 	else:
 		if recursive:
-			filenames = reduce(lambda x,y: x+y, [files for root, dirs, files in os.walk(path)])
-			path=[os.path.join(path,f) for f in filenames if f.endswith(file_format)]
+			for root,dirs,files in os.walk(path):
+				for file in files: 
+					f=os.path.join(root,file)
+					#print("\n File \t",f)
+					if f.endswith(file_format):
+						print("Root \t",root,"files\t",f,"\n")
+						path_lst.append(f)
+
 		else:
-			path=[os.path.join(path,f) for f in os.listdir(path) if f.endswith(file_format)]
-		if len(path)==1:
+			path_lst=[os.path.join(path,f) for f in os.listdir(path) \
+						if (f.endswith(file_format)) 
+						and (os.path.isfile(os.path.join(path,f))) \
+						and pattern in f]
+		if len(path_lst)==1:
 			is_file=True
-			path=path[0] # unfold path (result from filter was a list)
+			path_lst=path_lst[0] # unfold path (result from filter was a list)
 			is_dir=False
-		elif len(path)==0:
-			print("No file with extension",file_format,"in",path)
+		elif len(path_lst)==0:
+			print("No file with extension",file_format,"in",path_lst)
 			is_dir=False
+			is_file=False
 		else:
 			is_dir=True
+			is_file=False
 	if is_dir:
 		if file_format=="any_file":
 			if recursive:
-				filenames = reduce(lambda x,y: x+y, [files for root, dirs, files in os.walk(path)])
-				return [os.path.join(path,f) for  f in filenames if os.path.isfile(os.path.join(path,f))]
+
+				for root,dirs,files in os.walk(path):
+					for file in files: 
+						f=os.path.join(root,file)
+						path_lst.append(f)
+				return path_lst
 			else:
-				return [os.path.join(path,f) for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))]
+				return [os.path.join(path,f) for f in os.listdir(path) \
+							if os.path.isfile(os.path.join(path,f))]
 		else: # already listed
-			return path
+			return path_lst
 	elif is_file:
-		return [path] # formating to list to avoid iter errors
+		return [path_lst]  # formating to list to avoid iter errors
 	else:
 		print("Nothing in ", path)
 		return None
+def dir_list(path,pattern):
+	dir_lst=[os.path.join(path,d) for d in os.listdir(path) \
+				if os.path.isdir(os.path.join(path,d)) and pattern in d]
+	return dir_lst
 def assert_dir(dir_path,should_be_empty=True):
 	"""
 	Checks if dir_path leads to an existing directory. 
@@ -74,7 +96,8 @@ def assert_dir(dir_path,should_be_empty=True):
 
 def assert_file_exists(file_path,should_exist):
 	"""
-	Checks if a file exists. If it is the case and the file should not exist, propose to replace name (recursive)
+	Checks if a file exists. If it is the case and the file should not exist, 
+	propose to replace name (recursive)
 
 	-> WIP, doesn't update name
 
