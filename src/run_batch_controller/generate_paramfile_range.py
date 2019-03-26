@@ -30,20 +30,26 @@ file \
 
 def gen_file(file_path,param,value):
 	result={param:value}
-	 	
 	with open(file_path, 'w') as outfile:
 		yaml.dump(result,outfile)
 
-def gen_all_file(all_params_file,output_dir,standalone=False):
+def gen_all_file(all_params_file,output_dir,standalone=False,nested=False):
 	if standalone:
 		fu.assert_dir(output_dir,should_be_empty=True)
 	all_params=yaml.load(open(all_params_file,'r'))
 	file_counter=1
 	for name,parameters in all_params.items():
+		if nested:
+			rdir=os.path.join(output_dir,name)
+			fu.assert_dir(rdir,should_be_empty=True)
+		else:
+			rdir=output_dir
 		if parameters[0]=="single":
-			gen_single(parameters[1:], name, output_dir)
+			gen_single(parameters[1:], name, rdir)
 		elif parameters[0]=="range":
-			gen_range(parameters[1:], name, output_dir)
+			gen_range(parameters[1:], name, rdir)
+		elif parameters[0]=="modrange":
+			gen_modrange(parameters[1:], name, rdir)
 
 def gen_single(values,param_name,output_dir,standalone=False):
 	if standalone:
@@ -68,6 +74,31 @@ def gen_range(values,param_name,output_dir,standalone=False):
 	number=int(values[2])
 	file_counter=1
 	for val in np.linspace(min_bound,max_bound,number):
+		print(val)
+		file_path=os.path.join(output_dir,(param_name+str(file_counter)+".yaml"))
+		gen_file(file_path,param_name,float(val))
+		file_counter+=1
+
+def gen_modrange(values,param_name,output_dir,standalone=False):
+	if standalone:
+		fu.assert_dir(output_dir,should_be_empty=True)
+	if len(values)!=4:
+		print("Unexpected range format\t",values,"\t Should be min max center number")
+	min_bound=float(values[0])
+	max_bound=float(values[1])
+	center_val=float(values[2])
+	number=int(values[3])
+	nlow=int(number/2)
+	nhigh=number-nlow
+
+	file_counter=1
+
+	for val in np.linspace(min_bound,center_val,nlow,endpoint=False):
+		print(val)
+		file_path=os.path.join(output_dir,(param_name+str(file_counter)+".yaml"))
+		gen_file(file_path,param_name,float(val))
+		file_counter+=1
+	for val in np.linspace(center_val,max_bound,nhigh):
 		print(val)
 		file_path=os.path.join(output_dir,(param_name+str(file_counter)+".yaml"))
 		gen_file(file_path,param_name,float(val))
