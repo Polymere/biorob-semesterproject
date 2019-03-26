@@ -4,12 +4,13 @@ import sys
 import matplotlib.pyplot as plt
 import re
 import pandas as pd
+from shutil import copyfile
 
 import utils.file_utils as fu
 
 CSV_SAVE_DIR="/data/prevel/repos/biorob-semesterproject/data"
 
-
+DEFAULT_PATH="/data/prevel/human_2d/webots/controllers/GeyerReflex/Raw_files"
 
 def import_run(path,verbose=False,save_to_single=True,save_name="default_name",save_path="."):
 	first_call=True
@@ -19,7 +20,7 @@ def import_run(path,verbose=False,save_to_single=True,save_name="default_name",s
 		print("Saving as",save_name," in",save_path,"\n")
 		print("-------------------------------\n")
 	
-	for file_path in fu.file_list(path,file_format=".txt"):
+	for file_path in fu.file_list(path,file_format=".txt",verbose=False):
 
 		array,header=import_file(file_path,verbose=verbose)
 		if save_to_single:
@@ -28,7 +29,12 @@ def import_run(path,verbose=False,save_to_single=True,save_name="default_name",s
 			fields=fu.concat_field(file, header)
 			new_name=export_single_file(array,fields,save_name,save_path,first_call,verbose)
 			first_call=False
+	for file_path in fu.file_list(path,file_format=".csv",verbose=False):
+		file_name=os.path.basename(file_path)
+		save_dst=os.path.join(save_path,file_name)
+		copyfile(file_path, save_dst)
 	return
+
 
 def import_file(path,verbose=False):
 	if verbose:
@@ -107,16 +113,25 @@ def export_multi_index(data,fields,outputname,outputdir,first_call,verbose=False
 
 
 if __name__=="__main__":
-	if len(sys.argv)==2:
-		import_run(sys.argv[1], verbose=False, save_path=CSV_SAVE_DIR)
+	mode=sys.argv[1]
+	#if len(sys.argv)==2:
+	#	import_run(sys.argv[1], verbose=False, save_path=CSV_SAVE_DIR)
 
-	if len(sys.argv)==3:
+	if mode=="import":
 		"""
 		python import_run.py /data/prevel/Raw_files_reference /data/prevel/runs/078_17:26/result/reference
 		
 		"""
+		try:
+			path=sys.argv[2]
+		except:
+			path=DEFAULT_PATH
+		try:
+			save_path=sys.argv[3]
+		except:
+			save_path=CSV_SAVE_DIR
 
-		import_run(sys.argv[1], verbose=True, save_path=sys.argv[2])
+		import_run(path, verbose=True, save_path=save_path)
 
 	elif len(sys.argv)<2:
 		print("Not enough args, should have at least one run path", sys.argv)
