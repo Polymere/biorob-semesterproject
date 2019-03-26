@@ -35,6 +35,21 @@ def complete_map_value(folded_file):
 				unfolded_values[key]=0.63*param_value
 	return unfolded_values
 
+def inverse_map_value(unfolded_file,result_file,rounded=False):
+	values=yaml.load(open(unfolded_file,'r'))
+	map_file=map_file=yaml.load(open(MAP_VALUE_FILE,'r'))
+	folded_values={}
+	for u_name,value in values.items():
+		for f_name,u_name_lst in map_file.items():
+			if u_name in u_name_lst and f_name not in folded_values.keys():
+				if rounded:
+					folded_values[f_name]=round(value,2)
+				else:
+					folded_values[f_name]=value
+
+	with open(result_file, 'w') as outfile:
+		yaml.dump(folded_values,outfile,default_flow_style=False)
+	return folded_values
 
 
 
@@ -63,9 +78,29 @@ def compare_files(reference_file,verbose=False,test_file=None,test_dict=None):
 		for missing in missing_values_keys:
 			print ("\n Parameter",missing,"does not exist in reference file",reference_file)
 		print ("\n***************************")
-	return default_values_keys,missing_values_keys
-
-def create_file(folded_file,reference_file,result_file,verbose=False):
+	if len(default_values_keys)==0 and len(missing_values_keys)==0:
+		return True
+	else:
+		return False #default_values_keys,missing_values_keys
+def compare_values(file1,file2,verbose=True):
+	f1=yaml.load(open(file1,'r'))
+	f2=yaml.load(open(file2,'r'))
+	dif_val={}
+	dif_keys=[]
+	for key1,val1 in f1.items():
+		if key1 not in f2.keys():
+			dif_keys.append(key1)
+		elif f2[key1]!=val1:
+			dif_val[key1]=(val1,f2[key1])
+	for key2 in f2.keys():
+		if key2 not in f1.keys():
+			dif_keys.append(key2)
+	if verbose:
+		for key,dval in dif_val.items():
+			print ("\n Values for param",key,"are different \t:",dval[0],dval[1])
+		for param in dif_keys:
+			print ("\n Different parameters: \t",param)
+def create_file(folded_file,reference_file,result_file,verbose=False,copy_path=None):
 	if verbose:
 		print("Unfolding file",folded_file,"to",result_file,"\n")
 
@@ -84,6 +119,9 @@ def create_file(folded_file,reference_file,result_file,verbose=False):
 			pass
 	with open(result_file, 'w') as outfile:
 		yaml.dump(result,outfile,default_flow_style=False)
+	if copy_path:
+		with open(copy_path,'w') as outfile:
+			yaml.dump(result,outfile,default_flow_style=False)
 
 def complete_files(folded_dir,reference_file,result_dir):
 	fu.assert_dir(folded_dir,should_be_empty=False)
@@ -94,12 +132,27 @@ def complete_files(folded_dir,reference_file,result_dir):
 		create_file(folded_file,reference_file,result_file,verbose=False)
 		
 if __name__ == '__main__':
-	if len(sys.argv)==4:
-		reference_file=sys.argv[1]
-		folded_path=sys.argv[2] # can be either file or dir
-		result_params_dir=sys.argv[3]
+	mode=sys.argv[1]
+
+	if mode=="unfold_dir":
+		reference_file=sys.argv[2]
+		folded_path=sys.argv[3] # can be either file or dir
+		result_params_dir=sys.argv[4]
 		complete_files(folded_path, reference_file, result_params_dir)
 
 		for result_file in fu.file_list(result_params_dir,file_format=".yaml"):
 			compare_files(reference_file,test_file=result_file,verbose=True)
-
+	elif mode=="fold_file":
+		"""
+python unfold_param.py \
+fold_file \
+/data/prevel/human_2d/modeling/configFiles/Controllers/geyer-reflex1.yaml \
+/data/prevel/params/geyer-reflex1_folded.yaml \
+		"""
+		unfolded_file=sys.argv[2]
+		result_file=sys.argv[3]
+		inverse_map_value(unfolded_file,result_file)
+	elif mode=="compare_values":
+		file1=sys.argv[2]
+		file2=sys.argv[3]
+		compare_values(file1, file2)
