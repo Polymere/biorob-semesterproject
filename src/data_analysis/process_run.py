@@ -41,6 +41,32 @@ def compute_df(raw_file,process_params="all"):
 	#		data_out[col]=data_in[col]
 	print (data_in)
 	print(data_out)
+def metric_df(raw_file,objectives_file):
+	raw_in=pd.read_csv(open(raw_file))
+	metrics=pd.read_csv(open(objectives_file))
+
+	metrics["maxtime"]=max(raw_in.index*TIME_STEP)
+
+	activation=raw_in.filter(like="act",axis=1)
+	metrics["energy"]=activation.sum(axis=1,skipna=True)
+	return metrics
+
+def process(ind_dir):
+	raws=fu.file_list(ind_dir,file_format=".csv",pattern="raw")
+	objectives=fu.file_list(ind_dir,file_format=".csv",pattern="objectives")
+	def assert_one_dim(lst):
+		if len(lst)>1:
+			print("Multiple folds/worlds, should take worst run (not implemented yet)",lst)
+		return lst[0]
+	
+
+	raws=assert_one_dim(raws)
+	objectives=assert_one_dim(objectives)
+	df=metric_df(raws, objectives)
+	save_processed(df, ind_dir)
+
+
+
 def save_processed(df,path):
 	fu.assert_dir(path,should_be_empty=False)
 	save_path=os.path.join(path,"processed.csv")
@@ -201,6 +227,24 @@ if __name__ == '__main__':
 		#if os.isdir(raw_path):
 		raw_dirs=fu.dir_list(raw_path, pattern="ind")
 		plot_versus_ref_meta(raw_dirs,metric,what=comp,ref_file=ref,save_path=False)
+	elif mode=="process_and_save":
+		run_dir=param[0]
+		gen_dirs=fu.dir_list(run_dir,"param")
+		if len(gen_dirs)>0:
+			for gen_dir in gen_dirs:
+				ind_dirs=fu.dir_list(gen_dir,pattern="ind")
+				for ind in ind_dirs:
+					process(ind)
+		else:
+			ind_dirs=fu.dir_list(run_dir,pattern="ind")
+			if len(ind_dirs)>0:
+				for ind in ind_dirs:
+					process(ind)
+			else:
+				fl=fu.file_list(run_dir,file_format=".csv")
+				if len(fl)>=2:
+					process(run_dir)
+
 	
 
 

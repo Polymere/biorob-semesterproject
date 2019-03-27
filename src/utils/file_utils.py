@@ -3,6 +3,10 @@ import sys
 from shutil import rmtree
 from functools import reduce
 
+def assert_one_dim(lst,critical=False):
+	if len(lst)>1:
+		print("Multiple folds/worlds, should take worst run (not implemented yet)",lst)
+	return lst[0]
 def file_list(path,recursive=False,file_format="any_file",pattern="",verbose=True):
 	"""
 	Returns a list with absolute path to allfiles with 
@@ -62,8 +66,16 @@ def file_list(path,recursive=False,file_format="any_file",pattern="",verbose=Tru
 	else:
 		print("Nothing in ", path)
 		return None
-def dir_list(path,pattern):
-	dir_lst=[os.path.join(path,d) for d in os.listdir(path) \
+def dir_list(path,pattern,recursive=False):
+	if recursive:
+		dir_lst=[]
+		for root,dirs,files in os.walk(path):
+			for cdir in dirs: 
+				if pattern in cdir
+					f=os.path.join(root,cdir)
+					dir_lst.append(f)
+	else:
+		dir_lst=[os.path.join(path,d) for d in os.listdir(path) \
 				if os.path.isdir(os.path.join(path,d)) and pattern in d]
 	return dir_lst
 def assert_dir(dir_path,should_be_empty=True):
