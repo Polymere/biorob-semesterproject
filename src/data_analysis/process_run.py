@@ -23,6 +23,16 @@ import matplotlib.pyplot as plt
 
 TIME_STEP=1.0 #ms
 SAVEPATH="/data/prevel/runs/modrange_21/figures"
+
+def get_run_files(ind_path,verbose=False):
+	meta_file=fu.assert_one_dim(fu.file_list(ind_path,file_format=".yaml",pattern="meta"),\
+								critical=True,verbose=verbose)
+	dict_meta=yaml.load(open(meta_file))
+	processed_file=fu.assert_one_dim(fu.file_list(ind_path,file_format=".csv",pattern="processed"),\
+									critical=False,verbose=verbose)
+	pro_df=pd.read_csv(processed_file)
+	return dict_meta,pro_df
+
 def compute_df(raw_file,process_params="all"):
 
 	data_in=pd.read_csv(open(raw_file))
@@ -53,24 +63,18 @@ def metric_df(raw_file,objectives_file):
 
 def process(ind_dir):
 	raws=fu.file_list(ind_dir,file_format=".csv",pattern="raw")
-	objectives=fu.file_list(ind_dir,file_format=".csv",pattern="objectives")
-	def assert_one_dim(lst):
-		if len(lst)>1:
-			print("Multiple folds/worlds, should take worst run (not implemented yet)",lst)
-		return lst[0]
-	
+	objectives=fu.file_list(ind_dir,file_format=".csv",pattern="objectives")	
 
-	raws=assert_one_dim(raws)
-	objectives=assert_one_dim(objectives)
+	raws=fu.assert_one_dim(raws,critical=False)
+	objectives=fu.assert_one_dim(objectives,critical=False)
 	df=metric_df(raws, objectives)
 	save_processed(df, ind_dir)
-
-
 
 def save_processed(df,path):
 	fu.assert_dir(path,should_be_empty=False)
 	save_path=os.path.join(path,"processed.csv")
 	df.to_csv(save_path)
+
 def compare_ref(raw_file,ref_file,metric,what="max_value"):
 	df_raw=compute_df(raw_file,process_params=metric)
 	df_ref=compute_df(ref_file,process_params=metric)
@@ -90,6 +94,70 @@ def get_met(df,metric,what="max_value"):
 	elif what=="mean_std":
 		print ("WIP")
 		return None
+
+def get_label(meta):
+	#print(meta)
+	if "label" in meta.keys():
+		return meta["label"]
+	elif len(meta.keys())==1:
+		single_key=list(meta.keys())[0]
+		return round(meta[single_key],3)
+def get_param_value(meta,param_name=None):
+	if param_name is None and len(meta.keys())==1:
+		param_name=list(meta.keys())[0]
+		return param_name,meta[param_name]
+	elif param_name is not None and param_name in meta.keys():
+		return meta[param_name]
+	else:
+		print("Error in get_param_value for",meta,param_name)
+		return None
+def get_metric_value(proc,metric,what="max_value"):
+	if what=="max_value":
+		return proc[metric].max() # SEE dropna syntax
+	elif what=="mean_value":
+		return proc[metric].mean() # SEE dropna syntax
+def get_discriminant(proc,metric,params,what="geq_thr"):
+	if what=="geq_thr":
+		thr=params
+		return (proc[metric].values[0]>=thr)
+	else:
+		print("get_discriminant args",proc,metric,params,what)
+		return None
+
+def plot_with_success(indiv_dirs,ref_dir,metric,what="max_value"):
+	plot_qd_lst=[] # Contains (label,metric_value,param_value,discriminant)
+
+	for ind in indiv_dirs:
+		meta, proc=get_run_files(ind)
+		lab = get_label(meta)
+		met = get_metric_value(proc, metric)
+		pname, param_value = get_param_value(meta)
+		disc = get_discriminant(proc, "maxtime", 4000)
+		plot_qd_lst.append((lab, met, param_value, disc))
+	meta, proc = get_run_files(ref_dir)
+	lab = get_label(meta)
+	met = get_metric_value(proc, metric)
+	param_value = get_param_value(meta, param_name=pname)
+	disc = get_discriminant(proc,"maxtime",4000)
+	plot_qd_lst.append((lab,  met,  param_value,  disc))
+	sorted_qd_lst = sorted(plot_qd_lst,key=lambda val : val[2]) # sort by ascending metric value
+	fig_count = 0
+	ax=plt.axes()
+	label_lst=[]
+	for qd in sorted_qd_lst:
+		print ("\n",qd[3])
+		fig_count += 1
+		label_lst.append(qd[0])
+		if qd[3]:
+			ax.bar(fig_count, qd[1])
+		else:
+			ax.plot(fig_count,0,marker='x', markersize=3, color="red")
+	plt.xlabel(pname)
+	xt=np.arange(1,fig_count+1)
+	plt.xticks(xt,label_lst)
+	plt.ylabel(metric+" "+what)
+	plt.show()
+
 def plot_versus_ref(ref_file,raw_files,metric,what="max_value"):
 	df_ref=compute_df(ref_file,process_params=metric)
 	fig=plt.axes()
@@ -244,6 +312,20 @@ if __name__ == '__main__':
 				fl=fu.file_list(run_dir,file_format=".csv")
 				if len(fl)>=2:
 					process(run_dir)
+	elif mode=="plot_with_success":
+		"""
+		python process_run.py \
+		plot_with_success \
+		../../data/da_sample/param \
+		../../data/da_sample/reference \
+		velocity
+		"""
+		run_dir = param[0]
+		ind_dirs=fu.dir_list(run_dir,pattern="ind")
+		ref_dir=param[1]
+		metric=param[2]
+		plot_with_success(ind_dirs,ref_dir,metric,what="max_value")
+
 
 	
 
