@@ -4,7 +4,7 @@
 
 ### 1. Setting up the environment for desktop + laptop
 - Webots -> OK
-- Matlab ?
+- Matlab -> Nope
 - Python  -> OK, see ./config
 - Other : Mokka ?
 
@@ -90,10 +90,20 @@ Once the best set of parameters to fit the data is found, evaluate :
 	- Write higher level script for param file generation DONE
 	- Select parameters and values DONE
 	- Run (around 50 parameters sets, runtime 1h) DONE
+	- Reverse mapping parameter file DONE
 	- Evaluate the results
-		- Metric selection
-		- plot utils (versus reference run)
-	- 
+		- Metric selection DONE (extract metrics computed in objectives.py -> TODO)
+		- plot utils (versus reference run) DONE
+- Week 6 
+	- Runs with modrange (2 linespace for each parameters, between min to ref, and ref to max) DONE
+	- Run (20 parameters, 31 values) -> did not run for all different prestim DONE
+	- Save metrics 	+ objectives in a single file DONE
+	- Add metadata to each run (studied parameter, value, labels ...) DONE
+	- Plot with discriminating parameter (ex: plot speed vs param when simulation time == full time) DONE
+- Week 7 
+	- Event detection in stride for additional metrics (stride length, frequency) and split kinematics by stride (for stride comparison) DONE 
+	- Try single parameter evolution/variation to explore th _stable parameter space_
+
 
 ## Running the code
 
