@@ -3,16 +3,27 @@ import sys
 from shutil import rmtree
 from functools import reduce
 
-def assert_one_dim(lst,critical=False):
+def assert_one_dim(lst,critical=False,verbose=True):
+	print(len(lst))
 	if len(lst)>1:
-		print("Multiple folds/worlds, should take worst run (not implemented yet)",lst)
-	return lst[0]
+		if not critical and verbose: 
+			if verbose:
+				print("Multiple elements in,",lst,"taking only first one \n")
+			return lst[0]
+		elif critical:
+			print("Error ! list",lst,"has multiple elements. Returning None")
+			return None
+	else:
+		return lst[0]
+	
 def file_list(path,recursive=False,file_format="any_file",pattern="",verbose=True):
 	"""
 	Returns a list with absolute path to allfiles with 
 	extension file_format in directory path.
 	If path is not a directory (single file), returns the path to this file
 	UPDT
+
+	TODO -> Change to return False is resulting list is empty
 	"""
 	if verbose:
 		print("Listing files in",path)
@@ -71,7 +82,7 @@ def dir_list(path,pattern,recursive=False):
 		dir_lst=[]
 		for root,dirs,files in os.walk(path):
 			for cdir in dirs: 
-				if pattern in cdir
+				if pattern in cdir:
 					f=os.path.join(root,cdir)
 					dir_lst.append(f)
 	else:
