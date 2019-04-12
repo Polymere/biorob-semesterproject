@@ -4,9 +4,7 @@
 
 ### 1. Setting up the environment for desktop + laptop
 - Webots -> OK
-- Matlab -> Nope
 - Python  -> OK, see ./config
-- Other : Mokka ?
 
 ### 2. Parameter influence
  Evaluate the influence of the tunable parameters on the gait, both for the muscle reflex model and CPG+reflex model.
@@ -15,16 +13,12 @@
 
 	- Muscle reflex model :
 
-
 	<!--![Muscle reflex model parameters [@Geyer2010AMM]](./figures/reflex_params.png)-->
 	![Muscle reflex model parameters interpretation [@Geyer2010AMM]](./figures/table_param_muscle.svg)
 
-
 	- CPG + muscle reflex :
 
-
 	![Muscle reflex + CPG model parameters](./figures/reflex_cpg_params.png)
-
 
 
 
@@ -83,7 +77,7 @@ Once the best set of parameters to fit the data is found, evaluate :
 	- Launch a batch of runs DONE
 	- Generated different parameters files, by modifying single parameters DONE
 	- Improve param file generations (bound parameters, aliases) DONE
-	- Add reverse mapping (in order to have a cleaner param file to read) (not done for now)
+	- Add reverse mapping (in order to have a cleaner param file to read) -> W5
 
 	
 - Week 5 
@@ -92,17 +86,32 @@ Once the best set of parameters to fit the data is found, evaluate :
 	- Run (around 50 parameters sets, runtime 1h) DONE
 	- Reverse mapping parameter file DONE
 	- Evaluate the results
-		- Metric selection DONE (extract metrics computed in objectives.py -> TODO)
+		- Metric selection DONE (extract metrics computed in objectives.py -> W6)
 		- plot utils (versus reference run) DONE
 - Week 6 
 	- Runs with modrange (2 linespace for each parameters, between min to ref, and ref to max) DONE
+	- Extracted metrics in objectives.py DONE
 	- Run (20 parameters, 31 values) -> did not run for all different prestim DONE
 	- Save metrics 	+ objectives in a single file DONE
 	- Add metadata to each run (studied parameter, value, labels ...) DONE
 	- Plot with discriminating parameter (ex: plot speed vs param when simulation time == full time) DONE
 - Week 7 
-	- Event detection in stride for additional metrics (stride length, frequency) and split kinematics by stride (for stride comparison) DONE 
-	- Try single parameter evolution/variation to explore th _stable parameter space_
+	- Event detection in stride for additional metrics (stride length, frequency) DONE 
+	- Split kinematics by stride to compare with real data (winter) DONE
+	
+- Week 8
+	- Runs with 2 parameters (GGAS/GSOL) varying DONE
+	 
+ 	- correlations plots/comparison with real data DONE
+ 	- Plots in 2D parameter space DONE
+	- Improved simulation controller (switch parameters when leg is in swing) DONE
+
+- MIDTERM PRESENTATION
+ 	1. ankle/knee does not match real data, and leads to bad stability -> wait for better parameters or optimize myself ?
+ 	2. Sensitivity analysis with correlation to reference for kine (see how the gait changes with parameter)
+ 	3. Better explore the "biological" range for dual GSOL/GGAS
+
+
 
 
 ## Running the code
