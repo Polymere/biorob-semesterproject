@@ -4,7 +4,7 @@ from shutil import rmtree
 from functools import reduce
 
 def assert_one_dim(lst,critical=False,verbose=True):
-	print(len(lst))
+	#print(len(lst))
 	if len(lst)>1:
 		if not critical and verbose: 
 			if verbose:
@@ -16,7 +16,7 @@ def assert_one_dim(lst,critical=False,verbose=True):
 	else:
 		return lst[0]
 	
-def file_list(path,recursive=False,file_format="any_file",pattern="",verbose=True):
+def file_list(path,recursive=False,file_format="any_file",pattern="",verbose=False):
 	"""
 	Returns a list with absolute path to allfiles with 
 	extension file_format in directory path.
