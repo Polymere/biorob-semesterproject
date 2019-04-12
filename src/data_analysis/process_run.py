@@ -22,7 +22,8 @@ import utils.file_utils as fu
 import matplotlib.pyplot as plt
 
 TIME_STEP=1.0 #ms
-SAVEPATH="/data/prevel/runs/modrange_21/figures"
+SAVEPATH="/data/prevel/runs/newmodrange_31/figures"
+
 
 def get_run_files(ind_path,verbose=False):
 	meta_file=fu.assert_one_dim(fu.file_list(ind_path,file_format=".yaml",pattern="meta"),\
@@ -51,6 +52,7 @@ def compute_df(raw_file,process_params="all"):
 	#		data_out[col]=data_in[col]
 	print (data_in)
 	print(data_out)
+
 def metric_df(raw_file,objectives_file):
 	raw_in=pd.read_csv(open(raw_file))
 	metrics=pd.read_csv(open(objectives_file))
@@ -75,6 +77,8 @@ def save_processed(df,path):
 	save_path=os.path.join(path,"processed.csv")
 	df.to_csv(save_path)
 
+
+
 def compare_ref(raw_file,ref_file,metric,what="max_value"):
 	df_raw=compute_df(raw_file,process_params=metric)
 	df_ref=compute_df(ref_file,process_params=metric)
@@ -95,57 +99,111 @@ def get_met(df,metric,what="max_value"):
 		print ("WIP")
 		return None
 
-def get_label(meta):
+def get_label(meta,count=None):
 	#print(meta)
 	if "label" in meta.keys():
 		return meta["label"]
 	elif len(meta.keys())==1:
 		single_key=list(meta.keys())[0]
-		return round(meta[single_key],3)
+		return round(meta[single_key],5)
+	elif len(meta.keys())>1 and count is not None:
+		return count
 def get_param_value(meta,param_name=None):
-	if param_name is None and len(meta.keys())==1:
-		param_name=list(meta.keys())[0]
-		return param_name,meta[param_name]
-	elif param_name is not None and param_name in meta.keys():
-		return meta[param_name]
+	if param_name is None:
+		if len(meta.keys())==1:
+			param_name=list(meta.keys())[0]
+			return param_name,meta[param_name] 
+		elif len(meta.keys())>1:
+			return list(meta.keys()),list(meta.values())
+		else:
+			raise('ValueError',meta)
 	else:
-		print("Error in get_param_value for",meta,param_name)
-		return None
+		if type(param_name)==list:
+			vals=[]
+			for param in param_name:
+				vals.append(meta[param])
+			return vals
+		elif param_name in meta.keys():
+			return meta[param_name]
+		else:
+			raise('ValueError',meta,param_name)
+
 def get_metric_value(proc,metric,what="max_value"):
+
 	if what=="max_value":
 		return proc[metric].max() # SEE dropna syntax
 	elif what=="mean_value":
 		return proc[metric].mean() # SEE dropna syntax
-def get_discriminant(proc,metric,params,what="geq_thr"):
+def get_discriminant(proc, metric, params, what="geq_thr"):
 	if what=="geq_thr":
-		thr=params
+		thr=np.float(params)
 		return (proc[metric].values[0]>=thr)
 	else:
 		print("get_discriminant args",proc,metric,params,what)
 		return None
+def export_meta_params(indiv_dirs,ref_dir, disc_name, disc_params,save_path=None):
+	#df=pd.DataFrame()
+	count=1
+	for ind in indiv_dirs:
+		#print("\n",os.path.basename(ind))
+		ind_id=os.path.basename(ind)
+		meta, proc=get_run_files(ind)
+		lab = get_label(meta,count)
+		#met = get_metric_value(proc, metric)
+		pname, param_value = get_param_value(meta)
+		disc = get_discriminant(proc, disc_name, disc_params)
 
-def plot_with_success(indiv_dirs,ref_dir,metric,what="max_value"):
+		dct_row={}
+		for i in range(len(pname)):
+			dct_row["meta_"+pname[i]]=param_value[i]
+		
+		for metric_name in proc.columns:
+			#print(proc[metric_name])
+			dct_row["metric_"+metric_name]=proc[metric_name].values[0]
+		dct_row["disc"]=disc
+		dct_row["label"]=lab
+		if count==1:
+			df=pd.DataFrame.from_records([dct_row])
+		else:
+			df=df.append(dct_row,ignore_index=True)
+
+		count+=1
+	print(df)
+	if save_path is not None:
+		df.to_csv(save_path)
+		
+
+def plot_with_success(indiv_dirs, ref_dir, metric, disc_name, disc_params, what="max_value",save=True):
 	plot_qd_lst=[] # Contains (label,metric_value,param_value,discriminant)
 
 	for ind in indiv_dirs:
+		print("\n",os.path.basename(ind))
+		ind_id=os.path.basename(ind)
 		meta, proc=get_run_files(ind)
 		lab = get_label(meta)
 		met = get_metric_value(proc, metric)
 		pname, param_value = get_param_value(meta)
-		disc = get_discriminant(proc, "maxtime", 4000)
+		disc = get_discriminant(proc, disc_name, disc_params)
+		if disc:
+			lab=str(lab)+"\n"+str(ind_id)
+		else:
+			lab=round(lab, 1)
 		plot_qd_lst.append((lab, met, param_value, disc))
+
 	meta, proc = get_run_files(ref_dir)
 	lab = get_label(meta)
 	met = get_metric_value(proc, metric)
 	param_value = get_param_value(meta, param_name=pname)
-	disc = get_discriminant(proc,"maxtime",4000)
+	disc = get_discriminant(proc, disc_name, disc_params)
 	plot_qd_lst.append((lab,  met,  param_value,  disc))
 	sorted_qd_lst = sorted(plot_qd_lst,key=lambda val : val[2]) # sort by ascending metric value
 	fig_count = 0
+	fig=plt.figure(figsize=(len(sorted_qd_lst),10))
 	ax=plt.axes()
+	
 	label_lst=[]
 	for qd in sorted_qd_lst:
-		print ("\n",qd[3])
+		#print ("\n",qd[3])
 		fig_count += 1
 		label_lst.append(qd[0])
 		if qd[3]:
@@ -156,7 +214,18 @@ def plot_with_success(indiv_dirs,ref_dir,metric,what="max_value"):
 	xt=np.arange(1,fig_count+1)
 	plt.xticks(xt,label_lst)
 	plt.ylabel(metric+" "+what)
-	plt.show()
+	plt.grid(axis='y')
+	if not save:
+		plt.show()
+	else:
+		
+		plt.rcParams.update({'font.size': 22})
+		fig_name=pname+what+metric+".png"
+		p=os.path.join(SAVEPATH,fig_name)
+		plt.tight_layout()
+		plt.savefig(p,dpi=300,transparent=True)
+
+
 
 def plot_versus_ref(ref_file,raw_files,metric,what="max_value"):
 	df_ref=compute_df(ref_file,process_params=metric)
@@ -188,7 +257,7 @@ def plot_versus_ref(ref_file,raw_files,metric,what="max_value"):
 	plt.xlabel("Individual")
 	#plt.xticks([])
 	plt.ylabel(metric+" "+what)
-	plt.show()
+	plt.show()						# DEPRECATED
 def plot_met(fig,df,metric,what,fig_count):
 	if what=="max_value":
 		fig.bar(fig_count,max(df[metric]))
@@ -196,7 +265,7 @@ def plot_met(fig,df,metric,what,fig_count):
 		fig.bar(fig_count,df[metric].mean())
 	elif what=="mean_std":
 		print ("WIP")
-		return
+		return												# DEPRECATED
 def get_kv_meta(wdir,metric,what,expected_meta=None,current_dict=None):
 	"""
 		Creates/appends to a dictionnary with format
@@ -225,7 +294,7 @@ def get_kv_meta(wdir,metric,what,expected_meta=None,current_dict=None):
 		for key,srt_val in meta.items():
 			uid=str(key)+str(srt_val)
 			k=key
-			label=round(srt_val, 3)
+			label=round(srt_val, 2)
 	if expected_meta is not None:
 		k=expected_meta
 
@@ -234,8 +303,7 @@ def get_kv_meta(wdir,metric,what,expected_meta=None,current_dict=None):
 	srt_val=meta[k]
 	current_dict[uid]=(srt_val,plot_val,label)
 
-	return current_dict,k
-
+	return current_dict, 				# DEPRECATED
 def plot_versus_ref_meta(raw_dirs,metric,what="max_value",ref_file=None,save_path=None):
 	kv_dict={}
 	label_lst=[]
@@ -270,11 +338,13 @@ def plot_versus_ref_meta(raw_dirs,metric,what="max_value",ref_file=None,save_pat
 		#fig.set_size([20,20])
 		fig_name=k+what+metric+".png"
 		p=os.path.join(SAVEPATH,fig_name)
-		plt.savefig(p)
+		plt.savefig(p)# DEPRECATED
 
 if __name__ == '__main__':
 	mode=sys.argv[1]
 	param=sys.argv[2:]
+	print(mode)
+
 	if mode=="plot_versus_ref":
 		"""
 		python process_run.py \
@@ -296,6 +366,9 @@ if __name__ == '__main__':
 		raw_dirs=fu.dir_list(raw_path, pattern="ind")
 		plot_versus_ref_meta(raw_dirs,metric,what=comp,ref_file=ref,save_path=False)
 	elif mode=="process_and_save":
+		"""
+		python process_run.py process_and_save /data/prevel/runs/094_14:44
+		"""
 		run_dir=param[0]
 		gen_dirs=fu.dir_list(run_dir,"param")
 		if len(gen_dirs)>0:
@@ -319,16 +392,39 @@ if __name__ == '__main__':
 		../../data/da_sample/param \
 		../../data/da_sample/reference \
 		velocity
+		4000
 		"""
 		run_dir = param[0]
-		ind_dirs=fu.dir_list(run_dir,pattern="ind")
 		ref_dir=param[1]
 		metric=param[2]
-		plot_with_success(ind_dirs,ref_dir,metric,what="max_value")
+		disc_param=param[3]
+		do_save=True
 
-
-	
-
+		gen_dirs=fu.dir_list(run_dir,"param",)
+		if len(gen_dirs)>0:
+			for gen_dir in gen_dirs:
+				ind_dirs=fu.dir_list(gen_dir,pattern="ind")
+				plot_with_success(	ind_dirs,ref_dir,metric,disc_name='maxtime',disc_params=disc_param,what="max_value",save=do_save)
+		else:
+			ind_dirs=fu.dir_list(run_dir,pattern="ind")
+			plot_with_success(	ind_dirs,ref_dir,metric,disc_name='maxtime',disc_params=disc_param,what="max_value",save=do_save)
+							
+	elif mode=="export_joined_df":
+		"""
+		python process_run.py export_joined_df /data/prevel/runs/dual_modrange_SOL_TA/param1/ 4000 /data/prevel/runs/dual_modrange_SOL_TA/met.csv
+		"""
+		run_dir = param[0]
+		ref_dir=None
+		disc_param=param[1]
+		save_path=param[2]
+		gen_dirs=fu.dir_list(run_dir,"param")
+		if len(gen_dirs)>0:
+			for gen_dir in gen_dirs:
+				ind_dirs=fu.dir_list(gen_dir,pattern="ind")
+				export_meta_params(ind_dirs,ref_dir, disc_name='maxtime', disc_params=disc_param,save_path=save_path)
+		else:
+			ind_dirs=fu.dir_list(run_dir,pattern="ind")
+			export_meta_params(ind_dirs,ref_dir, disc_name='maxtime', disc_params=disc_param,save_path=save_path)
 
 
 
