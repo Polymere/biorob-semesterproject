@@ -22,7 +22,7 @@ import utils.file_utils as fu
 import matplotlib.pyplot as plt
 
 TIME_STEP=1.0 #ms
-SAVEPATH="/data/prevel/runs/newmodrange_31/figures"
+SAVEPATH="/data/prevel/runs/figures"
 
 
 def get_run_files(ind_path,verbose=False):
@@ -184,8 +184,8 @@ def plot_with_success(indiv_dirs, ref_dir, metric, disc_name, disc_params, what=
 		plt.rcParams.update({'font.size': 22})
 		fig_name=pname+what+metric+".png"
 		p=os.path.join(SAVEPATH,fig_name)
-		plt.tight_layout()
-		plt.savefig(p,dpi=300,transparent=True)
+		#plt.tight_layout()
+		plt.savefig(p,dpi=300,transparent=False)
 
 
 if __name__ == '__main__':
