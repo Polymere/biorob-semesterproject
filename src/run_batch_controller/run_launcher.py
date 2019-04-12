@@ -1,40 +1,40 @@
 """
-Launching a run with
+	Launching a run with
 
 
-Inputs : 
-	Parameter file eg. '../../../modeling/configFiles/geyer-structured-ISB.yaml' or paramter files folder
-	Number of folds for each parameter set
-	Worlds to test (if we optimize of different terrain/slopes)
-	Run result output directory
+	Inputs : 
+		Parameter file eg. '../../../modeling/configFiles/geyer-structured-ISB.yaml' or paramter files folder
+		Number of folds for each parameter set
+		Worlds to test (if we optimize of different terrain/slopes)
+		Run result output directory
 
 
-	The result directory structure is as follows
-	result_dir
-		/param1
-			param1_file.yaml
-			/world1
-				world1_file.wbt
-				raw1.csv
-				raw2.csv
-				...
-				rawNFOLD.csv
-			/world2
-				...
-		/param2
+		The result directory structure is as follows
+		result_dir
+			/param1
+				param1_file.yaml
+				/world1
+					world1_file.wbt
+					raw1.csv
+					raw2.csv
+					...
+					rawNFOLD.csv
+				/world2
+					...
+			/param2
 
-		...
+			...
 
-EXAMPLE:
-python run_launcher.py /data/prevel/trial/param_folder \
-4 \
-/data/prevel/trial/worlds_folder \
-/data/prevel/trial/result 
+	EXAMPLE:
+	python run_launcher.py /data/prevel/trial/param_folder \
+	4 \
+	/data/prevel/trial/worlds_folder \
+	/data/prevel/trial/result 
 
-python run_launcher.py /data/prevel/params/completed \
-1 \
-/data/prevel/trial/worlds_folder \
-/data/prevel/trial/result 
+	python run_launcher.py /data/prevel/params/completed \
+	1 \
+	/data/prevel/trial/worlds_folder \
+	/data/prevel/trial/result 
 """
 import utils.file_utils as fu
 import time
@@ -157,7 +157,7 @@ class runLauncher:
 		imp.import_run(SIM_OUTPUTDIR_RPATH,save_path=self.cdir, save_name=run_name)
 
 	def check_run(self, param_file):
-		if up.compare_files(REFERENCE_PARAMFILE_ABSPATH, test_file=param_file, verbose=True):
+		if up.compare_files(REFERENCE_PARAMFILE_ABSPATH, test_file=param_file, verbose=False):
 			copyfile(param_file, PARAMFILE_ABSPATH)
 		else:
 			up.create_file(param_file, REFERENCE_PARAMFILE_ABSPATH, PARAMFILE_ABSPATH)
