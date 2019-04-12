@@ -34,23 +34,31 @@ def get_run_files(ind_path,verbose=False):
 	pro_df=pd.read_csv(processed_file)
 	return dict_meta,pro_df
 
-def metric_df(raw_file,objectives_file):
+def metric_df(raw_file,objectives_file,ref_raw=None,verbose=True):
+
 	raw_in=pd.read_csv(open(raw_file))
+	# Metrics computed during the run
 	metrics=pd.read_csv(open(objectives_file))
-
+	# Max simulation time
 	metrics["maxtime"]=max(raw_in.index*TIME_STEP)
-
+	# Energy as the sum of all activations
 	activation=raw_in.filter(like="act",axis=1)
 	metrics["energy"]=activation.sum(axis=1,skipna=True)
+	if ref_raw is not None:
+		ref_df=pd.read_csv(open(ref_raw))
+		for met in ref_df.columns:
+			metrics["cor"+met]=ref_df[met].corr(raw_in[met])
+	if verbose:
+		print(metrics)
 	return metrics
 
-def process(ind_dir):
+def process(ind_dir,ref_raw=None):
 	raws=fu.file_list(ind_dir,file_format=".csv",pattern="raw")
 	objectives=fu.file_list(ind_dir,file_format=".csv",pattern="objectives")	
 
 	raws=fu.assert_one_dim(raws,critical=False)
 	objectives=fu.assert_one_dim(objectives,critical=False)
-	df=metric_df(raws, objectives)
+	df=metric_df(raws, objectives,ref_raw=ref_raw)
 	save_processed(df, ind_dir)
 
 def save_processed(df,path):
@@ -195,24 +203,26 @@ if __name__ == '__main__':
 
 	if mode=="process_and_save":
 		"""
-		python process_run.py process_and_save /data/prevel/runs/094_14:44
+		python process_run.py process_and_save /data/prevel/runs/094_14:44 (ref_dir)
 		"""
 		run_dir=param[0]
+		if len(param)>1:
+			ref_raw=param[1]
 		gen_dirs=fu.dir_list(run_dir,"param")
 		if len(gen_dirs)>0:
 			for gen_dir in gen_dirs:
 				ind_dirs=fu.dir_list(gen_dir,pattern="ind")
 				for ind in ind_dirs:
-					process(ind)
+					process(ind,ref_raw=ref_raw)
 		else:
 			ind_dirs=fu.dir_list(run_dir,pattern="ind")
 			if len(ind_dirs)>0:
 				for ind in ind_dirs:
-					process(ind)
+					process(ind,ref_raw=ref_raw)
 			else:
 				fl=fu.file_list(run_dir,file_format=".csv")
 				if len(fl)>=2:
-					process(run_dir)
+					process(run_dir,ref_raw=ref_raw)
 	elif mode=="plot_with_success":
 		"""
 		python process_run.py \
