@@ -1,0 +1,1 @@
+git+https://gitlab.com/farmsim/farms_pylog.git#farms-pylog
