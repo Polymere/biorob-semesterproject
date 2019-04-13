@@ -161,6 +161,8 @@ def interp_gaitprcent(s,n_goal):
 		nr=pd.Series(index=np.linspace(0,n_goal-1,n_goal,dtype=int))
 		nr[subsamble_idx]=r
 		fr=nr.interpolate()
+	else:
+		fr=s
 	return fr
 def get_all_stride(full_df,metric,interp=True,how="strike_to_strike",with_timestamps=False):
 
@@ -198,7 +200,7 @@ def get_mean_std_stride(full_df,metric,interp=True,how="strike_to_strike",stride
 	var=spl_stride.std(axis=1)*180/np.pi
 	if stride_choice=="repmax":
 		rep_max_idx=su[su.values==su.max()].index
-		print("repmax:",rep_max_idx)
+		#print("repmax:",rep_max_idx)
 		y=rep_strides[rep_max_idx].iloc[:,0]*180/np.pi
 	elif stride_choice=="mean":
 		 y=rep_strides.mean(axis=1)

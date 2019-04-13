@@ -20,7 +20,7 @@ import yaml
 import os
 import utils.file_utils as fu
 import matplotlib.pyplot as plt
-
+import data_analysis.event_detection as ed
 TIME_STEP=1.0 #ms
 SAVEPATH="/data/prevel/runs/figures"
 
@@ -36,18 +36,21 @@ def get_run_files(ind_path,verbose=False):
 
 def metric_df(raw_file,objectives_file,ref_raw=None,verbose=True):
 
-	raw_in=pd.read_csv(open(raw_file))
+	raw_df=pd.read_csv(open(raw_file))
 	# Metrics computed during the run
 	metrics=pd.read_csv(open(objectives_file))
 	# Max simulation time
-	metrics["maxtime"]=max(raw_in.index*TIME_STEP)
+	metrics["maxtime"]=max(raw_df.index*TIME_STEP)
 	# Energy as the sum of all activations
-	activation=raw_in.filter(like="act",axis=1)
+	activation=raw_df.filter(like="act",axis=1)
 	metrics["energy"]=activation.sum(axis=1,skipna=True)
 	if ref_raw is not None:
 		ref_df=pd.read_csv(open(ref_raw))
-		for met in ref_df.columns:
-			metrics["cor"+met]=ref_df[met].corr(raw_in[met])
+		for met in ref_df.filter(like="angle").columns:
+
+			mean_ref,std_ref=ed.get_mean_std_stride(ref_df,met,stride_choice="repmax")
+			mean_cur,std_cur=ed.get_mean_std_stride(raw_df,met,stride_choice="repmax")
+			metrics["cor"+met]=mean_cur.corr(mean_ref)
 	if verbose:
 		print(metrics)
 	return metrics
@@ -97,7 +100,9 @@ def get_param_value(meta,param_name=None):
 			raise('ValueError',meta,param_name)
 
 def get_metric_value(proc,metric,what="max_value"):
-
+	if metric not in proc.columns:
+		print("Band aid for correlation with ref \n ")
+		return 1
 	if what=="max_value":
 		return proc[metric].max() # SEE dropna syntax
 	elif what=="mean_value":
@@ -208,6 +213,9 @@ if __name__ == '__main__':
 		run_dir=param[0]
 		if len(param)>1:
 			ref_raw=param[1]
+			ref_dir=os.path.dirname(ref_raw)
+
+			process(ref_dir,ref_raw=ref_raw) # Correlation with itself to have all values
 		gen_dirs=fu.dir_list(run_dir,"param")
 		if len(gen_dirs)>0:
 			for gen_dir in gen_dirs:
@@ -236,7 +244,7 @@ if __name__ == '__main__':
 		ref_dir=param[1]
 		metric=param[2]
 		disc_param=param[3]
-		do_save=True
+		do_save=False
 
 		gen_dirs=fu.dir_list(run_dir,"param",)
 		if len(gen_dirs)>0:
