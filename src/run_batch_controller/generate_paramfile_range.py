@@ -28,9 +28,19 @@ file \
 """
 
 
-def gen_file(file_path,param,value):
-	result={param:value}
-	with open(file_path, 'w') as outfile:
+def gen_file(file_path,params,values):
+	result={}
+	if not type(params)==list:
+		params=[params]
+	if not type(values)==list:
+		values=[values]
+	if len(params)!=len(values):
+		raise('ValueError, received',len(params),"params and",len(values),"values")
+	for idx in range(len(params)):
+		cparam,cvalue=params[idx],values[idx]
+		result[str(cparam)]=float(cvalue)
+	#print(result,type(result))
+	with open(file_path, 'w+') as outfile:
 		yaml.dump(result,outfile)
 
 def gen_all_file(all_params_file,output_dir,standalone=False,nested=False):
@@ -50,6 +60,8 @@ def gen_all_file(all_params_file,output_dir,standalone=False,nested=False):
 			gen_range(parameters[1:], name, rdir)
 		elif parameters[0]=="modrange":
 			gen_modrange(parameters[1:], name, rdir)
+		elif parameters[0]=="dual_modrange":
+			gen_dual_modrange(parameters[1:], name, rdir)
 
 def gen_single(values,param_name,output_dir,standalone=False):
 	if standalone:
@@ -78,31 +90,46 @@ def gen_range(values,param_name,output_dir,standalone=False):
 		file_path=os.path.join(output_dir,(param_name+str(file_counter)+".yaml"))
 		gen_file(file_path,param_name,float(val))
 		file_counter+=1
-
+def _modlinespace(min_bound,max_bound,center_val,npoints):
+	npoints=int(npoints)
+	nlow=int(npoints/2)
+	nhigh=npoints-nlow
+	lin_low=np.linspace(float(min_bound),float(center_val),nlow,endpoint=False)
+	lin_high=np.linspace(float(center_val),float(max_bound),nhigh)
+	return np.concatenate((lin_low, lin_high))
 def gen_modrange(values,param_name,output_dir,standalone=False):
 	if standalone:
 		fu.assert_dir(output_dir,should_be_empty=True)
 	if len(values)!=4:
 		print("Unexpected range format\t",values,"\t Should be min max center number")
-	min_bound=float(values[0])
-	max_bound=float(values[1])
-	center_val=float(values[2])
-	number=int(values[3])
-	nlow=int(number/2)
-	nhigh=number-nlow
-
 	file_counter=1
+	vals=_modlinespace(values[0], values[1],values[2], values[3])
 
-	for val in np.linspace(min_bound,center_val,nlow,endpoint=False):
+	for val in vals:
 		print(val)
 		file_path=os.path.join(output_dir,(param_name+str(file_counter)+".yaml"))
 		gen_file(file_path,param_name,float(val))
 		file_counter+=1
-	for val in np.linspace(center_val,max_bound,nhigh):
-		print(val)
-		file_path=os.path.join(output_dir,(param_name+str(file_counter)+".yaml"))
-		gen_file(file_path,param_name,float(val))
-		file_counter+=1
+		
+def gen_dual_modrange(values,gen_name,output_dir,standalone=False):
+	if standalone:
+		fu.assert_dir(output_dir,should_be_empty=True)
+
+	p1=values[0]
+	p2=values[1]
+	name1=p1[0]
+	name2=p2[0]
+	vals1=_modlinespace(p1[1], p1[2], p1[3], p1[4])
+	vals2=_modlinespace(p2[1], p2[2], p2[3], p2[4])
+	params=[name1,name2]
+	file_counter=1
+	for val1 in vals1:
+		for val2 in vals2:
+			values=[val1,val2]
+			print(values)
+			file_path=os.path.join(output_dir,(gen_name+str(file_counter)+".yaml"))
+			gen_file(file_path, params, values)
+			file_counter+=1
 if __name__ == '__main__':
 	if len(sys.argv)>1:
 		mode=sys.argv[1]
