@@ -105,10 +105,11 @@ Once the best set of parameters to fit the data is found, evaluate :
  	- correlations plots/comparison with real data DONE
  	- Plots in 2D parameter space DONE
 	- Improved simulation controller (switch parameters when leg is in swing) DONE
+	- Correlations in kinematics with ref  (midterm) DONE
 
 - MIDTERM PRESENTATION
  	1. Ankle/knee does not match real data, and leads to bad stability -> wait for better parameters or optimize myself ?
- 	2. Sensitivity analysis with correlation to reference for kine (see how the gait changes with parameter) -> CORRELATION BETWEEN RPZ STRIDES
+ 	2. Sensitivity analysis with correlation to reference for kine (see how the gait changes with parameter)DONE
  	3. Better explore the "biological" range for dual GSOL/GGAS
 
 
