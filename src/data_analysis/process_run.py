@@ -21,8 +21,80 @@ import os
 import utils.file_utils as fu
 import matplotlib.pyplot as plt
 import data_analysis.event_detection as ed
+from utils.plot_utils import plot_mean_std_fill
 TIME_STEP=1.0 #ms
 SAVEPATH="/data/prevel/runs/figures"
+
+DIR_REF_CPP="../../data/ref_cpp/"
+REF_FORMAT='florin'
+MAP_MET_FLORIN={'angles_ankle_l':'ANKLE_LEFT',	'angles_ankle_r':'ANKLE_RIGHT',
+				'angles_hip_l':'HIP_LEFT',		'angles_hip_r':'HIP_RIGHT',
+				'angles_knee_l':'KNEE_LEFT',	'angles_knee_r':'KNEE_RIGHT'}
+
+MAP_MET_WINTER={'angles_ankle_l':'ankle',	'angles_ankle_r':'ankle',
+				'angles_hip_l':'hip',		'angles_hip_r':'hip',
+				'angles_knee_l':'knee',		'angles_knee_r':'knee'}
+
+class reference_compare:
+	rep_strides={}
+
+	def __init__(self,kind,files=None):
+		if kind=='florin':
+			contact_file=files[0]
+			joints_file=files[1]
+			contact=pd.read_csv(contact_file,sep=" ")
+			joints=pd.read_csv(joints_file,sep=" ")
+			self.set_repstrides_florin(contact, joints)
+		elif kind=='winter':
+			winter_file=files[0]
+			win_df=pd.read_csv(winter_file)
+			self.set_repstrides_winter(win_df)
+		elif kind=='raw':
+			ref_file=files[0]
+			ref_df=pd.read_csv(ref_file)
+			self.set_repstrides_raw(ref_df)
+
+
+
+	def set_repstrides_winter(self,win_df):
+		"""
+		hip angle is defined in the opposed direction
+		"""
+		for key_gen,key_win in MAP_MET_WINTER.items():
+			mean_ref=ed.interp_gaitprcent(win_df[key_win],100)
+			if key_win=="hip": # inversed angle orientation
+				mean_ref=-mean_ref
+			self.rep_strides[key_gen]=mean_ref
+
+	def set_repstrides_florin(self,contact,joints):
+		"""
+		ankle angle is defined in the opposed direction
+		"""
+		for key_gen,key_flor in MAP_MET_FLORIN.items():
+			mean_ref,std_ref=ed.get_rep_var_from_contact(contact,key_flor,joints)
+			mean_ref=ed.interp_gaitprcent(mean_ref,100)
+			if "ankle" in key_gen: # inversed angle orientation
+				print("opposed ankle")
+				mean_ref=-mean_ref
+			self.rep_strides[key_gen]=mean_ref
+
+	def set_repstrides_raw(self,ref_df):
+		angles=ref_df.filter(like="angle")
+		for key_gen in angles.keys():
+			mean_ref,std_ref=ed.get_mean_std_stride(angles,key_gen,stride_choice="repmax")
+			mean_ref=ed.interp_gaitprcent(mean_ref,100)
+			self.rep_strides[key_gen]=mean_ref
+
+	def get_corre(self,cmp_df,met):
+		mean_cur,std_cur=ed.get_mean_std_stride(cmp_df,met,stride_choice="repmax")
+		return mean_cur.corr(self.rep_strides[met])
+
+	def get_all_corr(self,cmp_df):
+		all_cor={}
+		for met in self.rep_strides.keys():
+			mean_cur,std_cur=ed.get_mean_std_stride(cmp_df,met,stride_choice="repmax")
+			all_cor[met]=mean_cur.corr(self.rep_strides[met])
+		return all_cor
 
 
 def get_run_files(ind_path,verbose=False):
@@ -34,7 +106,7 @@ def get_run_files(ind_path,verbose=False):
 	pro_df=pd.read_csv(processed_file)
 	return dict_meta,pro_df
 
-def metric_df(raw_file,objectives_file,ref_raw=None,verbose=True):
+def metric_df(raw_file,objectives_file,ref_cmp=None,verbose=True):
 
 	raw_df=pd.read_csv(open(raw_file))
 	# Metrics computed during the run
@@ -44,24 +116,21 @@ def metric_df(raw_file,objectives_file,ref_raw=None,verbose=True):
 	# Energy as the sum of all activations
 	activation=raw_df.filter(like="act",axis=1)
 	metrics["energy"]=activation.sum(axis=1,skipna=True)
-	if ref_raw is not None:
-		ref_df=pd.read_csv(open(ref_raw))
-		for met in ref_df.filter(like="angle").columns:
-
-			mean_ref,std_ref=ed.get_mean_std_stride(ref_df,met,stride_choice="repmax")
-			mean_cur,std_cur=ed.get_mean_std_stride(raw_df,met,stride_choice="repmax")
-			metrics["cor"+met]=mean_cur.corr(mean_ref)
+	if ref_cmp is not None:
+		corr_dct=ref_cmp.get_all_corr(raw_df)
+		for met,corrval in corr_dct.items():
+			metrics["cor"+met]=corrval
 	if verbose:
 		print(metrics)
 	return metrics
 
-def process(ind_dir,ref_raw=None):
+def process(ind_dir,ref_cmp=None):
 	raws=fu.file_list(ind_dir,file_format=".csv",pattern="raw")
 	objectives=fu.file_list(ind_dir,file_format=".csv",pattern="objectives")	
 
 	raws=fu.assert_one_dim(raws,critical=False)
 	objectives=fu.assert_one_dim(objectives,critical=False)
-	df=metric_df(raws, objectives,ref_raw=ref_raw)
+	df=metric_df(raws, objectives,ref_cmp=ref_cmp)
 	save_processed(df, ind_dir)
 
 def save_processed(df,path):
@@ -83,7 +152,7 @@ def get_param_value(meta,param_name=None):
 	if param_name is None:
 		if len(meta.keys())==1:
 			param_name=list(meta.keys())[0]
-			return param_name,meta[param_name] 
+			return [param_name],[meta[param_name]] 
 		elif len(meta.keys())>1:
 			return list(meta.keys()),list(meta.values())
 		else:
@@ -130,6 +199,7 @@ def export_meta_params(indiv_dirs,ref_dir, disc_name, disc_params,save_path=None
 
 		dct_row={}
 		for i in range(len(pname)):
+			print(pname)
 			dct_row["meta_"+pname[i]]=param_value[i]
 		
 		for metric_name in proc.columns:
@@ -211,26 +281,31 @@ if __name__ == '__main__':
 		python process_run.py process_and_save /data/prevel/runs/094_14:44 (ref_dir)
 		"""
 		run_dir=param[0]
+		ref=None
 		if len(param)>1:
-			ref_raw=param[1]
-			ref_dir=os.path.dirname(ref_raw)
-
-			process(ref_dir,ref_raw=ref_raw) # Correlation with itself to have all values
+			"""
+python process_run.py process_and_save /data/prevel/runs ... winter /data/prevel/comparisons/winter_data/data_normal.csv
+			"""
+			ref_kind=param[1]
+			ref_raw=param[2:]
+			
+			ref=reference_compare(ref_kind,files=ref_raw)
+			
 		gen_dirs=fu.dir_list(run_dir,"param")
 		if len(gen_dirs)>0:
 			for gen_dir in gen_dirs:
 				ind_dirs=fu.dir_list(gen_dir,pattern="ind")
 				for ind in ind_dirs:
-					process(ind,ref_raw=ref_raw)
+					process(ind,ref_cmp=ref)
 		else:
 			ind_dirs=fu.dir_list(run_dir,pattern="ind")
 			if len(ind_dirs)>0:
 				for ind in ind_dirs:
-					process(ind,ref_raw=ref_raw)
+					process(ind,ref_cmp=ref)
 			else:
 				fl=fu.file_list(run_dir,file_format=".csv")
 				if len(fl)>=2:
-					process(run_dir,ref_raw=ref_raw)
+					process(run_dir,ref_cmp=ref)
 	elif mode=="plot_with_success":
 		"""
 		python process_run.py \
