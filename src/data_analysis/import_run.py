@@ -12,6 +12,8 @@ CSV_SAVE_DIR="/data/prevel/repos/biorob-semesterproject/data"
 
 DEFAULT_PATH="/data/prevel/human_2d/webots/controllers/GeyerReflex/Raw_files"
 
+IGNORE_FILES=["f_ce.txt","f_se.txt","l_ce.txt","stim.txt","v_ce.txt"]
+
 def import_run(path,verbose=False,save_to_single=True,save_name="default_name",save_path="."):
 	first_call=True
 	if verbose:
@@ -21,9 +23,9 @@ def import_run(path,verbose=False,save_to_single=True,save_name="default_name",s
 		print("-------------------------------\n")
 	
 	for file_path in fu.file_list(path,file_format=".txt",verbose=False):
-
+		
 		array,header=import_file(file_path,verbose=verbose)
-		if save_to_single:
+		if save_to_single and (os.path.basename(file_path) not in IGNORE_FILES):
 			file=os.path.basename(file_path) # just the file name
 			file=os.path.splitext(file)[0] # remove extension
 			fields=fu.concat_field(file, header)
@@ -114,8 +116,7 @@ def export_multi_index(data,fields,outputname,outputdir,first_call,verbose=False
 
 if __name__=="__main__":
 	mode=sys.argv[1]
-	#if len(sys.argv)==2:
-	#	import_run(sys.argv[1], verbose=False, save_path=CSV_SAVE_DIR)
+
 
 	if mode=="import":
 		"""

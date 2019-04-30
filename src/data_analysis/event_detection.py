@@ -112,8 +112,16 @@ def get_max_event_duration(idx_event1,idx_event2):
 		dur.append(idx2-idx1)
 	return max(dur)
 
-def split_stride(df,fy_df,column,side='right',how="strike_to_liftoff",with_timestamps=False):
-	
+def split_stride(df,fy_df,column,side='smart',how="strike_to_strike",with_timestamps=False):
+	if side=='smart':
+		lwr=column.lower()
+		if 'left' in lwr or lwr[-2:]=='_l':
+			side='left'
+		elif 'right' in lwr or lwr[-2:]=='_r':
+			side='right'
+		else:
+			print("No side found in ",column,'taking right as default')
+			side='right'
 	if how=="strike_to_strike":
 		idx_event1=fy_df[fy_df[side+'strike'].notnull()].index.to_list()
 		idx_event2=idx_event1[1:]
@@ -182,9 +190,9 @@ def get_all_stride(full_df,metric,interp=True,how="strike_to_strike",with_timest
 	else:
 		return spl_stride
 
-def get_mean_std_stride(full_df,metric,interp=True,how="strike_to_strike",stride_choice="repmax"):
-
-	fy_df=add_strike_lift(full_df)
+def get_mean_std_stride(full_df,metric,fy_df=None,interp=True,how="strike_to_strike",stride_choice="repmax"):
+	if fy_df is None:
+		fy_df=add_strike_lift(full_df)
 	
 	spl_stride=split_stride(full_df,fy_df,metric,how=how) # split by stride
 	for stride in spl_stride.columns:
@@ -197,22 +205,76 @@ def get_mean_std_stride(full_df,metric,interp=True,how="strike_to_strike",stride
 	rep_index=su[su.values>su.mean()].index
 	rep_strides=spl_stride.filter(items=rep_index)
 	
-	var=spl_stride.std(axis=1)*180/np.pi
+	var=spl_stride.std(axis=1)
 	if stride_choice=="repmax":
 		rep_max_idx=su[su.values==su.max()].index
 		#print("repmax:",rep_max_idx)
-		y=rep_strides[rep_max_idx].iloc[:,0]*180/np.pi
+		y=rep_strides[rep_max_idx].iloc[:,0]
 	elif stride_choice=="mean":
 		 y=rep_strides.mean(axis=1)
 	elif stride_choice in spl_stride.columns:
-		y=spl_stride[stride_choice]*180/np.pi
+		y=spl_stride[stride_choice]
 	else:
 		raise ValueError('stride_choice',stride_choice)
 	if interp:
 		var=interp_gaitprcent(var,100)
 		y=interp_gaitprcent(y,100)
 	return y,var
+# ALTERNATES TO HANDLE FLORIN FORMAT
+def split_stride_contact(contact):
+	fy=contact.copy()
+	s=contact[contact.left==0].index
 
+	s_filter=[s[idx+1] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
+	fy['leftlift']=contact.iloc[s_filter]['left']
+	s_filter=[s[idx] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
+	fy['leftstrike']=contact.iloc[s_filter]['left']
+	
+	s=contact[contact.right==0].index
+
+	s_filter=[s[idx+1] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
+	fy['rightlift']=contact.iloc[s_filter]['right']
+	s_filter=[s[idx] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
+	fy['rightstrike']=contact.iloc[s_filter]['right']
+	
+	return fp_correction(fy)
+
+def get_rep_var_from_contact(contact,metric,joints):
+	if metric not in joints.columns:
+		print('\n Metric:\t',metric)
+		print('\n Columns:\t',joints.columns())
+		raise('KeyError')
+	stride_choice='repmax'
+	interp=True
+	fy_df=split_stride_contact(contact)
+	spl_stride=split_stride(joints,fy_df,metric)
+	for stride in spl_stride.columns:
+		spl_stride[stride]=interp_gaitprcent(spl_stride[stride],100)
+
+	spl_stride=spl_stride.dropna()
+	cor=spl_stride.corr() # computes correlation
+
+	su=cor.sum(axis=1)
+	rep_index=su[su.values>su.mean()].index
+	rep_strides=spl_stride.filter(items=rep_index)
+
+	var=spl_stride.std(axis=1)
+	if stride_choice=="repmax":
+		rep_max_idx=su[su.values==su.max()].index
+		print("repmax:",rep_max_idx)
+		y=rep_strides[rep_max_idx].iloc[:,0]
+	elif stride_choice=="mean":
+		 y=rep_strides.mean(axis=1)
+	elif stride_choice in spl_stride.columns:
+		y=spl_stride[stride_choice]
+	else:
+		raise ValueError('stride_choice',stride_choice)
+	if interp:
+		var=interp_gaitprcent(var,100)
+		y=interp_gaitprcent(y,100)
+		
+	return y,var
+	
 if __name__ == '__main__':
 	WINTER_PATH="../../data/winter_data/"
 	win_df_data=pd.read_csv(WINTER_PATH+"data_normal.csv")

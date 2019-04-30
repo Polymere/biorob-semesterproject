@@ -1,0 +1,3 @@
+git+https://gitlab.com/farmsim/farms_pylog.git#farms-pylog
+git+https://gitlab.com/BioRobAnimals/network_generator.git#network-generator
+git+https://gitlab.com/BioRobAnimals/muscle_generator.git@geyer_muscle_model#muscle-generator
