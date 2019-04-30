@@ -113,12 +113,12 @@ Once the best set of parameters to fit the data is found, evaluate :
  	3. Better explore the "biological" range for dual GSOL/GGAS DONE
  
  - Week 9
-  - Comparison with kinematics from the CPP implementation DONE
-  - Correlation with CPP gait when changing GGAS/GSOL DONE
- 
- - Easter "vacations"
-  - Comparison with outputs from open loop cpp on kinematics DONE
-  - Understand what is going on TODO (-> Week 10)
+	  - Comparison with kinematics from the CPP implementation DONE
+	  - Correlation with CPP gait when changing GGAS/GSOL DONE
+	 
+	 - Easter "vacations"
+	  - Comparison with outputs from open loop cpp on kinematics DONE
+	  - Understand what is going on TODO (-> Week 10)
   	> Really bad fit between open loop cpp and python was due to different logging /sampling rate
  
  - Week 10
