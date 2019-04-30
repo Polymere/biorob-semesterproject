@@ -1,4 +1,4 @@
-# Repository for semester project : TITLE
+# Repository for semester project : Sensitity analysis on reflex parameters using a sensory driven bio-inspired controller for human locomotion
 
 ## Milestones
 
