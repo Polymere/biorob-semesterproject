@@ -54,8 +54,6 @@ class reference_compare:
 			ref_df=pd.read_csv(ref_file)
 			self.set_repstrides_raw(ref_df)
 
-
-
 	def set_repstrides_winter(self,win_df):
 		"""
 		hip angle is defined in the opposed direction
@@ -97,14 +95,7 @@ class reference_compare:
 		return all_cor
 
 
-def get_run_files(ind_path,verbose=False):
-	meta_file=fu.assert_one_dim(fu.file_list(ind_path,file_format=".yaml",pattern="meta"),\
-								critical=True,verbose=verbose)
-	dict_meta=yaml.load(open(meta_file))
-	processed_file=fu.assert_one_dim(fu.file_list(ind_path,file_format=".csv",pattern="processed"),\
-									critical=False,verbose=verbose)
-	pro_df=pd.read_csv(processed_file)
-	return dict_meta,pro_df
+
 
 def metric_df(raw_file,objectives_file,ref_cmp=None,verbose=True):
 
@@ -124,21 +115,29 @@ def metric_df(raw_file,objectives_file,ref_cmp=None,verbose=True):
 		print(metrics)
 	return metrics
 
-def process(ind_dir,ref_cmp=None):
+def process(ind_dir,ref_cmp=None,save=True):
 	raws=fu.file_list(ind_dir,file_format=".csv",pattern="raw")
 	objectives=fu.file_list(ind_dir,file_format=".csv",pattern="objectives")	
 
 	raws=fu.assert_one_dim(raws,critical=False)
 	objectives=fu.assert_one_dim(objectives,critical=False)
 	df=metric_df(raws, objectives,ref_cmp=ref_cmp)
-	save_processed(df, ind_dir)
+	if save:
+		fu.assert_dir(ind_dir,should_be_empty=False)
+		save_path=os.path.join(ind_dir,"processed.csv")
+		df.to_csv(save_path)
+	else:
+		return df
 
-def save_processed(df,path):
-	fu.assert_dir(path,should_be_empty=False)
-	save_path=os.path.join(path,"processed.csv")
-	df.to_csv(save_path)
-
-
+def get_run_files(ind_path,verbose=False):
+	meta_file=fu.assert_one_dim(fu.file_list(ind_path,file_format=".yaml",pattern="meta"),\
+								critical=True,verbose=verbose)
+	dict_meta=yaml.load(open(meta_file))
+	processed_file=fu.assert_one_dim(fu.file_list(ind_path,file_format=".csv",pattern="processed"),\
+									critical=False,verbose=verbose)
+	pro_df=pd.read_csv(processed_file)
+	return dict_meta,pro_df
+	
 def get_label(meta,count=None):
 	#print(meta)
 	if "label" in meta.keys():
@@ -184,7 +183,6 @@ def get_discriminant(proc, metric, params, what="geq_thr"):
 	else:
 		print("get_discriminant args",proc,metric,params,what)
 		return None
-
 def export_meta_params(indiv_dirs,ref_dir, disc_name, disc_params,save_path=None):
 	#df=pd.DataFrame()
 	count=1
@@ -284,7 +282,7 @@ if __name__ == '__main__':
 		ref=None
 		if len(param)>1:
 			"""
-python process_run.py process_and_save /data/prevel/runs ... winter /data/prevel/comparisons/winter_data/data_normal.csv
+		python process_run.py process_and_save /data/prevel/runs ... winter /data/prevel/comparisons/winter_data/data_normal.csv
 			"""
 			ref_kind=param[1]
 			ref_raw=param[2:]
@@ -306,6 +304,7 @@ python process_run.py process_and_save /data/prevel/runs ... winter /data/prevel
 				fl=fu.file_list(run_dir,file_format=".csv")
 				if len(fl)>=2:
 					process(run_dir,ref_cmp=ref)
+	
 	elif mode=="plot_with_success":
 		"""
 		python process_run.py \

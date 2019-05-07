@@ -4,44 +4,17 @@ import utils.file_utils as fu
 import numpy as np
 import yaml
 """
-EXAMPLE
-python generate_paramfile_range.py \
-single \
-/data/prevel/params/gen_param \
-phik_off \
-0 0.5 1
+Mutiple methods to generate (minimal) parameter files for sensitivity analysis
+The files generated MUST be unfolded (see unfold_param.py) before simulation
 
-or 
+Methods:
+	1. gen_all_file -> meta-method, syntax example in /examples/ex_sensitivity.yaml
+	TODO -> create expale file
 
-python generate_paramfile_range.py \
-range \
-/data/prevel/params/gen_param \
-phik_off \
-0 1 2
-
-or 
-
-python generate_paramfile_range.py \
-file \
-/data/prevel/params/gen_param_1/ \
-/data/prevel/params/test_min_max.yaml 
+	2. gen_single :
+	...
+	COMPLETE
 """
-
-
-def gen_file(file_path,params,values):
-	result={}
-	if not type(params)==list:
-		params=[params]
-	if not type(values)==list:
-		values=[values]
-	if len(params)!=len(values):
-		raise('ValueError, received',len(params),"params and",len(values),"values")
-	for idx in range(len(params)):
-		cparam,cvalue=params[idx],values[idx]
-		result[str(cparam)]=float(cvalue)
-	#print(result,type(result))
-	with open(file_path, 'w+') as outfile:
-		yaml.dump(result,outfile)
 
 def gen_all_file(all_params_file,output_dir,standalone=False,nested=False):
 	if standalone:
@@ -71,7 +44,7 @@ def gen_single(values,param_name,output_dir,standalone=False):
 		try: 
 			val=float(value)
 			file_path=os.path.join(output_dir,(param_name+str(file_counter)+".yaml"))
-			gen_file(file_path,param_name,val)
+			fu.save_dict(file_path,param_name,val)
 		except ValueError:
 			print("Error",value,"is not a number")
 		file_counter+=1
@@ -88,8 +61,9 @@ def gen_range(values,param_name,output_dir,standalone=False):
 	for val in np.linspace(min_bound,max_bound,number):
 		print(val)
 		file_path=os.path.join(output_dir,(param_name+str(file_counter)+".yaml"))
-		gen_file(file_path,param_name,float(val))
+		fu.save_dict(file_path,param_name,float(val))
 		file_counter+=1
+
 def _modlinespace(min_bound,max_bound,center_val,npoints):
 	npoints=int(npoints)
 	nlow=int(npoints/2)
@@ -97,6 +71,7 @@ def _modlinespace(min_bound,max_bound,center_val,npoints):
 	lin_low=np.linspace(float(min_bound),float(center_val),nlow,endpoint=False)
 	lin_high=np.linspace(float(center_val),float(max_bound),nhigh)
 	return np.concatenate((lin_low, lin_high))
+
 def gen_modrange(values,param_name,output_dir,standalone=False):
 	if standalone:
 		fu.assert_dir(output_dir,should_be_empty=True)
@@ -108,7 +83,7 @@ def gen_modrange(values,param_name,output_dir,standalone=False):
 	for val in vals:
 		print(val)
 		file_path=os.path.join(output_dir,(param_name+str(file_counter)+".yaml"))
-		gen_file(file_path,param_name,float(val))
+		fu.save_dict(file_path,param_name,float(val))
 		file_counter+=1
 		
 def gen_dual_modrange(values,gen_name,output_dir,standalone=False):
@@ -128,8 +103,9 @@ def gen_dual_modrange(values,gen_name,output_dir,standalone=False):
 			values=[val1,val2]
 			print(values)
 			file_path=os.path.join(output_dir,(gen_name+str(file_counter)+".yaml"))
-			gen_file(file_path, params, values)
+			fu.save_dict(file_path, params, values)
 			file_counter+=1
+
 if __name__ == '__main__':
 	if len(sys.argv)>1:
 		mode=sys.argv[1]

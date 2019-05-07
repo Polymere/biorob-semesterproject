@@ -73,20 +73,22 @@ class runLauncher:
 	individual_counter = 1
 	max_folds = 1
 
-	def __init__(self, args):
+	def __init__(self,worlds_dir, **kwargs):
 		self.time_start = time.time()
-		mode = args[0]
-		if len(args) == 4:
-			self.trial_dir = args[3]
-		elif len(args) == 3:
-			self.trial_dir = os.path.join(
-				ROOT_RESULT_DIR, time.strftime("%j_%H:%M"))
+		#mode = args[0]
 
+		self.worlds = fu.file_list(worlds_dir, file_format=".wbt")
+
+		if "trial_dir" in kwargs.keys()
+			self.trial_dir = kwargs["trial_dir"]
+		else
+			self.trial_dir = os.path.join(ROOT_RESULT_DIR, time.strftime("%j_%H:%M"))
+	def run_batch(self,mode)
 		if mode == "param_fixed_values":
 			"""
 			python run_launcher.py 	param_fixed_values /data/prevel/params/test_range_GSOL.yaml /data/prevel/trial/worlds_folder 
 			"""
-			param_values_file = args[1]
+			param_values_file = args[0]
 			tmp_folded_dir = os.path.join(self.trial_dir, "tmp_folded")
 			nested_runs = True
 			gen_all_file(param_values_file, tmp_folded_dir, standalone=True, nested=nested_runs)
@@ -97,16 +99,16 @@ class runLauncher:
 					self.gens.append(fu.file_list(param, file_format=".yaml"))
 			gen_id = None
 		elif mode == "param_folder":
-			param_dir == args[1]
-			self.individuals = fu.file_list(self.param_dir, file_format=".yaml")
+			#Single generation with all individuals in param_dir
+			param_dir == args[0]
+			self.gens = [fu.file_list(self.param_dir, file_format=".yaml")]
 		elif mode == "single_run":
 			"""python run_launcher.py single_run /data/prevel/params/geyer-florin.yaml"""
-			param_file = args[1]
+			param_file = args[0]
 			self.check_run(param_file)
 			return
+		
 		fu.assert_dir(self.trial_dir)
-		world_dirpath = args[2]
-		self.worlds = fu.file_list(world_dirpath, file_format=".wbt")
 
 		gen_count = 1
 		for gen in self.gens:
@@ -120,7 +122,6 @@ class runLauncher:
 			self.cdir = os.path.join(self.trial_dir, gen_id)
 			fu.assert_dir(self.cdir, should_be_empty=True)
 			self.gen_dir = os.path.join(self.trial_dir, gen_id)
-
 			print("\n*************\t", gen_id, "\t************* \n")
 		else:
 			self.gen_dir = self.trial_dir
@@ -143,13 +144,13 @@ class runLauncher:
 					print("\tWorld:\t", self.world_counter, "\n")
 				self.fold_counter = 0
 				for self.fold_counter in range(self.max_folds):
-					self.single_run(world)
+					self.run_ind(world)
 					self.fold_counter += 1
 				self.world_counter += 1
 			self.individual_counter += 1
 		print("\n**************************")
 
-	def single_run(self, world_file):
+	def run_ind(self, world_file):
 		if self.fold_counter == 0:
 			copyfile(world_file, WORLD_ABSPATH)
 		subprocess.run(["webots", "--mode=fast", "--batch","--minimize", WORLD_ABSPATH])
@@ -164,104 +165,5 @@ class runLauncher:
 		subprocess.run(["webots", "--mode=realtime", "--batch","--fullscreen", WORLD_ABSPATH])
 
 
-def launch_run(parameter_file=None, world_file=None):
-
-	subprocess.run(["webots", "--mode=fast", "--batch","--minimize", WORLD_ABSPATH])
-	# print("RUUUNNN")
-
-
-def gen_param(param_range_file, param_dst):
-	gen_all_file(param_range_file, param_dst, standalone=True)
-
-
-def gen_param_and_launch(param_range_file, world_dirpath, run_dir):
-	print(run_dir)
-	fu.assert_dir(run_dir)
-	folded_param_dir = os.path.join(run_dir, "folded_params")
-	print(folded_param_dir)
-	fu.assert_dir(folded_param_dir)
-	gen_all_file(param_range_file, folded_param_dir, standalone=True)
-	complete_param_dir = os.path.join(run_dir, "complete_params")
-
-	complete_files(folded_param_dir,
-				   REFERENCE_PARAMFILE_ABSPATH, complete_param_dir)
-
-	result_dir = os.path.join(run_dir, "result")
-	fu.assert_dir(result_dir)
-
-	launch_param_dir(complete_param_dir, world_dirpath, result_dir)
-
-
-def launch_param_dir(parameter_dirpath, world_dirpath, result_dir, nfolds=1, verbose=True):
-	parameter_files = fu.file_list(parameter_dirpath, file_format='.yaml')
-	world_files = fu.file_list(world_dirpath, file_format='.wbt')
-	fu.assert_dir(result_dir)
-	if verbose:
-		print("********************************************\n")
-		print("Running \t", nfolds, " folds\n")
-		print("Parameter files :\n", parameter_files, "\n")
-		print("Testing on worlds:\n", world_files, "\n")
-		print("Outputs in :\t", result_dir, "\n")
-		print("********************************************* \n \n")
-	param_counter = 1
-
-	for parameter_file in parameter_files:
-		param_filepath = os.path.join(parameter_dirpath, parameter_file)
-		param_dir = os.path.join(result_dir, ("param" + str(param_counter)))
-		fu.assert_dir(param_dir)
-		copy(param_filepath, param_dir)
-		# save current param file in result/param folder
-		copyfile(param_filepath, PARAMFILE_ABSPATH)
-		# copy current  param file to PARAMFILE_ABSPATH (replace the file to
-		# change current run parameters)
-		world_counter = 1
-		for world_file in world_files:
-			world_filepath = os.path.join(world_dirpath, world_file)
-			world_dir = os.path.join(param_dir, ("world" + str(world_counter)))
-			fu.assert_dir(world_dir)
-			copy(world_filepath, world_dir)
-			# save current world file in result/param/world folder
-			copyfile(world_filepath, WORLD_ABSPATH)
-			# copy current  world file to WORLD_ABSPATH (replace the file to
-			# change current run world)
-			for fold in range(nfolds):
-				launch_run(param_filepath, world_filepath)
-				imp.import_run(	SIM_OUTPUTDIR_RPATH, save_path=world_dir,\
-							 	save_name="raw" + str(fold + 1))
-			world_counter = world_counter + 1
-		param_counter = param_counter + 1
-
 if __name__ == '__main__':
 	runLauncher(sys.argv[1:])
-	"""
-	mode=sys.argv[1]
-
-	if mode=="param_dir":
-		if len(sys.argv)==6:
-			parameter_dirpath=sys.argv[2]
-			nfolds=int(sys.argv[3])
-			world_dirpath=sys.argv[4]
-			result_dir=sys.argv[5]
-		elif len(sys.argv)==5:
-			parameter_dirpath=sys.argv[2]
-			nfolds=int(sys.argv[3])
-			world_dirpath=sys.argv[4]
-			result_dir=os.path.join(ROOT_RESULT_DIR,time.strftime("%j_%H:%M"),"/")
-
-		launch_param_dir(parameter_dirpath, world_dirpath, result_dir, nfolds)
-	elif mode=="param_file_range":
-				python run_launcher.py \
-		param_file_range \
-		/data/prevel/params/test_min_max.yaml \
-		/data/prevel/trial/worlds_folder \
-		/data/prevel/trial/result (optional, otherwise in /data/prevel/runs/date)
-
-		
-		param_range_file=sys.argv[2]
-		world_dirpath=sys.argv[3]
-		if len(sys.argv)==5:
-			run_dir=sys.argv[4]
-		elif len(sys.argv)==4:
-			run_dir=os.path.join(ROOT_RESULT_DIR,time.strftime("%j_%H:%M"))
-		gen_param_and_launch(param_range_file,world_dirpath, run_dir)
-	"""

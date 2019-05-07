@@ -160,3 +160,18 @@ def concat_field(file_name,suffix):
 			concat_lst.append(file_name+"_"+field)
 			
 	return concat_lst
+
+def save_dict(file_path,keys,values):
+	result={}
+	if not type(keys)==list:
+		keys=[keys]
+	if not type(values)==list:
+		values=[values]
+	if len(keys)!=len(values):
+		print("Received",len(keys),"keys and",len(values),"values")
+		raise ValueError, 
+	for idx in range(len(keys)):
+		cparam,cvalue=keys[idx],values[idx]
+		result[str(cparam)]=float(cvalue)
+	with open(file_path, 'w+') as outfile:
+		yaml.dump(result,outfile)
