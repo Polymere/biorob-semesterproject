@@ -1,4 +1,4 @@
-# Repository for semester project : TITLE
+# Repository for semester project : Sensitity analysis on reflex parameters using a sensory driven bio-inspired controller for human locomotion
 
 ## Milestones
 
@@ -105,12 +105,24 @@ Once the best set of parameters to fit the data is found, evaluate :
  	- correlations plots/comparison with real data DONE
  	- Plots in 2D parameter space DONE
 	- Improved simulation controller (switch parameters when leg is in swing) DONE
+	- Correlations in kinematics with ref  (midterm) DONE
 
 - MIDTERM PRESENTATION
  	1. Ankle/knee does not match real data, and leads to bad stability -> wait for better parameters or optimize myself ?
- 	2. Sensitivity analysis with correlation to reference for kine (see how the gait changes with parameter) -> CORRELATION BETWEEN RPZ STRIDES
- 	3. Better explore the "biological" range for dual GSOL/GGAS
-
+ 	2. Sensitivity analysis with correlation to reference for kine (see how the gait changes with parameter)DONE
+ 	3. Better explore the "biological" range for dual GSOL/GGAS DONE
+ 
+ - Week 9
+	  - Comparison with kinematics from the CPP implementation DONE
+	  - Correlation with CPP gait when changing GGAS/GSOL DONE
+	 
+ - Easter "vacations"
+	  - Comparison with outputs from open loop cpp on kinematics DONE
+	  - Understand what is going on TODO (-> Week 10)
+  	> Really bad fit between open loop cpp and python was due to different logging /sampling rate
+ 
+ - Week 10
+ 	- Further investigations on python/cpp differences (still not perfect fit after issue with sampling/logging rate has been corrected)
 
 
 
@@ -121,11 +133,13 @@ Once the best set of parameters to fit the data is found, evaluate :
 Additional python packages dependencies are :
 
 - pandas (handling the data)
+- pyyaml (yaml file read/write)
 - jupyter notebook (not required, used for prototyping)
+- seaborn (nicer plots for notebooks)
 
 These dependencies where installed in a conda environment, which can be installed with:
   
-`conda create --name <env> --file config/biorob_proj.txt`
+`conda create --name <env> --file config/biorob_proj_config.yml`
 
 ### Environment
 
