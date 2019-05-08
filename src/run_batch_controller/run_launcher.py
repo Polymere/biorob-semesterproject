@@ -170,7 +170,6 @@ class runLauncher:
 					print("\tWorld:\t", self.world_counter, "\n")
 				self.fold_counter = 0
 				for self.fold_counter in range(self.max_folds):
-
 					self.run_ind(gen_id)
 					self.fold_counter += 1
 				self.world_counter += 1
