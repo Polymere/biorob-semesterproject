@@ -1,0 +1,310 @@
+# Overview of all parameter names
+
+# Basal activities: to be optimized
+s0_glut_max_r: 0.074214147496435511897
+s0_psoas_r: 0.028405114662567162997
+s0_bifemlh_r: 0.052200134065161302166
+s0_vas_int_r: 0.058120074968998923504
+s0_med_gas_r: 0.042163777392187844206
+s0_soleus_r: 0.023646929285519383002
+s0_tib_ant_r: 0.088715562186285040758
+
+s0_glut_max_l: 0.074214147496435511897
+s0_psoas_l: 0.028405114662567162997
+s0_bifemlh_l: 0.052200134065161302166
+s0_vas_int_l: 0.058120074968998923504
+s0_med_gas_l: 0.042163777392187844206
+s0_soleus_l: 0.023646929285519383002
+s0_tib_ant_l: 0.088715562186285040758
+
+# STANCE PHASE
+# Force feedback weights
+w_for_stance_glut_max_r: 0
+w_for_stance_psoas_r: 0
+w_for_stance_bifemlh_r: 0
+w_for_stance_vas_int_r: 2.100837759744729194
+w_for_stance_med_gas_r: 1.5891605194328091155
+w_for_stance_soleus_r: 2.682413105936853448
+w_for_stance_tib_ant_r: 0
+
+w_for_stance_glut_max_l: 0
+w_for_stance_psoas_l: 0
+w_for_stance_bifemlh_l: 0
+w_for_stance_vas_int_l: 2.100837759744729194
+w_for_stance_med_gas_l: 1.5891605194328091155
+w_for_stance_soleus_l: 2.682413105936853448
+w_for_stance_tib_ant_l: 0
+
+# Length feedback weights
+w_len_stance_glut_max_r: 0
+w_len_stance_psoas_r: 0
+w_len_stance_bifemlh_r: 0
+w_len_stance_vas_int_r: 0
+w_len_stance_med_gas_r: 0
+w_len_stance_soleus_r: 0
+w_len_stance_tib_ant_r: 1.4922853222553309482
+
+w_len_stance_glut_max_l: 0
+w_len_stance_psoas_l: 0
+w_len_stance_bifemlh_l: 0
+w_len_stance_vas_int_l: 0
+w_len_stance_med_gas_l: 0
+w_len_stance_soleus_l: 0
+w_len_stance_tib_ant_l: 1.4922853222553309482
+
+# Length offsetts
+l_off_stance_glut_max_r: 0
+l_off_stance_psoas_r: 0
+l_off_stance_bifemlh_r: 0
+l_off_stance_vas_int_r: 0
+l_off_stance_med_gas_r: 0
+l_off_stance_soleus_r: 0
+l_off_stance_tib_ant_r: 0.58705703008306120427
+
+l_off_stance_glut_max_l: 0
+l_off_stance_psoas_l: 0
+l_off_stance_bifemlh_l: 0
+l_off_stance_vas_int_l: 0
+l_off_stance_med_gas_l: 0
+l_off_stance_soleus_l: 0
+l_off_stance_tib_ant_l: 0.58705703008306120427
+
+# Position trunk gaint
+kp_stance_glut_max_r: 1.62365918487
+kp_stance_psoas_r: 2.3877340953978540838
+kp_stance_bifemlh_r: 2.3877340953978540838
+kp_stance_vas_int_r: 0
+kp_stance_med_gas_r: 0
+kp_stance_soleus_r: 0
+kp_stance_tib_ant_r: 0
+
+kp_stance_glut_max_l: 1.62365918487
+kp_stance_psoas_l: 2.3877340953978540838
+kp_stance_bifemlh_l: 2.3877340953978540838
+kp_stance_vas_int_l: 0
+kp_stance_med_gas_l: 0
+kp_stance_soleus_l: 0
+kp_stance_tib_ant_l: 0
+
+# Derivative trunk gain
+kd_stance_glut_max_r: 1.2945377968328057872
+kd_stance_psoas_r: 1.2945377968328057872
+kd_stance_bifemlh_r: 1.2945377968328057872
+kd_stance_vas_int_r: 0
+kd_stance_med_gas_r: 0
+kd_stance_soleus_r: 0
+kd_stance_tib_ant_r: 0
+
+kd_stance_glut_max_l: 1.2945377968328057872
+kd_stance_psoas_l: 1.2945377968328057872
+kd_stance_bifemlh_l: 1.2945377968328057872
+kd_stance_vas_int_l: 0
+kd_stance_med_gas_l: 0
+kd_stance_soleus_l: 0
+kd_stance_tib_ant_l: 0
+
+# Hyperextension gain
+kphi_stance_glut_max_r: 0
+kphi_stance_psoas_r: 0
+kphi_stance_bifemlh_r: 0
+kphi_stance_vas_int_r: 1.6403733975295877734
+kphi_stance_med_gas_r: 0
+kphi_stance_soleus_r: 0
+kphi_stance_tib_ant_r: 0
+
+kphi_stance_glut_max_l: 0
+kphi_stance_psoas_l: 0
+kphi_stance_bifemlh_l: 0
+kphi_stance_vas_int_l: 1.6403733975295877734
+kphi_stance_med_gas_l: 0
+kphi_stance_soleus_l: 0
+kphi_stance_tib_ant_l: 0
+
+# Body weight gaint
+kbw_stance_glut_max_r: 1.6307505394293342338
+kbw_stance_psoas_r: 1.6307505394293342338
+kbw_stance_bifemlh_r: 1.6307505394293342338
+kbw_stance_vas_int_r: 1.6307505394293342338
+kbw_stance_med_gas_r: 0
+kbw_stance_soleus_r: 0
+kbw_stance_tib_ant_r: 0
+
+kbw_stance_glut_max_l: 1.6307505394293342338
+kbw_stance_psoas_l: 1.6307505394293342338
+kbw_stance_bifemlh_l: 1.6307505394293342338
+kbw_stance_vas_int_l: 1.6307505394293342338
+kbw_stance_med_gas_l: 0
+kbw_stance_soleus_l: 0
+kbw_stance_tib_ant_l: 0
+
+# Lean gain
+klean_stance_glut_max_r: 0
+klean_stance_psoas_r: 0
+klean_stance_bifemlh_r: 0
+klean_stance_vas_int_r: 0
+klean_stance_med_gas_r: 0
+klean_stance_soleus_r: 0
+klean_stance_tib_ant_r: 0
+
+klean_stance_glut_max_l: 0
+klean_stance_psoas_l: 0
+klean_stance_bifemlh_l: 0
+klean_stance_vas_int_l: 0
+klean_stance_med_gas_l: 0
+klean_stance_soleus_l: 0
+klean_stance_tib_ant_l: 0
+
+#SWING PHASE
+# Force feedback weights
+w_for_swing_glut_max_r: 0.89093410754905855153
+w_for_swing_psoas_r: 0
+w_for_swing_bifemlh_r: 0.30246875039219767167
+w_for_swing_vas_int_r: 0
+w_for_swing_med_gas_r: 0
+w_for_swing_soleus_r: 0
+w_for_swing_tib_ant_r: 0
+
+w_for_swing_glut_max_l: 0.89093410754905855153
+w_for_swing_psoas_l: 0
+w_for_swing_bifemlh_l: 0.30246875039219767167
+w_for_swing_vas_int_l: 0
+w_for_swing_med_gas_l: 0
+w_for_swing_soleus_l: 0
+w_for_swing_tib_ant_l: 0
+
+# Length feedback weights
+w_len_swing_glut_max_r: 0
+w_len_swing_psoas_r: 3.8524960732493629401
+w_len_swing_bifemlh_r: 0
+w_len_swing_vas_int_r: 0
+w_len_swing_med_gas_r: 0
+w_len_swing_soleus_r: 0
+w_len_swing_tib_ant_r: 1.4922853222553309482
+
+w_len_swing_glut_max_l: 0
+w_len_swing_psoas_l: 3.8524960732493629401
+w_len_swing_bifemlh_l: 0
+w_len_swing_vas_int_l: 0
+w_len_swing_med_gas_l: 0
+w_len_swing_soleus_l: 0
+w_len_swing_tib_ant_l: 1.4922853222553309482
+
+# Length offsetts
+l_off_swing_glut_max_r: 0
+l_off_swing_psoas_r: 0.46714453170058944931
+l_off_swing_bifemlh_r: 0.80781654599764263214
+l_off_swing_vas_int_r: 0
+l_off_swing_med_gas_r: 0
+l_off_swing_soleus_r: 0
+l_off_swing_tib_ant_r: 0.58705703008306120427
+
+l_off_swing_glut_max_l: 0
+l_off_swing_psoas_l: 0.46714453170058944931
+l_off_swing_bifemlh_l: 0.80781654599764263214
+l_off_swing_vas_int_l: 0
+l_off_swing_med_gas_l: 0
+l_off_swing_soleus_l: 0
+l_off_swing_tib_ant_l: 0.58705703008306120427
+
+# Position trunk gaint
+kp_swing_glut_max_r: 0
+kp_swing_psoas_r: 0
+kp_swing_bifemlh_r: 0
+kp_swing_vas_int_r: 0
+kp_swing_med_gas_r: 0
+kp_swing_soleus_r: 0
+kp_swing_tib_ant_r: 0
+
+kp_swing_glut_max_l: 0
+kp_swing_psoas_l: 0
+kp_swing_bifemlh_l: 0
+kp_swing_vas_int_l: 0
+kp_swing_med_gas_l: 0
+kp_swing_soleus_l: 0
+kp_swing_tib_ant_l: 0
+
+# Derivative trunk gain
+kd_swing_glut_max_r: 0
+kd_swing_psoas_r: 0
+kd_swing_bifemlh_r: 0
+kd_swing_vas_int_r: 0
+kd_swing_med_gas_r: 0
+kd_swing_soleus_r: 0
+kd_swing_tib_ant_r: 0
+
+kd_swing_glut_max_l: 0
+kd_swing_psoas_l: 0
+kd_swing_bifemlh_l: 0
+kd_swing_vas_int_l: 0
+kd_swing_med_gas_l: 0
+kd_swing_soleus_l: 0
+kd_swing_tib_ant_l: 0
+
+# Hyperextension gain
+kphi_swing_glut_max_r: 0
+kphi_swing_psoas_r: 0
+kphi_swing_bifemlh_r: 0
+kphi_swing_vas_int_r: 0
+kphi_swing_med_gas_r: 0
+kphi_swing_soleus_r: 0
+kphi_swing_tib_ant_r: 0
+
+kphi_swing_glut_max_l: 0
+kphi_swing_psoas_l: 0
+kphi_swing_bifemlh_l: 0
+kphi_swing_vas_int_l: 0
+kphi_swing_med_gas_l: 0
+kphi_swing_soleus_l: 0
+kphi_swing_tib_ant_l: 0
+
+# Body weight gain
+kbw_swing_glut_max_r: 0
+kbw_swing_psoas_r: 0
+kbw_swing_bifemlh_r: 0
+kbw_swing_vas_int_r: 0
+kbw_swing_med_gas_r: 0
+kbw_swing_soleus_r: 0
+kbw_swing_tib_ant_r: 0
+
+kbw_swing_glut_max_l: 0
+kbw_swing_psoas_l: 0
+kbw_swing_bifemlh_l: 0
+kbw_swing_vas_int_l: 0
+kbw_swing_med_gas_l: 0
+kbw_swing_soleus_l: 0
+kbw_swing_tib_ant_l: 0
+
+# Lean gain
+klean_swing_glut_max_r: 0
+klean_swing_psoas_r: 0.79627821861140712922
+klean_swing_bifemlh_r: 0
+klean_swing_vas_int_r: 0
+klean_swing_med_gas_r: 0
+klean_swing_soleus_r: 0
+klean_swing_tib_ant_r: 0
+
+klean_swing_glut_max_l: 0
+klean_swing_psoas_l: 0.79627821861140712922
+klean_swing_bifemlh_l: 0
+klean_swing_vas_int_l: 0
+klean_swing_med_gas_l: 0
+klean_swing_soleus_l: 0
+klean_swing_tib_ant_l: 0
+
+# Extra Geyer parameters
+qref_l: 0.073868138042435846358
+qref_r: 0.073868138042435846358
+phik_off_l: 0.085202874024973312972
+phik_off_r: 0.085202874024973312972
+DS_stance_l: 0.37451499589923042954
+DS_swing_l: 0
+w_len_hamhfl_stance_l: 0
+w_for_solta_stance_l: 1.6786242308366643439
+w_len_hamhfl_swing_l: 1.1183033676997307104
+w_for_solta_swing_l: 0
+DS_stance_r: 0.37451499589923042954
+DS_swing_r: 0
+w_len_hamhfl_stance_r: 0
+w_for_solta_stance_r: 1.6786242308366643439
+w_len_hamhfl_swing_r: 1.1183033676997307104
+w_for_solta_swing_r: 0

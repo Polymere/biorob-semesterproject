@@ -14,10 +14,115 @@ import os
 import utils.file_utils as fu
 
 
-MAP_VALUE_FILE = "/data/prevel/repos/biorob-semesterproject/data/map_geyer_syme.yaml"
+MAP_VALUE_FILE = "../../data/references/map_geyer_sym.yaml"
+REFERENCE_FILE="../../data/references/geyer1.yaml"
+
+class ParamMapper():
+
+	def __init__(self,verbose=False):
+
+		self.map_file=yaml.load(open(MAP_VALUE_FILE, 'r'))
+		self.reference_file=yaml.load(open(REFERENCE_FILE,'r'))
+		self.verbose=verbose
+
+	def complete(self,folded_dct,split):
+		unf=self.unfold(folded_dct)
+
+		comp=self.complete(unf)
+		if split:
+			return self.split(comp)
+		else:
+			return comp
+
+	def complete_and_save(self,folded_dct,save_file_path,split):
+
+		unf=self.unfold(folded_dct)
+
+		comp=self.complete(unf)
+
+		right,left,complete=self.split(comp)
+
+		dirp, base = os.path.split(save_file_path)
+		save_path = base.split('.')
+		if len(save_path) != 2:
+			print("\n", save_path, "\n")
+			raise ValueError
+		f_name, f_extension = save_path[0], save_path[1]
+		right_file = os.path.join(dirp, f_name + "_r." + f_extension)
+		left_file = os.path.join(dirp, f_name + "_l." + f_extension)
+		with open(right_file, 'w') as outfile:
+			yaml.dump(right, outfile, default_flow_style=False)
+		with open(left_file, 'w') as outfile:
+			yaml.dump(left, outfile, default_flow_style=False)
+		with open(save_file_path, 'w') as outfile:
+			yaml.dump(complete, outfile, default_flow_style=False)
+
+	def unfold(self,folded_dct):
+		unfolded_dct = {}
+		for param_name, param_value in folded_dct.items():
+			try:
+				keys = self.map_file[param_name]
+			except KeyError:
+				print("Parameter \t", param_name,"not found in \t", MAP_VALUE_FILE)
+			for key in keys:
+				unfolded_dct[key] = param_value
+			if param_name == "kp":
+				for key in map_file["063kp"]:
+					unfolded_dct[key] = 0.63 * param_value
+		return unfolded_dct
+
+	def complete(self,unfolded_dct):
+		completed = copy.deepcopy(self.reference_file)
+		for param_name, param_value in unfolded_dct.items():
+			try:
+				completed[param_name] = param_value
+			except KeyError as e:
+				print("Parameter ", param_name, "missing from reference",\
+						reference_file, ". Ignoring \n")
+			except Exception as e:
+				print("Unknown error ", e)
+				pass
+		return completed
+	def split(self,completed):
+		dct_r = {}
+		dct_l = {}
+		for p_name, p_val in completed.items():
+			if p_name[-2:] == "_r":
+				dct_r[p_name] = p_val
+			elif p_name[-2:] == "_l":
+				dct_l[p_name] = p_val
+			else:
+				print("\nParam \t", p_name, "\tfor both legs")
+				dct_l[p_name] = p_val
+				dct_r[p_name] = p_val
+		return self.complete(dct_r),self.complete(dct_l),completed
+
+	def inverse_mapping(self,unfolded_dct, rounded=False):
+		map_file = map_file = yaml.load(open(MAP_VALUE_FILE, 'r'))
+		folded_dct = {}
+		for u_name, value in unfolded_dct.items():
+			for f_name, u_name_lst in self.map_file.items():
+				if u_name in u_name_lst and f_name not in folded_dct.keys():
+					if rounded:
+						folded_dct[f_name] = round(value, 2)
+					else:
+						folded_dct[f_name] = value
+
+		return folded_dct
+	def is_parameter_valid(self,params):
+		if type(params) is dict:
+			return params.keys()==self.reference.keys()
+		elif fu.assert_file_exists(params):
+			param_dct=yaml.load(open(params),'r')
+			return param_dct.keys()==self.reference.keys()
+		else:
+			print("Cannot compare",params,"with reference")
+			raise ValueError
 
 
+## WILL BE DEPRECATED, CLEANUP
 def unfold_map_value(folded_file):
+	raise DeprecationWarning
 	values = yaml.load(open(folded_file, 'r'))
 
 	unfolded_values = {}
@@ -35,9 +140,10 @@ def unfold_map_value(folded_file):
 				unfolded_values[key] = 0.63 * param_value
 	return unfolded_values
 
-
 def inverse_map_value(unfolded_file, result_file, rounded=False):
+	raise DeprecationWarning
 	values = yaml.load(open(unfolded_file, 'r'))
+
 	map_file = map_file = yaml.load(open(MAP_VALUE_FILE, 'r'))
 	folded_values = {}
 	for u_name, value in values.items():
@@ -52,8 +158,8 @@ def inverse_map_value(unfolded_file, result_file, rounded=False):
 		yaml.dump(folded_values, outfile, default_flow_style=False)
 	return folded_values
 
-
 def compare_files(reference_file, verbose=False, test_file=None, test_dict=None):
+	raise DeprecationWarning
 	if test_file is None and test_dict is None:
 		print("Missing arguments (test file or dict)")
 		return
@@ -85,8 +191,8 @@ def compare_files(reference_file, verbose=False, test_file=None, test_dict=None)
 	else:
 		return False  # default_values_keys,missing_values_keys
 
-
 def compare_values(file1, file2, verbose=True):
+	raise DeprecationWarning
 	f1 = yaml.load(open(file1, 'r'))
 	f2 = yaml.load(open(file2, 'r'))
 	dif_val = {}
@@ -106,8 +212,8 @@ def compare_values(file1, file2, verbose=True):
 		for param in dif_keys:
 			print("\n Different parameters: \t", param)
 
-
 def split_by_leg(dct):
+	raise DeprecationWarning
 	dct_r = {}
 	dct_l = {}
 	for p_name, p_val in dct.items():
@@ -120,7 +226,9 @@ def split_by_leg(dct):
 			dct_l[p_name] = p_val
 			dct_r[p_name] = p_val
 	return dct_r, dct_l
+
 def complete_with_reference(unfolded,reference,verbose=True):
+	raise DeprecationWarning
 	result = copy.deepcopy(reference)
 	dif_count=0
 	for param_name, param_value in unfolded.items():
@@ -138,8 +246,8 @@ def complete_with_reference(unfolded,reference,verbose=True):
 		print("\nSame :",same_count,"\tDiff: ",dif_count)
 	return result
 
-def create_file(folded_file, reference_file, result_file,
-				split=True, verbose=False, copy_path=None):
+def create_file(folded_file, reference_file, result_file,split=True, verbose=False, copy_path=None):
+	raise DeprecationWarning
 	if verbose:
 		print("Unfolding file", folded_file, "to", result_file, "\n")
 
@@ -172,8 +280,8 @@ def create_file(folded_file, reference_file, result_file,
 		with open(copy_path, 'w') as outfile:
 			yaml.dump(result, outfile, default_flow_style=False)
 
-
 def complete_files(folded_dir, reference_file, result_dir):
+	raise DeprecationWarning
 	fu.assert_dir(folded_dir, should_be_empty=False)
 	fu.assert_dir(result_dir, should_be_empty=True)
 	for folded_file in fu.file_list(folded_dir, file_format=".yaml"):

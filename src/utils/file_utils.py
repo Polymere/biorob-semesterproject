@@ -161,7 +161,7 @@ def concat_field(file_name,suffix):
 			
 	return concat_lst
 
-def save_dict(file_path,keys,values):
+def dict_from_keyvals(keys,values,file_path=None):
 	result={}
 	if not type(keys)==list:
 		keys=[keys]
@@ -169,9 +169,12 @@ def save_dict(file_path,keys,values):
 		values=[values]
 	if len(keys)!=len(values):
 		print("Received",len(keys),"keys and",len(values),"values")
-		raise ValueError, 
+		raise ValueError
 	for idx in range(len(keys)):
 		cparam,cvalue=keys[idx],values[idx]
 		result[str(cparam)]=float(cvalue)
-	with open(file_path, 'w+') as outfile:
-		yaml.dump(result,outfile)
+	if file_path is not None:
+		with open(file_path, 'w+') as outfile:
+			yaml.dump(result,outfile)
+	else:
+		return result
