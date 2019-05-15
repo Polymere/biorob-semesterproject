@@ -8,13 +8,21 @@ from shutil import copyfile
 
 import utils.file_utils as fu
 
-CSV_SAVE_DIR="/data/prevel/repos/biorob-semesterproject/data"
+import argparse
+
+# create the top-level parser
+parser = argparse.ArgumentParser(prog='PYTHON_NMM_OL')
+parser.add_argument("-p", "--path", help="Path to run raw data", default="/data/prevel/human_2d/webots/controllers/GeyerReflex/Raw_files")
+parser.add_argument("-op", "--output_path", help="Output path for csv file", default="/data/prevel/repos/biorob-semesterproject/data")
+
+CSV_SAVE_DIR="/data/prevel/repos/biorob-semesterproject/data" # remove
 
 DEFAULT_PATH="/data/prevel/human_2d/webots/controllers/GeyerReflex/Raw_files"
 
 IGNORE_FILES=["f_ce.txt","f_se.txt","l_ce.txt","stim.txt","v_ce.txt"]
+IGNORE_FILES=[]
 
-def import_run(path,verbose=False,save_to_single=True,save_name="default_name",save_path="."):
+def new_import_run(path,verbose=False,save_to_single=True,save_name="default_name",save_path="."):
 	first_call=True
 	if verbose:
 		print("-------------------------------\n")
@@ -23,22 +31,32 @@ def import_run(path,verbose=False,save_to_single=True,save_name="default_name",s
 		print("-------------------------------\n")
 	
 	for file_path in fu.file_list(path,file_format=".txt",verbose=False):
-		
-		array,header=import_file(file_path,verbose=verbose)
 		if save_to_single and (os.path.basename(file_path) not in IGNORE_FILES):
+			data=pd.read_csv(file_path,sep=" ")
 			file=os.path.basename(file_path) # just the file name
 			file=os.path.splitext(file)[0] # remove extension
-			fields=fu.concat_field(file, header)
-			new_name=export_single_file(array,fields,save_name,save_path,first_call,verbose)
+			data.columns=fu.concat_field(file, data.columns)
+			new_export_single_file(data,save_name,save_path,first_call,verbose)
 			first_call=False
-	for file_path in fu.file_list(path,file_format=".csv",verbose=False):
-		file_name=os.path.basename(file_path)
-		save_dst=os.path.join(save_path,file_name)
-		copyfile(file_path, save_dst)
 	return
 
+def new_export_single_file(data,outputname,outputdir,first_call,verbose=False):
 
+	file_path=os.path.join(outputdir,outputname)
+	file_path=file_path+".csv"
+	if first_call:
+		fu.assert_file_exists(file_path, should_exist=False)
+		df=data
+	else:
+		fu.assert_file_exists(file_path, should_exist=True)
+		df=pd.read_csv(file_path)
+		df=pd.concat([df,data],axis=1)
+		
+	
+	df.to_csv(file_path,index=False)
+## Needed to parse log files with previous dataLogger, see if not needed anymore
 def import_file(path,verbose=False):
+	raise DeprecationWarning
 	if verbose:
 		print ("Importing file",path)
 	with open(path) as f:
@@ -55,12 +73,12 @@ def import_file(path,verbose=False):
 		else:
 			array[idx,:]=clean
 		idx=idx+1
-
+	if array is None:
+		print(header)
 	return array,header
-
-
+## Needed to parse log files with previous dataLogger, see if not needed anymore
 def export_single_file(data,fields,outputname,outputdir,first_call,verbose=False):
-
+	raise DeprecationWarning
 	file_path=os.path.join(outputdir,outputname)
 	file_path=file_path+".csv"
 	if first_call:
@@ -82,6 +100,30 @@ def export_single_file(data,fields,outputname,outputdir,first_call,verbose=False
 	for col in range(width):
 		df[fields[col]]=data[:,col]
 	df.to_csv(file_path,index=False)
+## Needed to parse log files with previous dataLogger, see if not needed anymore
+def import_run(path,verbose=False,save_to_single=True,save_name="default_name",save_path="."):
+	raise DeprecationWarning
+	first_call=True
+	if verbose:
+		print("-------------------------------\n")
+		print ("Importing files in",path,"\n")
+		print("Saving as",save_name," in",save_path,"\n")
+		print("-------------------------------\n")
+	
+	for file_path in fu.file_list(path,file_format=".txt",verbose=False):
+		
+		array,header=import_file(file_path,verbose=verbose)
+		if save_to_single and (os.path.basename(file_path) not in IGNORE_FILES):
+			file=os.path.basename(file_path) # just the file name
+			file=os.path.splitext(file)[0] # remove extension
+			fields=fu.concat_field(file, header)
+			new_name=export_single_file(array,fields,save_name,save_path,first_call,verbose)
+			first_call=False
+	for file_path in fu.file_list(path,file_format=".csv",verbose=False):
+		file_name=os.path.basename(file_path)
+		save_dst=os.path.join(save_path,file_name)
+		copyfile(file_path, save_dst)
+	return
 
 def parse_field(field):
 	if field[-2:]=="_r":
@@ -133,6 +175,21 @@ if __name__=="__main__":
 			save_path=CSV_SAVE_DIR
 
 		import_run(path, verbose=True, save_path=save_path)
+	elif mode=="new_import":
+		"""
+		python import_run.py /data/prevel/Raw_files_reference /data/prevel/runs/078_17:26/result/reference
+		
+		"""
+		try:
+			path=sys.argv[2]
+		except:
+			path=DEFAULT_PATH
+		try:
+			save_path=sys.argv[3]
+		except:
+			save_path=CSV_SAVE_DIR
+
+		new_import_run(path, verbose=True, save_path=save_path)
 
 	elif len(sys.argv)<2:
 		print("Not enough args, should have at least one run path", sys.argv)
