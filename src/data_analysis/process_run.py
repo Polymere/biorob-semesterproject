@@ -27,13 +27,16 @@ SAVEPATH="/data/prevel/runs/figures"
 
 DIR_REF_CPP="../../data/ref_cpp/"
 REF_FORMAT='florin'
-MAP_MET_FLORIN={'angles_ankle_l':'ANKLE_LEFT',	'angles_ankle_r':'ANKLE_RIGHT',
+MAP_PYTHON_CPP={'angles_ankle_l':'ANKLE_LEFT',	'angles_ankle_r':'ANKLE_RIGHT',
 				'angles_hip_l':'HIP_LEFT',		'angles_hip_r':'HIP_RIGHT',
 				'angles_knee_l':'KNEE_LEFT',	'angles_knee_r':'KNEE_RIGHT'}
 
-MAP_MET_WINTER={'angles_ankle_l':'ankle',	'angles_ankle_r':'ankle',
+MAP_PYTHON_WINTER={'angles_ankle_l':'ankle',	'angles_ankle_r':'ankle',
 				'angles_hip_l':'hip',		'angles_hip_r':'hip',
 				'angles_knee_l':'knee',		'angles_knee_r':'knee'}
+
+MAP_CPP_WINTER={'joints_angle1_ANGLE_ANKLE_LEFT':'ankle','joints_angle1_ANGLE_HIP_LEFT':'hip','joints_angle1_ANGLE_KNEE_LEFT':'knee'}
+
 
 class reference_compare:
 	rep_strides={}
@@ -49,6 +52,11 @@ class reference_compare:
 			winter_file=files[0]
 			win_df=pd.read_csv(winter_file)
 			self.set_repstrides_winter(win_df)
+
+		elif kind=='winter_cpp':
+			winter_file=files[0]
+			win_df=pd.read_csv(winter_file)
+			self.set_repstrides_winter_cpp(win_df)
 		elif kind=='raw':
 			ref_file=files[0]
 			ref_df=pd.read_csv(ref_file)
@@ -62,6 +70,14 @@ class reference_compare:
 			mean_ref=ed.interp_gaitprcent(win_df[key_win],100)
 			if key_win=="hip": # inversed angle orientation
 				mean_ref=-mean_ref
+			self.rep_strides[key_gen]=mean_ref
+
+	def set_repstrides_winter_cpp(self,win_df):
+		"""
+		hip angle is defined in the same direction !
+		"""
+		for key_gen,key_win in MAP_CPP_WINTER.items():
+			mean_ref=ed.interp_gaitprcent(win_df[key_win],100)
 			self.rep_strides[key_gen]=mean_ref
 
 	def set_repstrides_florin(self,contact,joints):
@@ -94,9 +110,17 @@ class reference_compare:
 			all_cor[met]=mean_cur.corr(self.rep_strides[met])
 		return all_cor
 
+	def get_all_corr_cpp(self,cmp_df):
+		all_cor={}
+		for met in self.rep_strides.keys():
+			mean_cur,std_cur=ed.get_rep_var_from_contact(contact_df(cmp_df),met,cmp_df)
+			all_cor[met]=mean_cur.corr(self.rep_strides[met])
+		return all_cor
 
-
-
+def contact_df(full_df):
+	contact=full_df.filter(like="footfall1")
+	contact.columns=["left","right"]
+	return contact
 def metric_df(raw_file,objectives_file,ref_cmp=None,verbose=True):
 
 	raw_df=pd.read_csv(open(raw_file))
@@ -115,6 +139,40 @@ def metric_df(raw_file,objectives_file,ref_cmp=None,verbose=True):
 		print(metrics)
 	return metrics
 
+
+def metric_df_cpp(raw_file,ref_cmp=None,verbose=True):
+
+	raw_df=pd.read_csv(open(raw_file))
+	# Metrics computed during the run
+
+	metrics=pd.DataFrame(["value"])
+	metrics["maxtime"]=max(raw_df.index*TIME_STEP)
+	# Energy as the sum of all activations
+	metrics["energy"]=raw_df["energy1_energy"].max()
+	#activation=raw_df.filter(like="act",axis=1)
+	#metrics["energy"]=activation.sum(axis=1,skipna=True)
+	if ref_cmp is not None:
+		corr_dct=ref_cmp.get_all_corr_cpp(raw_df)
+		for met,corrval in corr_dct.items():
+			metrics["cor"+met]=corrval
+	if verbose:
+		print(metrics)
+	return pd.DataFrame(data=metrics)
+
+def process_cpp(ind_dir,ref_cmp=None,save=True,verbose=True):
+
+	raws=fu.file_list(ind_dir,file_format=".csv",pattern="raw")
+
+	raws=fu.assert_one_dim(raws,critical=False)
+	if verbose:
+		print("\nProcessing",raws)
+	df=metric_df_cpp(raws,ref_cmp=ref_cmp)
+	if save:
+		fu.assert_dir(ind_dir,should_be_empty=False)
+		save_path=os.path.join(ind_dir,"processed.csv")
+		df.to_csv(save_path)
+	else:
+		return df
 def process(ind_dir,ref_cmp=None,save=True):
 	raws=fu.file_list(ind_dir,file_format=".csv",pattern="raw")
 	objectives=fu.file_list(ind_dir,file_format=".csv",pattern="objectives")	
@@ -304,6 +362,33 @@ if __name__ == '__main__':
 				fl=fu.file_list(run_dir,file_format=".csv")
 				if len(fl)>=2:
 					process(run_dir,ref_cmp=ref)
+
+	elif mode=="process_and_save_cpp":
+		"""
+		python process_run.py process_and_save /data/prevel/runs/094_14:44 (ref_dir)
+		"""
+		run_dir=param[0]
+		ref_kind="winter_cpp"
+		ref_raw=["/data/prevel/repos/biorob-semesterproject/data/winter_data/data_normal.csv"]
+		
+		ref=reference_compare(ref_kind,files=ref_raw)
+			
+		#gen_dirs=fu.dir_list(run_dir,"")
+		#print(gen_dirs)
+		"""if len(gen_dirs)>0:
+			for gen_dir in gen_dirs:
+				ind_dirs=fu.dir_list(gen_dir,pattern="ind")
+				for ind in ind_dirs:
+					process_cpp(ind,ref_cmp=ref)
+		else:"""
+		ind_dirs=fu.dir_list(run_dir,pattern="ind")
+		if len(ind_dirs)>0:
+			for ind in ind_dirs:
+				process_cpp(ind,ref_cmp=ref)
+		else:
+			fl=fu.file_list(run_dir,file_format=".csv")
+			if len(fl)>=2:
+				process_cpp(run_dir,ref_cmp=ref)
 	
 	elif mode=="plot_with_success":
 		"""

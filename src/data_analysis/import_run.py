@@ -22,7 +22,12 @@ DEFAULT_PATH="/data/prevel/human_2d/webots/controllers/GeyerReflex/Raw_files"
 IGNORE_FILES=["f_ce.txt","f_se.txt","l_ce.txt","stim.txt","v_ce.txt"]
 IGNORE_FILES=[]
 
-def new_import_run(path,verbose=False,save_to_single=True,save_name="default_name",save_path="."):
+INCLUDE_FILES=["distance1","energy1","footfall1","joints_angle1"]
+
+
+
+def cpp_import_run(path,verbose=False,save_to_single=True,save_name="default_name",save_path="."):
+	INCLUDE_FILES=["distance1","energy1","footfall1","joints_angle1"]
 	first_call=True
 	if verbose:
 		print("-------------------------------\n")
@@ -30,11 +35,45 @@ def new_import_run(path,verbose=False,save_to_single=True,save_name="default_nam
 		print("Saving as",save_name," in",save_path,"\n")
 		print("-------------------------------\n")
 	
-	for file_path in fu.file_list(path,file_format=".txt",verbose=False):
+	for file_path in fu.file_list(path,verbose=False):
+		if save_to_single and (os.path.basename(file_path) in INCLUDE_FILES):
+			if verbose:
+				print("\nImporting",os.path.basename(file_path))
+			data=pd.read_csv(file_path,sep=" ",error_bad_lines=False)
+			file=os.path.basename(file_path) # just the file name
+			file=os.path.splitext(file)[0] # remove extension
+			data=data.loc[:, ~data.columns.str.match('Unnamed')] # remove columns due to trailing seps
+			data.columns=fu.concat_field(file, data.columns)
+			new_export_single_file(data,save_name,save_path,first_call,verbose)
+			first_call=False
+	return
+def new_import_run(path,verbose=True,save_to_single=True,save_name="default_name",save_path="."):
+	first_call=True
+	if verbose:
+		print("-------------------------------\n")
+		print ("Importing files in",path,"\n")
+		print("Saving as",save_name," in",save_path,"\n")
+		print("-------------------------------\n")
+	
+	for file_path in fu.file_list(path,verbose=False):
+		"""
 		if save_to_single and (os.path.basename(file_path) not in IGNORE_FILES):
+			if verbose:
+				print("\nImporting",os.path.basename(file_path))
 			data=pd.read_csv(file_path,sep=" ")
 			file=os.path.basename(file_path) # just the file name
 			file=os.path.splitext(file)[0] # remove extension
+			data.columns=fu.concat_field(file, data.columns)
+			new_export_single_file(data,save_name,save_path,first_call,verbose)
+			first_call=False
+		"""
+		if save_to_single and (os.path.basename(file_path) in INCLUDE_FILES):
+			if verbose:
+				print("\nImporting",os.path.basename(file_path))
+			data=pd.read_csv(file_path,sep=" ",error_bad_lines=False)
+			file=os.path.basename(file_path) # just the file name
+			file=os.path.splitext(file)[0] # remove extension
+			data=data.loc[:, ~data.columns.str.match('Unnamed')] # remove columns due to trailing seps
 			data.columns=fu.concat_field(file, data.columns)
 			new_export_single_file(data,save_name,save_path,first_call,verbose)
 			first_call=False
