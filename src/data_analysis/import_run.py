@@ -54,6 +54,8 @@ def new_export_single_file(data,outputname,outputdir,first_call,verbose=False):
 		
 	
 	df.to_csv(file_path,index=False)
+
+	
 ## Needed to parse log files with previous dataLogger, see if not needed anymore
 def import_file(path,verbose=False):
 	raise DeprecationWarning
