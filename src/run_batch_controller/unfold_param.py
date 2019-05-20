@@ -37,7 +37,7 @@ class ParamMapper():
 						reference_file, ". Ignoring \n")
 			except Exception as e:
 				print("Unknown error ", e)
-				pass
+				raise e
 		return completed
 
 	def is_parameter_valid(self,params):
@@ -52,7 +52,7 @@ class ParamMapper():
 
 class PythonMapper(ParamMapper):
 	def __init__(self,verbose=False):
-		self.__init__(ParamMapper,verbose)
+		ParamMapper.__init__(self,verbose)
 		self.reference_file=yaml.load(open(REFERENCE_FILE_PY,'r'))
 		self.map_file=yaml.load(open(MAP_VALUE_FILE, 'r'))
 
@@ -117,10 +117,10 @@ class PythonMapper(ParamMapper):
 
 class CppMapper(ParamMapper):
 	def __init__(self,verbose=False):
-		self.__init__(ParamMapper,verbose)
+		ParamMapper.__init__(self,verbose)
 		self.reference_file=yaml.load(open(REFERENCE_FILE_CPP,'r'))
 	def complete_and_save(self,folded_dct,save_file_path):
-		comp=self.complete(unf)
+		complete=self.complete(folded_dct)
 		self.save_file(save_file_path, complete)
 ## WILL BE DEPRECATED, CLEANUP
 def unfold_map_value(folded_file):
