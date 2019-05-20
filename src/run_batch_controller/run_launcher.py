@@ -87,6 +87,10 @@ class runLauncher:
 		else:
 			self.trial_dir = os.path.join(ROOT_RESULT_DIR, time.strftime("%j_%H:%M"))
 		#fu.assert_dir(self.trial_dir,should_be_empty=True)
+		if "model_language" in kwargs.keys():
+			self.model_language=kwargs["model_language"]
+		else:
+			self.model_language="cpp"
 		self.mapper=ParamMapper()
 
 	def run_batch(self,mode,*args,**kwargs):
@@ -134,6 +138,7 @@ class runLauncher:
 			self.individuals=population.values()
 			nb_gen=args[1]
 			return self.run_gen(str(nb_gen),**kwargs)
+		elif mode =="cpp":	
 			
 	def run_gen(self, gen_id, **opt_args):
 		tot_ind = len(self.individuals)
