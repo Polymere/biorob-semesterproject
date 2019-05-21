@@ -22,7 +22,7 @@ import utils.file_utils as fu
 import matplotlib.pyplot as plt
 import data_analysis.event_detection as ed
 from utils.plot_utils import plot_mean_std_fill
-TIME_STEP=1.0 #ms
+TIME_STEP=1e-3 #ms
 SAVEPATH="/data/prevel/runs/figures"
 
 DIR_REF_CPP="../../data/ref_cpp/"
@@ -43,21 +43,41 @@ class reference_compare:
 
 	def __init__(self,kind,files=None):
 		if kind=='florin':
+			""" directions :
+				ankle -
+				knee +
+				hip +
+			""" 
 			contact_file=files[0]
 			joints_file=files[1]
 			contact=pd.read_csv(contact_file,sep=" ")
 			joints=pd.read_csv(joints_file,sep=" ")
 			self.set_repstrides_florin(contact, joints)
 		elif kind=='winter':
+			""" directions :
+				ankle + 
+				knee +
+				hip -
+			""" 
 			winter_file=files[0]
 			win_df=pd.read_csv(winter_file)
 			self.set_repstrides_winter(win_df)
 
-		elif kind=='winter_cpp':
+		elif kind=='winter_cpp': # winter to cpp (florin) !
+			""" directions :
+				ankle -
+				knee +
+				hip -
+			""" 
 			winter_file=files[0]
 			win_df=pd.read_csv(winter_file)
 			self.set_repstrides_winter_cpp(win_df)
 		elif kind=='raw':
+			""" directions :
+				ankle + 
+				knee +
+				hip +
+			""" 
 			ref_file=files[0]
 			ref_df=pd.read_csv(ref_file)
 			self.set_repstrides_raw(ref_df)
@@ -78,6 +98,12 @@ class reference_compare:
 		"""
 		for key_gen,key_win in MAP_CPP_WINTER.items():
 			mean_ref=ed.interp_gaitprcent(win_df[key_win],100)
+			if "ankle" in key_win: # inversed angle orientation
+				print("opposed ankle")
+				mean_ref=-mean_ref
+			if "hip" in key_win: # inversed angle orientation
+				print("opposed hip")
+				mean_ref=-mean_ref
 			self.rep_strides[key_gen]=mean_ref
 
 	def set_repstrides_florin(self,contact,joints):
@@ -140,33 +166,36 @@ def metric_df(raw_file,objectives_file,ref_cmp=None,verbose=True):
 	return metrics
 
 
-def metric_df_cpp(raw_file,ref_cmp=None,verbose=True):
+def metric_dct_cpp(raw_file,ref_cmp=None,verbose=False):
 
 	raw_df=pd.read_csv(open(raw_file))
 	# Metrics computed during the run
 
 	metrics=pd.DataFrame(["value"])
 	metrics["maxtime"]=max(raw_df.index*TIME_STEP)
+	metrics["distance"]=raw_df["distance1_distance"].max()
 	# Energy as the sum of all activations
+	metrics["mean_speed"]=metrics["distance"]/metrics["maxtime"]
 	metrics["energy"]=raw_df["energy1_energy"].max()
+	metrics["energy_to_dist"]=metrics["energy"]/metrics["distance"]
 	#activation=raw_df.filter(like="act",axis=1)
 	#metrics["energy"]=activation.sum(axis=1,skipna=True)
 	if ref_cmp is not None:
 		corr_dct=ref_cmp.get_all_corr_cpp(raw_df)
 		for met,corrval in corr_dct.items():
-			metrics["cor"+met]=corrval
+			metrics["cor"+MAP_CPP_WINTER[met]]=corrval
 	if verbose:
 		print(metrics)
-	return pd.DataFrame(data=metrics)
+	return metrics
 
-def process_cpp(ind_dir,ref_cmp=None,save=True,verbose=True):
+def process_cpp(ind_dir,ref_cmp=None,save=True,verbose=False):
 
 	raws=fu.file_list(ind_dir,file_format=".csv",pattern="raw")
 
 	raws=fu.assert_one_dim(raws,critical=False)
 	if verbose:
 		print("\nProcessing",raws)
-	df=metric_df_cpp(raws,ref_cmp=ref_cmp)
+	df=metric_dct_cpp(raws,ref_cmp=ref_cmp,verbose=verbose)
 	if save:
 		fu.assert_dir(ind_dir,should_be_empty=False)
 		save_path=os.path.join(ind_dir,"processed.csv")
@@ -191,10 +220,17 @@ def get_run_files(ind_path,verbose=False):
 	meta_file=fu.assert_one_dim(fu.file_list(ind_path,file_format=".yaml",pattern="meta"),\
 								critical=True,verbose=verbose)
 	dict_meta=yaml.load(open(meta_file))
+
 	processed_file=fu.assert_one_dim(fu.file_list(ind_path,file_format=".csv",pattern="processed"),\
 									critical=False,verbose=verbose)
 	pro_df=pd.read_csv(processed_file)
-	return dict_meta,pro_df
+
+	param_file=fu.assert_one_dim(fu.file_list(ind_path,file_format=".yaml",pattern="param"),\
+								critical=True,verbose=verbose)
+	dict_param=yaml.load(open(param_file))
+
+	
+	return dict_meta,pro_df,dict_param
 	
 def get_label(meta,count=None):
 	#print(meta)
@@ -274,32 +310,32 @@ def export_meta_params(indiv_dirs,ref_dir, disc_name, disc_params,save_path=None
 		df.to_csv(save_path)
 		
 
-def plot_with_success(indiv_dirs, ref_dir, metric, disc_name, disc_params, what="max_value",save=True):
+def plot_with_success(indiv_dirs, metric, disc_name, disc_params, ref_dir=None,what="max_value",save=False):
 	plot_qd_lst=[] # Contains (label,metric_value,param_value,discriminant)
 
 	for ind in indiv_dirs:
 		print("\n",os.path.basename(ind))
 		ind_id=os.path.basename(ind)
-		meta, proc=get_run_files(ind)
-		lab = get_label(meta)
+		meta, proc,param =get_run_files(ind)
+		lab = get_label(param)
 		met = get_metric_value(proc, metric)
-		pname, param_value = get_param_value(meta)
+		pname, param_value = get_param_value(param)
 		disc = get_discriminant(proc, disc_name, disc_params)
 		if disc:
-			lab=str(lab)+"\n"+str(ind_id)
+			lab=str(round(lab,2))+"\n"+str(ind_id)
 		else:
 			lab=round(lab, 1)
 		plot_qd_lst.append((lab, met, param_value, disc))
-
-	meta, proc = get_run_files(ref_dir)
-	lab = get_label(meta)
-	met = get_metric_value(proc, metric)
-	param_value = get_param_value(meta, param_name=pname)
-	disc = get_discriminant(proc, disc_name, disc_params)
-	plot_qd_lst.append((lab,  met,  param_value,  disc))
+	if ref_dir is not None:
+		meta, proc = get_run_files(ref_dir)
+		lab = get_label(meta)
+		met = get_metric_value(proc, metric)
+		param_value = get_param_value(meta, param_name=pname)
+		disc = get_discriminant(proc, disc_name, disc_params)
+		plot_qd_lst.append((lab,  met,  param_value,  disc))
 	sorted_qd_lst = sorted(plot_qd_lst,key=lambda val : val[2]) # sort by ascending metric value
 	fig_count = 0
-	fig=plt.figure(figsize=(len(sorted_qd_lst),10))
+	fig=plt.figure(figsize=(len(sorted_qd_lst)*1.5,10))
 	ax=plt.axes()
 	
 	label_lst=[]
@@ -321,10 +357,11 @@ def plot_with_success(indiv_dirs, ref_dir, metric, disc_name, disc_params, what=
 	else:
 		
 		plt.rcParams.update({'font.size': 22})
-		fig_name=pname+what+metric+".png"
+		fig_name=pname[0]+what+metric+".png"
 		p=os.path.join(SAVEPATH,fig_name)
 		#plt.tight_layout()
 		plt.savefig(p,dpi=300,transparent=False)
+		plt.close()
 
 
 if __name__ == '__main__':
@@ -373,22 +410,31 @@ if __name__ == '__main__':
 		
 		ref=reference_compare(ref_kind,files=ref_raw)
 			
-		#gen_dirs=fu.dir_list(run_dir,"")
-		#print(gen_dirs)
-		"""if len(gen_dirs)>0:
+		gen_dirs=fu.dir_list(run_dir,"param")
+		nb_gen=len(gen_dirs)
+
+		if nb_gen>0:
+			prog_gen=1
 			for gen_dir in gen_dirs:
+				print("Gen",prog_gen,"/",nb_gen)
 				ind_dirs=fu.dir_list(gen_dir,pattern="ind")
+				nb_ind=len(ind_dirs)
+				prog_ind=1
+				for ind in ind_dirs:
+					print("Gen",prog_gen,"/",nb_gen,"\tInd",prog_ind,"/",nb_ind)
+
+					process_cpp(ind,ref_cmp=ref)
+					prog_ind+=1
+				prog_gen+=1
+		else:
+			ind_dirs=fu.dir_list(run_dir,pattern="ind")
+			if len(ind_dirs)>0:
 				for ind in ind_dirs:
 					process_cpp(ind,ref_cmp=ref)
-		else:"""
-		ind_dirs=fu.dir_list(run_dir,pattern="ind")
-		if len(ind_dirs)>0:
-			for ind in ind_dirs:
-				process_cpp(ind,ref_cmp=ref)
-		else:
-			fl=fu.file_list(run_dir,file_format=".csv")
-			if len(fl)>=2:
-				process_cpp(run_dir,ref_cmp=ref)
+			else:
+				fl=fu.file_list(run_dir,file_format=".csv")
+				if len(fl)>=2:
+					process_cpp(run_dir,ref_cmp=ref)
 	
 	elif mode=="plot_with_success":
 		"""
@@ -400,20 +446,20 @@ if __name__ == '__main__':
 		4000
 		"""
 		run_dir = param[0]
-		ref_dir=param[1]
-		metric=param[2]
-		disc_param=param[3]
-		do_save=False
+		#ref_dir=param[1]
+		metric="distance"
+		disc_param=0
+		do_save=True
 
 		gen_dirs=fu.dir_list(run_dir,"param",)
 		if len(gen_dirs)>0:
 			for gen_dir in gen_dirs:
 				ind_dirs=fu.dir_list(gen_dir,pattern="ind")
-				plot_with_success(	ind_dirs,ref_dir,metric,disc_name='maxtime',
+				plot_with_success(	ind_dirs,metric,disc_name='maxtime',
 									disc_params=disc_param,what="max_value",save=do_save)
 		else:
 			ind_dirs=fu.dir_list(run_dir,pattern="ind")
-			plot_with_success(	ind_dirs,ref_dir,metric,disc_name='maxtime',
+			plot_with_success(	ind_dirs,metric,disc_name='maxtime',
 								disc_params=disc_param,what="max_value",save=do_save)
 							
 	elif mode=="export_joined_df":
