@@ -8,6 +8,7 @@ python unfold_param.py \
 """
 
 import yaml
+import csv
 import sys
 import copy
 import os
@@ -119,6 +120,12 @@ class CppMapper(ParamMapper):
 	def __init__(self,verbose=False):
 		ParamMapper.__init__(self,verbose)
 		self.reference_file=yaml.load(open(REFERENCE_FILE_CPP,'r'))
+
+	def save_file(self,save_path,data):
+		with open(save_path, 'w') as outfile:
+			w = csv.writer(outfile,delimiter=" ")
+			for key,val in data.items():
+				w.writerow([key,val])
 	def complete_and_save(self,folded_dct,save_file_path):
 		complete=self.complete(folded_dct)
 		self.save_file(save_file_path, complete)

@@ -72,7 +72,7 @@ SIM_OUTPUTDIR_RPATH = os.path.join(CONTROLLER_ABSPATH, "Raw_files")
 
 PYTHON_LOG_PATH="/data/prevel/human_2d/webots/controllers/GeyerReflex/Raw_files" # not used,change
 
-CPP_CONFIG_PATH="/data/prevel/repos/humanWebotsNmm/config/sample"
+CPP_CONFIG_PATH="/data/prevel/repos/humanWebotsNmm/config/2D"
 
 CPP_LOG_PATH="/data/prevel/repos/humanWebotsNmm/log/current_log"
 
@@ -117,26 +117,34 @@ class runLauncher:
 			self.individuals=population.values()
 			nb_gen=args[1]
 			return self.run_gen("gen"+str(nb_gen),**kwargs)
+		elif mode=="check":
+			print(args[0])
+			ind={args[0][0]:float(args[0][1])}
+			self.check_run(ind)
 			
 	def run_ind(self,gen_id):
 		if self.fold_counter==0:
 			copyfile(self.cworld, self.world_path)
 
 		subprocess.run(["webots", "--mode=fast", "--batch","--minimize", self.world_path])
-
 		run_suffix="_w"+str(self.world_counter)+"_f"+str(self.fold_counter+1)
-
 		self.import_run(self.run_import_path,save_path=self.cdir, save_name="raw"+run_suffix)
-		meta_file_path=os.path.join(self.cdir, "meta"+run_suffix+".yaml")
-		with open(meta_file_path, 'w+') as meta:
-			yaml.dump(self._get_meta_dct(gen_id=gen_id),meta)
+		self.dump_meta(self._get_meta_dct(gen_id=gen_id))
 
-	def check_run(self,param_file):
+	def dump_meta(self,dct):
+		print("Dumping",dct)
+		run_suffix="_w"+str(self.world_counter)+"_f"+str(self.fold_counter+1)
+		meta_file_path=os.path.join(self.cdir, "meta"+run_suffix+".yaml")
+		with open(meta_file_path, 'a+') as meta:
+			yaml.dump(dct,meta)
+	def check_run(self,param_name,param_value):
 		raise NotImplementedError
 		#if self.mapper.is_parameter_valid(param_file):
 			
 	def _get_meta_dct(self,**kwargs):
-		return {"gen_id":kwargs["gen_id"],"world":self.cworld,"ind":self.individual_counter}
+		return {"info":{"gen_id":kwargs["gen_id"],
+				"world":self.cworld,
+				"ind":self.individual_counter}}
 
 
 class PythonLauncher(runLauncher):
@@ -216,10 +224,9 @@ class CppLauncher(runLauncher):
 			self.cdir = os.path.join(self.gen_dir, "ind" + str(self.individual_counter))
 			fu.assert_dir(self.cdir, should_be_empty=True)
 			self.mapper.complete_and_save(ind, self.param_write_path)
+			param_file_copypath = os.path.join(self.cdir, "full_params")
+			copyfile(self.param_write_path, param_file_copypath)
 
-			folded_path = os.path.join(self.cdir, "params.yaml")
-			with open(folded_path,'w+') as fold_param:
-				yaml.dump(dict(ind), fold_param)
 
 			for world in self.worlds:
 				self.cworld=world
@@ -227,6 +234,7 @@ class CppLauncher(runLauncher):
 					print("\tWorld:\t", self.world_counter, "\n")
 				self.fold_counter = 0
 				for self.fold_counter in range(self.max_folds):
+					self.dump_meta({"opt_params":dict(ind)})
 					self.run_ind(gen_id)
 					self.fold_counter += 1
 				self.world_counter += 1
@@ -235,8 +243,11 @@ class CppLauncher(runLauncher):
 		return self.gen_dir
 
 
-
+	def check_run(self,ind):
+		self.mapper.complete_and_save(ind, self.param_write_path)
+		subprocess.run(["webots", "--batch", self.world_path])
 if __name__ == '__main__':
+	#python run_launcher.py cpp param_fixed_values /data/prevel
 
 	if sys.argv[1]=="cpp":
 		r=CppLauncher()
