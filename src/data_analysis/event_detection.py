@@ -261,7 +261,7 @@ def get_rep_var_from_contact(contact,metric,joints):
 	var=spl_stride.std(axis=1)
 	if stride_choice=="repmax":
 		rep_max_idx=su[su.values==su.max()].index
-		print("repmax:",rep_max_idx)
+		#print("repmax:",rep_max_idx)
 		y=rep_strides[rep_max_idx].iloc[:,0]
 	elif stride_choice=="mean":
 		 y=rep_strides.mean(axis=1)
@@ -274,7 +274,8 @@ def get_rep_var_from_contact(contact,metric,joints):
 		y=interp_gaitprcent(y,100)
 		
 	return y,var
-	
+
+
 if __name__ == '__main__':
 	WINTER_PATH="../../data/winter_data/"
 	win_df_data=pd.read_csv(WINTER_PATH+"data_normal.csv")
