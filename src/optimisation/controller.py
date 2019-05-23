@@ -9,8 +9,9 @@ from utils.file_utils import assert_file_exists,assert_dir
 from data_analysis.process_run import CppRunProcess,PythonRunProcess
 
 ROOT_RESULT_DIR = "/data/prevel/runs"
+ROOT_RESULT_DIR = "./trash"
 NORUNMODE=True
-NORUNMODE_RESULTDIR="/data/prevel/runs/new_cpp_moodrange/param1"
+NORUNMODE_RESULTDIR="../../data/template_gen"
 
 class EvolutionController():
 	"""docstring for ClassName"""
@@ -79,6 +80,8 @@ class EvolutionController():
 		print("\n",couples)
 		print("\nP1",selected_parents.iloc[couples[0][:]],
 			"\tP2",selected_parents.iloc[couples[1][:]])
+
+
 		raise NotImplementedError
 
 	def select(self,sorted_pop):
