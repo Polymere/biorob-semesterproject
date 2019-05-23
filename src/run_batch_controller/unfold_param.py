@@ -17,7 +17,7 @@ import utils.file_utils as fu
 
 MAP_VALUE_FILE = "../../data/references/map_geyer_sym.yaml"
 REFERENCE_FILE_PY="../../data/references/geyer1.yaml"
-REFERENCE_FILE_CPP="../../data/references/geyer_cpp.yaml"
+REFERENCE_FILE_CPP="../../data/references/geyer_cpp_launching.yaml"
 
 class ParamMapper():
 
@@ -37,6 +37,8 @@ class ParamMapper():
 				print("Parameter ", param_name, "missing from reference",\
 						reference_file, ". Ignoring \n")
 			except Exception as e:
+				print("\nRef",self.reference_file)
+
 				print("Unknown error ", e)
 				raise e
 		return completed
@@ -57,7 +59,7 @@ class PythonMapper(ParamMapper):
 		self.reference_file=yaml.load(open(REFERENCE_FILE_PY,'r'))
 		self.map_file=yaml.load(open(MAP_VALUE_FILE, 'r'))
 
-	def complete_and_save(self,folded_dct,save_file_path,split):
+	def complete_and_save(self,folded_dct,save_file_path,split=True):
 
 		unf=self.unfold(folded_dct)
 

@@ -72,7 +72,7 @@ SIM_OUTPUTDIR_RPATH = os.path.join(CONTROLLER_ABSPATH, "Raw_files")
 
 PYTHON_LOG_PATH="/data/prevel/human_2d/webots/controllers/GeyerReflex/Raw_files" # not used,change
 
-CPP_CONFIG_PATH="/data/prevel/repos/humanWebotsNmm/config/2D"
+CPP_CONFIG_PATH="/data/prevel/repos/humanWebotsNmm/config/2D_paul"
 
 CPP_LOG_PATH="/data/prevel/repos/humanWebotsNmm/log/current_log"
 
@@ -86,6 +86,7 @@ class runLauncher:
 	world_counter = 1
 	individual_counter = 1
 	max_folds = 1
+	online_processing=False
 
 	def __init__(self,worlds_dir, **kwargs):
 		self.time_start = time.time()
@@ -98,6 +99,7 @@ class runLauncher:
 		else:
 			self.trial_dir = os.path.join(ROOT_RESULT_DIR, time.strftime("%j_%H:%M"))
 
+
 	def run_batch(self,mode,*args,**kwargs):
 		if mode == "param_fixed_values":
 			param_values_file = args[0][0]
@@ -106,6 +108,7 @@ class runLauncher:
 			gen_count=1
 			for gen in self.gens:
 				self.individuals=gen
+				self.individuals_ids=range(1,len(gen)+1)
 				self.run_gen("param"+str(gen_count))
 				gen_count+=1
 		elif mode == "single_run":
@@ -115,21 +118,22 @@ class runLauncher:
 		elif mode == "pop":
 			population=args[0]
 			self.individuals=population.values()
-			nb_gen=args[1]
-			return self.run_gen("gen"+str(nb_gen),**kwargs)
+			self.individuals_ids=population.keys()
+			gen_counter=args[1]
+			return self.run_gen("gen"+str(gen_counter),**kwargs)
 		elif mode=="check":
 			print(args[0])
 			ind={args[0][0]:float(args[0][1])}
 			self.check_run(ind)
 			
-	def run_ind(self,gen_id):
+	def run_ind(self):
 		if self.fold_counter==0:
 			copyfile(self.cworld, self.world_path)
 
 		subprocess.run(["webots", "--mode=fast", "--batch","--minimize", self.world_path])
 		run_suffix="_w"+str(self.world_counter)+"_f"+str(self.fold_counter+1)
 		self.import_run(self.run_import_path,save_path=self.cdir, save_name="raw"+run_suffix)
-		self.dump_meta(self._get_meta_dct(gen_id=gen_id))
+		
 
 	def dump_meta(self,dct):
 		print("Dumping",dct)
@@ -142,10 +146,9 @@ class runLauncher:
 		#if self.mapper.is_parameter_valid(param_file):
 			
 	def _get_meta_dct(self,**kwargs):
-		return {"info":{"gen_id":kwargs["gen_id"],
-				"world":self.cworld,
-				"ind":self.individual_counter}}
-
+		return {"gen_id":kwargs["gen_id"],
+				"worlds":self.cworld,
+				"ind":self.individual_counter}
 
 class PythonLauncher(runLauncher):
 	def __init__(self,worlds=DEFAULT_PYTHON_WORLD,**kwargs):
@@ -175,7 +178,7 @@ class PythonLauncher(runLauncher):
 			self.world_counter = 1
 			self.cdir = os.path.join(self.gen_dir, "ind" + str(self.individual_counter))
 			fu.assert_dir(self.cdir, should_be_empty=True)
-			self.mapper.complete_and_save(ind, PARAMFILE_ABSPATH, do_split)
+			self.mapper.complete_and_save(ind, PARAMFILE_ABSPATH,do_split)
 
 			folded_path = os.path.join(self.cdir, "params.yaml")
 			with open(folded_path,'w+') as fold_param:
@@ -189,7 +192,9 @@ class PythonLauncher(runLauncher):
 					print("\tWorld:\t", self.world_counter, "\n")
 				self.fold_counter = 0
 				for self.fold_counter in range(self.max_folds):
-					self.run_ind(gen_id)
+					self.dump_meta({"opt_params":dict(ind)})
+					self.dump_meta(self._get_meta_dct(gen_id=gen_id))
+					self.run_ind()
 					self.fold_counter += 1
 				self.world_counter += 1
 			self.individual_counter += 1
@@ -206,7 +211,6 @@ class CppLauncher(runLauncher):
 		self.param_write_path=os.path.join(CPP_CONFIG_PATH,"gaits/current")
 		self.run_import_path=CPP_LOG_PATH
 
-
 	def run_gen(self, gen_id, **opt_args):
 		tot_ind = len(self.individuals)
 		if gen_id is not None:
@@ -218,8 +222,8 @@ class CppLauncher(runLauncher):
 			self.gen_dir = self.trial_dir
 			print("\n**************************\n")
 		self.individual_counter = 1
-		for ind in self.individuals:
-			print("Individual:\t", self.individual_counter, "/",tot_ind,"\n")
+		for ind,ind_uid in zip(self.individuals,self.individuals_ids):
+			print("Individual", ind_uid,":\t",self.individual_counter, "/",tot_ind,"\n")
 			self.world_counter = 1
 			self.cdir = os.path.join(self.gen_dir, "ind" + str(self.individual_counter))
 			fu.assert_dir(self.cdir, should_be_empty=True)
@@ -234,9 +238,12 @@ class CppLauncher(runLauncher):
 					print("\tWorld:\t", self.world_counter, "\n")
 				self.fold_counter = 0
 				for self.fold_counter in range(self.max_folds):
-					self.dump_meta({"opt_params":dict(ind)})
-					self.run_ind(gen_id)
-					self.fold_counter += 1
+					self.dump_meta({"opt_params":dict(ind),
+									"uid":ind_uid,
+									"info":self._get_meta_dct(gen_id=gen_id)})
+					#self.dump_meta({"uid":ind_uid})
+					#self.dump_meta(self._get_meta_dct(gen_id=gen_id))
+					self.run_ind()
 				self.world_counter += 1
 			self.individual_counter += 1
 		print("\n**************************")
@@ -250,6 +257,7 @@ if __name__ == '__main__':
 	#python run_launcher.py cpp param_fixed_values /data/prevel
 
 	if sys.argv[1]=="cpp":
+		print(sys.argv[2],sys.argv[3:])
 		r=CppLauncher()
 	elif sys.argv[1]=="py":
 		r=PythonLauncher()
