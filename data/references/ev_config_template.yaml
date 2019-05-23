@@ -1,3 +1,5 @@
 max_nb_gen: 2
-nb_ind: 1
+nb_ind: 10
 dofs: {G_SOL: [0, 2.0]}
+kinematics_compare_file: "../../data/winter_data/data_normal.csv"
+world_dir: "../../data/worlds/cpp_worlds"
