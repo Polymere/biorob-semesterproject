@@ -117,7 +117,7 @@ def assert_dir(dir_path,should_be_empty=True):
 		
 
 
-def assert_file_exists(file_path,should_exist):
+def assert_file_exists(file_path,should_exist,verbose=False):
 	"""
 	Checks if a file exists. If it is the case and the file should not exist, 
 	propose to replace name (recursive)
@@ -127,7 +127,7 @@ def assert_file_exists(file_path,should_exist):
 	"""
 	if os.path.isfile(file_path):
 		if should_exist:
-			return
+			return True
 		else:
 			print("A file already exists at location",file_path)
 			replace=input ("Replace file : Y/N\n")
@@ -142,14 +142,15 @@ def assert_file_exists(file_path,should_exist):
 				print("Deleting file",file_path)
 				os.remove(file_path)
 				open(file_path, "w")
-			return
+			return True
 	else:
 		if should_exist:
-			print("Error, file at",file_path,"should exist!!")
-			return
+			if verbose:
+				print("Error, file at",file_path,"should exist!!")
+			return False
 		else:
-			open(file_path, "w")
-			return
+			#open(file_path, "w")
+			return True 
 def concat_field(file_name,suffix):
 	concat_lst=[]
 	for field in suffix:

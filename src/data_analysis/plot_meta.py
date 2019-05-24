@@ -4,6 +4,7 @@ import sys
 import yaml
 import os
 import utils.file_utils as fu
+import utils.meta_utils as mu
 import matplotlib.pyplot as plt
 
 from utils.plot_utils import plot_mean_std_fill
@@ -17,11 +18,11 @@ def export_meta_params(indiv_dirs,ref_dir, disc_name, disc_params,save_path=None
 	for ind in indiv_dirs:
 		#print("\n",os.path.basename(ind))
 		ind_id=os.path.basename(ind)
-		meta, proc=get_run_files(ind)
-		lab = get_label(meta,count)
+		meta, proc=mu.get_run_files(ind)
+		lab = mu.get_label(meta,count)
 		#met = get_metric_value(proc, metric)
-		pname, param_value = get_param_value(meta)
-		disc = get_discriminant(proc, disc_name, disc_params)
+		pname, param_value = mu.get_param_value(meta)
+		disc = mu.get_discriminant(proc, disc_name, disc_params)
 
 		dct_row={}
 		for i in range(len(pname)):
@@ -44,69 +45,7 @@ def export_meta_params(indiv_dirs,ref_dir, disc_name, disc_params,save_path=None
 		df.to_csv(save_path)
 
 
-def get_param_value(meta,param_name=None):
-	if param_name is None:
-		try:
-			meta_params=meta["opt_params"]
-		except KeyError:
-			print(meta.keys())
-			raise KeyError
-		return list(meta_params.keys()),list(meta_params.values())
 
-	else: # not modified 
-		raise NotImplementedError
-		if type(param_name)==list:
-			vals=[]
-			for param in param_name:
-				vals.append(meta[param])
-			return vals
-		elif param_name in meta.keys():
-			return meta[param_name]
-		else:
-			raise('ValueError',meta,param_name)
-
-def get_metric_value(proc,metric,what="max_value"):
-	if metric not in proc.columns:
-		print("Band aid for correlation with ref \n ")
-		return 1
-	if what=="max_value":
-		return proc[metric].max() # SEE dropna syntax
-	elif what=="mean_value":
-		return proc[metric].mean() # SEE dropna syntax
-
-def get_discriminant(proc, metric, params, what="geq_thr"):
-	if what=="geq_thr":
-		thr=np.float(params)
-		return (proc[metric].values[0]>=thr)
-	else:
-		print("get_discriminant args",proc,metric,params,what)
-		return None
-
-def get_run_files(ind_path,verbose=False):
-	meta_file=fu.assert_one_dim(fu.file_list(ind_path,file_format=".yaml",pattern="meta"),\
-								critical=True,verbose=verbose)
-	dict_meta=yaml.load(open(meta_file))
-
-	processed_file=fu.assert_one_dim(fu.file_list(ind_path,file_format=".csv",pattern="processed"),\
-									critical=False,verbose=verbose)
-	pro_df=pd.read_csv(processed_file)
-
-	return dict_meta,pro_df
-	
-def get_label(meta,count=None):
-	try:
-		meta_params=meta["opt_params"]
-	except KeyError:
-		print(meta.keys())
-		raise KeyError
-	if "label" in meta.keys():
-		return meta["label"]
-
-	elif len(meta_params)==1:
-		lab=list(meta_params.values())[0]
-		return lab
-	elif len(meta_params)>1 and count is not None:
-		return count
 
 
 def plot_with_success(indiv_dirs, metric, disc_name, disc_params, ref_dir=None,what="max_value",save_path=None):
@@ -115,22 +54,22 @@ def plot_with_success(indiv_dirs, metric, disc_name, disc_params, ref_dir=None,w
 	for ind in indiv_dirs:
 		#print("\n",os.path.basename(ind))
 		ind_id=os.path.basename(ind)
-		meta, proc =get_run_files(ind)
-		lab = get_label(meta)
-		met = get_metric_value(proc, metric)
-		pname, param_value = get_param_value(meta)
-		disc = get_discriminant(proc, disc_name, disc_params)
+		meta, proc =mu.get_run_files(ind)
+		lab = mu.get_label(meta)
+		met = mu.get_metric_value(proc, metric)
+		pname, param_value = mu.get_param_value(meta)
+		disc = mu.get_discriminant(proc, disc_name, disc_params)
 		if disc:
 			lab=str(round(lab,2))+"\n"+str(ind_id)
 		else:
 			lab=round(lab, 1)
 		plot_qd_lst.append((lab, met, param_value, disc))
 	if ref_dir is not None:
-		meta, proc = get_run_files(ref_dir)
-		lab = get_label(meta)
-		met = get_metric_value(proc, metric)
-		param_value = get_param_value(meta, param_name=pname)
-		disc = get_discriminant(proc, disc_name, disc_params)
+		meta, proc = mu.get_run_files(ref_dir)
+		lab = mu.get_label(meta)
+		met = mu.get_metric_value(proc, metric)
+		param_value = mu.get_param_value(meta, param_name=pname)
+		disc = mu.get_discriminant(proc, disc_name, disc_params)
 		plot_qd_lst.append((lab,  met,  param_value,  disc))
 	sorted_qd_lst = sorted(plot_qd_lst,key=lambda val : val[2]) # sort by ascending metric value
 	fig_count = 0

@@ -19,7 +19,7 @@ import os
 import utils.file_utils as fu
 import data_analysis.event_detection as ed
 from data_analysis.import_run import cpp_import_run
-from data_analysis.plot_meta import get_run_files
+from utils.meta_utils import get_run_files
 
 TIME_STEP=1e-3 #ms
 
