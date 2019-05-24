@@ -22,21 +22,23 @@ DEFAULT_PATH="/data/prevel/human_2d/webots/controllers/GeyerReflex/Raw_files"
 IGNORE_FILES=["f_ce.txt","f_se.txt","l_ce.txt","stim.txt","v_ce.txt"]
 IGNORE_FILES=[]
 
-INCLUDE_FILES=["distance1","energy1","footfall1","joints_angle1"]
+DEFAULT_INCLUDE_FILES=["distance1","energy1","footfall1","joints_angle1"]
 
 
 
-def cpp_import_run(path,verbose=False,save_to_single=True,save_name="default_name",save_path="."):
-	INCLUDE_FILES=["distance1","energy1","footfall1","joints_angle1"]
+def cpp_import_run(path,save_to_single,verbose=False,save_name="default_name",save_path=".",
+					include_files=DEFAULT_INCLUDE_FILES):
+
 	first_call=True
 	if verbose:
 		print("-------------------------------\n")
 		print ("Importing files in",path,"\n")
-		print("Saving as",save_name," in",save_path,"\n")
+		if save_to_single:
+			print("Saving as",save_name," in",save_path,"\n")
 		print("-------------------------------\n")
-	
-	for file_path in fu.file_list(path,verbose=False):
-		if save_to_single and (os.path.basename(file_path) in INCLUDE_FILES):
+	#run_df=None
+	for file_path in fu.file_list(path,verbose=verbose): # could filter before iter
+		if os.path.basename(file_path) in include_files:
 			if verbose:
 				print("\nImporting",os.path.basename(file_path))
 			data=pd.read_csv(file_path,sep=" ",error_bad_lines=False)
@@ -44,9 +46,15 @@ def cpp_import_run(path,verbose=False,save_to_single=True,save_name="default_nam
 			file=os.path.splitext(file)[0] # remove extension
 			data=data.loc[:, ~data.columns.str.match('Unnamed')] # remove columns due to trailing seps
 			data.columns=fu.concat_field(file, data.columns)
-			new_export_single_file(data,save_name,save_path,first_call,verbose)
+			if save_to_single:
+				new_export_single_file(data,save_name,save_path,first_call,verbose)
+				run_df=None
+			elif first_call:
+				run_df=data
+			else:
+				run_df=pd.concat([run_df,data],axis=1)
 			first_call=False
-	return
+	return run_df
 def new_import_run(path,verbose=True,save_to_single=True,save_name="default_name",save_path="."):
 	first_call=True
 	if verbose:

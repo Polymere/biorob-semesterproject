@@ -80,8 +80,8 @@ DEFAULT_PYTHON_WORLD="/data/prevel/worlds_folder/python_worlds"
 
 CPP_WORLD_PATH = "/data/prevel/repos/humanWebotsNmm/webots/worlds/current.wbt"
 
-
 DEFAULT_CPP_WORLD="/data/prevel/worlds_folder/cpp_worlds"
+
 class runLauncher:
 	world_counter = 1
 	individual_counter = 1
@@ -122,7 +122,7 @@ class runLauncher:
 			gen_counter=args[1]
 			return self.run_gen("gen"+str(gen_counter),**kwargs)
 		elif mode=="check":
-			print(args[0])
+			#print(args[0])
 			ind={args[0][0]:float(args[0][1])}
 			self.check_run(ind)
 			
@@ -249,16 +249,20 @@ class CppLauncher(runLauncher):
 		print("\n**************************")
 		return self.gen_dir
 
+	#def create_pop(self,population):
 
 	def check_run(self,ind):
 		self.mapper.complete_and_save(ind, self.param_write_path)
-		subprocess.run(["webots", "--batch", self.world_path])
+		subprocess.run(["webots", "--batch","--fullscreen", self.world_path])
 if __name__ == '__main__':
 	#python run_launcher.py cpp param_fixed_values /data/prevel
 
 	if sys.argv[1]=="cpp":
-		print(sys.argv[2],sys.argv[3:])
+		#print(sys.argv[2],sys.argv[3:])
 		r=CppLauncher()
 	elif sys.argv[1]=="py":
 		r=PythonLauncher()
+	else:
+		print("\n[ERROR] arg",sys.argv[1])
+		raise ValueError
 	r.run_batch(sys.argv[2],sys.argv[3:])

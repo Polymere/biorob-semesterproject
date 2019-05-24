@@ -8,10 +8,13 @@ from run_batch_controller.run_launcher import CppLauncher
 from utils.file_utils import assert_file_exists,assert_dir
 from data_analysis.process_run import CppRunProcess,PythonRunProcess
 
-ROOT_RESULT_DIR = "/data/prevel/runs"
-ROOT_RESULT_DIR = "./trash"
+
 NORUNMODE=True
-NORUNMODE_RESULTDIR="../../data/template_gen"
+if NORUNMODE:
+	ROOT_RESULT_DIR = "./trash"
+else:
+	ROOT_RESULT_DIR = "/data/prevel/runs"
+NORUNMODE_RUNDIR="../../data/template_gen"
 
 class EvolutionController():
 	"""docstring for ClassName"""
@@ -97,7 +100,7 @@ class EvolutionController():
 	def eval_pop(self,population):
 		if NORUNMODE:
 			#print(self.current_pop)
-			scores=self.run_processor.process_gen(NORUNMODE_RESULTDIR)
+			scores=self.run_processor.process_gen(NORUNMODE_RUNDIR)
 			print("\n[DEBUG] Eval pop\n",scores)
 		else:	
 			result_dir=self.run_launcher.run_batch("pop",population,self.nb_gen)
