@@ -38,6 +38,7 @@
 """
 import utils.file_utils as fu
 import time
+import pandas as pd
 import data_analysis.import_run as imp
 import sys
 from shutil import copy, copyfile
@@ -45,6 +46,7 @@ import yaml
 import os
 import subprocess
 from run_batch_controller.generate_paramfile_range import gen_all_file
+from utils.meta_utils import get_uid_result
 import run_batch_controller.unfold_param as up
 from run_batch_controller.unfold_param import PythonMapper,CppMapper
 """
@@ -84,6 +86,7 @@ DEFAULT_CPP_WORLD="/data/prevel/worlds_folder/cpp_worlds"
 
 class runLauncher:
 	world_counter = 1
+	fold_counter=0
 	individual_counter = 1
 	max_folds = 1
 	online_processing=False
@@ -249,7 +252,45 @@ class CppLauncher(runLauncher):
 		print("\n**************************")
 		return self.gen_dir
 
-	#def create_pop(self,population):
+	def create_pop(self,population,param_paths,log_paths,gen_id,verbose=True):
+		if len(population)!=len(param_paths) or len(population)!=len(log_paths):
+			print("\n[ERROR]Should have has much valid param_paths as ind:\n\tpop",
+					len(population),"params",len(param_paths),"logs",len(log_paths))
+			raise ValueError
+		for ind, ind_uid, param_path, log_path in zip(population.values(), population.keys(),param_paths,log_paths):
+			self.cdir=log_path
+			self.dump_meta({"opt_params":ind,
+				"uid":ind_uid})#,
+				#"info":self._get_meta_dct(gen_id=gen_id)})
+			self.mapper.complete_and_save(ind, param_path)
+			if verbose:
+				print("\n[INFO] Created param at",param_path,"for ind",ind_uid,"with params\n",ind)
+
+	def wait_for_fitness(self,log_paths,verbose=True):
+
+		evaluations_terminated=False
+		cnt=0
+		nb_ind=len(log_paths)
+		res={}
+		while not evaluations_terminated:
+			for log_path in log_paths:
+				res_path=os.path.join(log_path,"result.csv")
+				if fu.assert_file_exists(res_path,should_exist=True):
+					if verbose:
+						print("\n[INFO]Run in \n",log_path,"has finished")
+					result=get_uid_result(log_path)
+					if cnt==0:
+						result_df=pd.DataFrame(columns=result.keys(),
+												index=pd.RangeIndex((len(log_paths))))
+					result_df.loc[cnt]=result
+					cnt+=1
+					log_paths.remove(log_path)
+
+			if cnt==nb_ind:
+				evaluations_terminated=True
+			else:
+				time.sleep(1.0)
+		return result_df
 
 	def check_run(self,ind):
 		self.mapper.complete_and_save(ind, self.param_write_path)
