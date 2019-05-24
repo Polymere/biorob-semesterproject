@@ -148,7 +148,7 @@ class CppEvolutionController(EvolutionController):
 		self.run_processor=CppRunProcess(compare_files)
 
 if __name__ == '__main__':
-	config_file="ev_config_template.yaml"
+	config_file="../../data/references/ev_config_template.yaml"
 	mode="cpp"
 	assert_file_exists(config_file, should_exist=True)
 	if mode=="cpp":

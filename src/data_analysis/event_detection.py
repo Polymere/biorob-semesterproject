@@ -175,6 +175,24 @@ def interp_gaitprcent(s,n_goal):
 	else:
 		fr=s
 	return fr
+
+def interp_gaitprcent_df(s_df,n_goal):
+	n_strides,n_init=s_df.shape
+	#interp_df=pd.DataFrame(np.zeros((n_strides,n_goal)))
+	if n_init>n_goal:
+		downsample_idx=np.linspace(0,n_init,n_goal,dtype=int)
+		#print(s_df.loc[:,downsample_idx])
+		interp_df=s_df.loc[:,downsample_idx]
+		interp_df.reindex()
+		return interp_df
+	elif n_init<n_goal:
+		subsamble_idx=np.linspace(0,n_goal-1,n_init,dtype=int)
+		interp_df.loc[:,subsamble_idx]=s_df
+		return interp_df.interpolate()
+	else:
+		return s_df.dropna()
+
+
 def get_all_stride(full_df,metric,interp=True,how="strike_to_strike",with_timestamps=False):
 
 	 # event detection
@@ -284,7 +302,7 @@ def get_rep_var_from_contact(contact,metric,joints,drop_n_first_strides=3):
 
 
 if __name__ == '__main__':
-	WINTER_PATH="../../data/winter_data/"
+	"""WINTER_PATH="../../data/winter_data/"
 	win_df_data=pd.read_csv(WINTER_PATH+"data_normal.csv")
 	win_df_std=pd.read_csv(WINTER_PATH+"std_normal.csv")
 	what="ankle"
@@ -299,4 +317,8 @@ if __name__ == '__main__':
 
 	mean_exp,std_exp=get_mean_std_stride(df,"angles_"+what+"_r",interp=True,stride_choice="stride24")
 	plt.plot(mean_exp)
-	plt.show()
+	plt.show()"""
+
+	s_df=pd.DataFrame(np.random.randint(0,20,(3,20)))
+	print(interp_gaitprcent_df(s_df,10))
+		
