@@ -1,0 +1,21 @@
+- list_name  :   reflexes
+  parameters :   string
+  list_content : kp kd kref kp_cor kd_cor klean klean_cor_had klean_cor_hab
+- list_name  :   motoneurons
+  parameters :   string
+  list_content : left_vas left_hf left_glu left_hab left_had right_vas right_hf right_glu right_hab right_had
+- table_name :   sensorystream
+  parameters :   table
+  headers_type : string        string               string
+  headers_name : sensor_cat    sensor_name          sensor_type
+  content :      joint_angle   all                  double
+                 input         theta_trunk          double
+                 input         thetacor_trunk       double
+                 sensor        left_foot            double
+                 sensor        right_foot           double
+                 state         lateralspeed_trunk   double
+                 state         energy_dt            double
+                 state         energy_oe_dt         double
+                 state         prediction_error     double
+- parameters : double
+  motoneuron_scaling : 0.1

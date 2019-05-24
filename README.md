@@ -1,5 +1,50 @@
 # Repository for semester project : Sensitity analysis on reflex parameters using a sensory driven bio-inspired controller for human locomotion
 
+ -> Project summary
+
+ [FOR FLORIN (fitness computation)](#fitness-computation)
+ 
+## Running the code
+REQUIRED : conda
+
+### Scripts
+
+`source setup/env.sh`
+
+- Installs the conda environment (see dependencies) if not installed
+- Activates the env
+- Appends ./src to PYTHONPATH 
+
+### Dependencies
+
+Additional python packages dependencies are :
+
+- pandas (handling the data)
+- pyyaml (yaml file read/write)
+- jupyter notebook (not required, used for prototyping)
+- seaborn (nicer plots for notebooks)
+
+These dependencies were installed in a conda environment, which can be installed with:
+  
+`conda create --name <env> --file config/biorob_proj_config.yml`
+
+### Environment
+
+The src folder should be added to the PYTHONPATH
+
+`export PYTHONPATH=$PYTHONPATH:path/to/repo/src`
+
+### Fitness computation
+
+ Either :
+
+ 1. Call `import_and_process_from_dir` (located in src/data_analysis/process_run.py) with the log folder (/humanWebotsNmm/log/folder) or a list of log folders
+ 2. Run `python process_run.py cpp_import_process logfolders`
+
+Result is a fitness value / list of fitness values
+
+
+
 ## Milestones
 
 ### 1. Setting up the environment for desktop + laptop
@@ -124,28 +169,15 @@ Once the best set of parameters to fit the data is found, evaluate :
  - Week 10
  	- Further investigations on python/cpp differences (still not perfect fit after issue with sampling/logging rate has been corrected)
 
+ - Weeks 11-13
+	- Setup for the CPP implementation DONE
+	- Refactored the code to handle CPP and Python controller/logging DONE
+	- Speed up run evaluations for GA WIP
+	- Setup to run on the cluster WIP
+	- New sensitivity analysis with CPP model (ranges from Geyer paper) DONE, good results
+	- GA implementation WIP
+	- Extend GA to NSGA-II algo TODO(to do)
 
 
-## Running the code
 
-### Dependencies
 
-Additional python packages dependencies are :
-
-- pandas (handling the data)
-- pyyaml (yaml file read/write)
-- jupyter notebook (not required, used for prototyping)
-- seaborn (nicer plots for notebooks)
-
-These dependencies where installed in a conda environment, which can be installed with:
-  
-`conda create --name <env> --file config/biorob_proj_config.yml`
-
-### Environment
-
-The src folder should be added to the PYTHON_PATH
-
-`export PYTHONPATH=$PYTHONPATH:path/to/repo/src`
-
-### Scripts
-TODO

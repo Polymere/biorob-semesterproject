@@ -1,0 +1,36 @@
+- parameters   : table
+  table_name   : muscles
+  headers_type : string                double         double         double          double         double        double           double              bool
+  headers_name : muscle_name           muscle_fmax    muscle_l_opts  muscle_l_slacks muscle_v_maxes muscle_masses muscle_pennation muscle_typeIfiber   sagital
+  content :      hf                    2000           0.11           0.10            12.0           1.87          0.5              0.5                 true
+                 glu                   1500           0.11           0.13            12.0           1.4           0.5              0.5                 true
+                 vas                   6000           0.08           0.23            12.0           2.91          0.7              0.5                 true
+                 ham                   3000           0.10           0.31            12.0           1.82          0.7              0.44                true
+                 gas                   1500           0.05           0.40            12.0           0.45          0.7              0.54                true
+                 sol                   4000           0.04           0.26            6.0            1.36          0.5              0.81                true
+                 ta                    800            0.06           0.24            12.0           0.29          0.7              0.7                 true
+                 hab                   3000           0.09           0.07            12.0           1.145         1.0              0.5                 false
+                 had                   4500           0.1            0.18            12.0           1.91          1.0              0.5                 false
+- parameters   : table
+  table_name   : muscle_joints
+  headers_type : string                string                        double                         double                         double              string
+  headers_name : muscle_joint_muscle   muscle_joint_joint            muscle_joint_moment_arm        muscle_joint_ref               muscle_joint_max    muscle_joint_type
+  content      : hf                    hip                           0.10                           0.0                            0.0                 cst
+                 glu                   hip                          -0.10                          -30.0                           0.0                 cst
+                 vas                   knee                          0.06                           55.0                           0.0                 cst
+                 sol                   ankle                        -0.05                          -10.0                           20.0                cst
+                 ta                    ankle                         0.04                           20.0                           0.0                 cst
+                 hab                   hipcor                        0.06                           0.0                            0.0                 cst
+                 had                   hipcor                       -0.03                           0.0                            0.0                 cst
+                 ham                   hip                          -0.08                          -25.0                          -180.0               cst
+                 ham                   knee                         -0.05                           0.0                            0.0                 geyer
+                 gas                   knee                         -0.05                           15.0                           40.0                geyer
+                 gas                   ankle                        -0.05                          -10.0                           20.0                geyer
+- parameters   : table
+  table_name   : joints
+  headers_type : string                string         double         double          double         bool
+  headers_name : joint_name            j_type         j_ref_pos      j_min_pos       j_max_pos      j_sagital
+  content      : hip                   cst            0.0            -160.0          50.0           true
+                 hipcor                geyer          0.0            0.0             80.0           false
+                 knee                  geyer          0.0            5               135            true
+                 ankle                 geyer          0.0            -20.0           40.0           true

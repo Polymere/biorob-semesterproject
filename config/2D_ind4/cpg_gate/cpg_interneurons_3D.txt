@@ -1,0 +1,15 @@
+sol__mff_stance cpg 0.0
+ta__mlf_cycle cpg 0.0
+gas__mff_stance cpg 0.0
+sol_ta_mff_stance cpg 0.0
+vas__mff_stance cpg 0.0
+ham__mff_swing cpg 0.2
+glu__mff_swing cpg 0.2
+hf__mlf_swing cpg 0.2
+ham_hf_mlf_swing cpg 0.0
+vas_gcf_finishingstance cst 0.0
+ham_gif_stance cpg 0.0
+hf_gif_stance cpg 0.0
+glu_gif_stance cpg 0.0
+hab_gif_stance cpg 0.1
+had_gif_stance cpg 0.1

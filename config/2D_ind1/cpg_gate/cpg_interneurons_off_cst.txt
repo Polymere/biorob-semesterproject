@@ -1,0 +1,13 @@
+sol__mff_stance cst 0.0
+ta__mlf_cycle cst 0.0
+gas__mff_stance cst 0.0
+sol_ta_mff_stance cst 0.0
+vas__mff_stance cst 0.0
+ham__mff_swing cst 0.0
+glu__mff_swing cst 0.0
+hf__mlf_swing cst 0.0
+ham_hf_mlf_swing cst 0.0
+vas_gcf_finishingstance cst 0.0
+ham_gif_stance cst 0.0
+hf_gif_stance cst 0.0
+glu_gif_stance cst 0.0

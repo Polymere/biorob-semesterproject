@@ -1,0 +1,8 @@
+amp_change_cpg 1.0
+offset_change_cpg 0.0
+amp_change_cst 1.0
+offset_change_cst 0.0
+amp_change_reflex 1.0
+offset_change_reflex 0.0
+freq_change 1.0
+

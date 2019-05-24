@@ -1,0 +1,62 @@
+# CST		: works and changing the ratio between feedforward and feedback
+# 		  at the level of the soleus decreases the speed. We can 
+#   		  reach almost 0.9/0.8 m/s that way, mixing range [0; 0.4[. 
+# CPG		: works until 0.4 mixing ratio
+sol__mff_stance cst 0.0
+###########################################################
+
+# CST 		: works until 0.3 ratio
+# CPG		: works until 0.3 ratio
+ta__mlf_cycle cpg 0.0
+###########################################################
+
+# CST		: works. If put at 1/0 ratio decreases the gait speed.
+# 		  offset -> speed : inverse relation, range [-0.1; 0.13]
+# 		  amplitude -> speed : inverse relation, range [0.7; 2.0 (no visual changes from 1.5)]  
+# CPG		: works, increasing frequency decrease speed (change in step length). range [0.9; 1.3]
+gas__mff_stance cst 0.0
+
+# CST		: works.
+# CPG		: works until 0.3
+sol_ta_mff_stance cpg 0.3
+###########################################################
+
+# CST		: works until 0.9
+# CPG		: works
+vas__mff_stance cst 0.4
+###########################################################
+
+# CST		: works and changing the amplitude changes the speed
+# CPG		: works and changing frequency changes the speed
+ham__mff_swing cpg 0.0
+###########################################################
+
+# CPG		: works until 0.7
+# CST		: works
+glu__mff_swing cst 0.0
+###########################################################
+
+# CPG		: works until 0.4
+# CST		: works until 0.7
+hf__mlf_swing cpg 0.0
+###########################################################
+
+# CPG		: works
+# CST 		: works until 0.4
+ham_hf_mlf_swing cpg 0.0
+###########################################################
+
+# CPG		: works
+# CST		: works
+vas_gcf_finishingstance cpg 0.0
+###########################################################
+
+# CPG		: does not work
+# CST		: does not work
+ham_gif_stance cst 0.0
+###########################################################
+
+# CPG		: works
+# CST		: does not work
+hf_gif_stance cpg 0.0
+glu_gif_stance cpg 0.0
