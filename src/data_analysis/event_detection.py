@@ -155,6 +155,9 @@ def split_stride(df,fy_df,column,side='smart',how="strike_to_strike",with_timest
 		return df_out,time_stamps
 
 def interp_gaitprcent(s,n_goal):
+	if s is None:
+		print("Empty stride interpolate")
+		return pd.Series(np.zeros(n_goal))
 	r=s.dropna()
 	n_init=len(r)
 
@@ -239,7 +242,7 @@ def split_stride_contact(contact):
 	
 	return fp_correction(fy)
 
-def get_rep_var_from_contact(contact,metric,joints):
+def get_rep_var_from_contact(contact,metric,joints,drop_n_first_strides=3):
 	if metric not in joints.columns:
 		print('\n Metric:\t',metric)
 		print('\n Columns:\t',joints.columns())
@@ -248,23 +251,27 @@ def get_rep_var_from_contact(contact,metric,joints):
 	interp=True
 	fy_df=split_stride_contact(contact)
 	spl_stride=split_stride(joints,fy_df,metric)
+	spl_stride.drop(spl_stride.iloc[:,0:drop_n_first_strides], axis=1, inplace=True)
 	for stride in spl_stride.columns:
 		spl_stride[stride]=interp_gaitprcent(spl_stride[stride],100)
-
+	
 	spl_stride=spl_stride.dropna()
-	cor=spl_stride.corr() # computes correlation
 
+	cor=spl_stride.corr() # computes correlation
 	su=cor.sum(axis=1)
-	rep_index=su[su.values>su.mean()].index
-	rep_strides=spl_stride.filter(items=rep_index)
 
 	var=spl_stride.std(axis=1)
+
 	if stride_choice=="repmax":
 		rep_max_idx=su[su.values==su.max()].index
-		print("repmax:",rep_max_idx)
-		y=rep_strides[rep_max_idx].iloc[:,0]
+		try:
+			y=spl_stride[rep_max_idx[0]]#.iloc[:,0]
+		except IndexError:
+			y=None 
 	elif stride_choice=="mean":
-		 y=rep_strides.mean(axis=1)
+		rep_index=su[su.values>su.mean()].index
+		rep_strides=spl_stride.filter(items=rep_index)
+		y=rep_strides.mean(axis=1)
 	elif stride_choice in spl_stride.columns:
 		y=spl_stride[stride_choice]
 	else:
@@ -274,7 +281,8 @@ def get_rep_var_from_contact(contact,metric,joints):
 		y=interp_gaitprcent(y,100)
 		
 	return y,var
-	
+
+
 if __name__ == '__main__':
 	WINTER_PATH="../../data/winter_data/"
 	win_df_data=pd.read_csv(WINTER_PATH+"data_normal.csv")
