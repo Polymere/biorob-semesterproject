@@ -1,5 +1,14 @@
 max_nb_gen: 2
-nb_ind: 10
-dofs: {G_SOL: [0, 2.0]}
+nb_ind: 4
+dofs: {solsol_wf: [0, 2.0]}
 kinematics_compare_file: "../../data/winter_data/data_normal.csv"
 world_dir: "../../data/worlds/cpp_worlds"
+param_paths: ["/data/prevel/repos/humanWebotsNmm/config/2D_ind1/gaits/current",
+              "/data/prevel/repos/humanWebotsNmm/config/2D_ind2/gaits/current",
+              "/data/prevel/repos/humanWebotsNmm/config/2D_ind3/gaits/current",
+              "/data/prevel/repos/humanWebotsNmm/config/2D_ind4/gaits/current"]
+
+log_paths: ["/data/prevel/repos/humanWebotsNmm/log/log_ind1",
+            "/data/prevel/repos/humanWebotsNmm/log/log_ind2",
+            "/data/prevel/repos/humanWebotsNmm/log/log_ind3",
+            "/data/prevel/repos/humanWebotsNmm/log/log_ind4"]
