@@ -9,7 +9,7 @@ REQUIRED : conda
 
 ### Scripts
 
-`source setup/env.sh`
+`source env.sh`
 
 - Installs the conda environment (see dependencies) if not installed
 - Activates the env
@@ -26,7 +26,7 @@ Additional python packages dependencies are :
 
 These dependencies were installed in a conda environment, which can be installed with:
   
-`conda create --name <env> --file config/biorob_proj_config.yml`
+`conda create --name bio --file setup/biorob_proj_config.yml`
 
 ### Environment
 
