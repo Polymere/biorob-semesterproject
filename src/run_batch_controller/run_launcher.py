@@ -1,40 +1,6 @@
 """
 	Launching a run with
 
-
-	Inputs : 
-		Parameter file eg. '../../../modeling/configFiles/geyer-structured-ISB.yaml' or paramter files folder
-		Number of folds for each parameter set
-		Worlds to test (if we optimize of different terrain/slopes)
-		Run result output directory
-
-
-		The result directory structure is as follows
-		result_dir
-			/param1
-				param1_file.yaml
-				/world1
-					world1_file.wbt
-					raw1.csv
-					raw2.csv
-					...
-					rawNFOLD.csv
-				/world2
-					...
-			/param2
-
-			...
-
-	EXAMPLE:
-	python run_launcher.py /data/prevel/trial/param_folder \
-	4 \
-	/data/prevel/trial/worlds_folder \
-	/data/prevel/trial/result 
-
-	python run_launcher.py /data/prevel/params/completed \
-	1 \
-	/data/prevel/trial/worlds_folder \
-	/data/prevel/trial/result 
 """
 import utils.file_utils as fu
 import time
@@ -252,7 +218,7 @@ class CppLauncher(runLauncher):
 		print("\n**************************")
 		return self.gen_dir
 
-	def create_pop(self,population,param_paths,log_paths,gen_id,verbose=True):
+	def create_pop(self,population,param_paths,log_paths,verbose=True):
 		if len(population)!=len(param_paths) or len(population)!=len(log_paths):
 			print("\n[ERROR]Should have has much valid param_paths as ind:\n\tpop",
 					len(population),"params",len(param_paths),"logs",len(log_paths))
@@ -260,8 +226,7 @@ class CppLauncher(runLauncher):
 		for ind, ind_uid, param_path, log_path in zip(population.values(), population.keys(),param_paths,log_paths):
 			self.cdir=log_path
 			self.dump_meta({"opt_params":ind,
-				"uid":ind_uid})#,
-				#"info":self._get_meta_dct(gen_id=gen_id)})
+				"uid":ind_uid})
 			self.mapper.complete_and_save(ind, param_path)
 			if verbose:
 				print("\n[INFO] Created param at",param_path,"for ind",ind_uid,"with params\n",ind)
@@ -290,7 +255,7 @@ class CppLauncher(runLauncher):
 				evaluations_terminated=True
 			else:
 				time.sleep(1.0)
-		return result_df
+		return result_df.set_index('uid')
 
 	def check_run(self,ind):
 		self.mapper.complete_and_save(ind, self.param_write_path)

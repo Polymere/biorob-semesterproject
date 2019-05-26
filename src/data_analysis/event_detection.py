@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import argrelextrema
 
-
+import time
 
 def add_strike_lift(df,correction=True,smooth=True):
 	fy=df.copy()
@@ -178,17 +178,15 @@ def interp_gaitprcent(s,n_goal):
 
 def interp_gaitprcent_df(s_df,n_goal):
 	n_strides,n_init=s_df.shape
-	#interp_df=pd.DataFrame(np.zeros((n_strides,n_goal)))
+	interp_df=pd.DataFrame(np.full((n_strides,n_goal),np.nan))
 	if n_init>n_goal:
-		downsample_idx=np.linspace(0,n_init,n_goal,dtype=int)
-		#print(s_df.loc[:,downsample_idx])
+		downsample_idx=np.linspace(0,n_init,n_goal,endpoint=False,dtype=int)
 		interp_df=s_df.loc[:,downsample_idx]
-		interp_df.reindex()
 		return interp_df
 	elif n_init<n_goal:
-		subsamble_idx=np.linspace(0,n_goal-1,n_init,dtype=int)
+		subsamble_idx=np.linspace(0,n_goal,n_init,endpoint=False,dtype=int)
 		interp_df.loc[:,subsamble_idx]=s_df
-		return interp_df.interpolate()
+		return interp_df.interpolate(axis=1) # linear interpolation
 	else:
 		return s_df.dropna()
 
@@ -259,20 +257,25 @@ def split_stride_contact(contact):
 	fy['rightstrike']=contact.iloc[s_filter]['right']
 	
 	return fp_correction(fy)
-
+class timer:
+	def __init__(self):
+		self.t1=time.time_ns()
+	def end(self):
+		print("\n[TIMER]",(time.time_ns()-self.t1)/1e6)
 def get_rep_var_from_contact(contact,metric,joints,drop_n_first_strides=3):
 	if metric not in joints.columns:
-		print('\n Metric:\t',metric)
-		print('\n Columns:\t',joints.columns())
-		raise('KeyError')
+		print('\n[ERROR] Metric:\t',metric)
+		print('\n[ERROR] Columns:\t',joints.columns)
+		raise KeyError 
 	stride_choice='repmax'
-	interp=True
+
 	fy_df=split_stride_contact(contact)
 	spl_stride=split_stride(joints,fy_df,metric)
 	spl_stride.drop(spl_stride.iloc[:,0:drop_n_first_strides], axis=1, inplace=True)
+
+
 	for stride in spl_stride.columns:
 		spl_stride[stride]=interp_gaitprcent(spl_stride[stride],100)
-	
 	spl_stride=spl_stride.dropna()
 
 	cor=spl_stride.corr() # computes correlation
@@ -293,32 +296,12 @@ def get_rep_var_from_contact(contact,metric,joints,drop_n_first_strides=3):
 	elif stride_choice in spl_stride.columns:
 		y=spl_stride[stride_choice]
 	else:
-		raise ValueError('stride_choice',stride_choice)
-	if interp:
-		var=interp_gaitprcent(var,100)
-		y=interp_gaitprcent(y,100)
-		
+		print("\n[ERROR]Stride choice:\t",stride_choice)
+		raise ValueError
 	return y,var
 
 
 if __name__ == '__main__':
-	"""WINTER_PATH="../../data/winter_data/"
-	win_df_data=pd.read_csv(WINTER_PATH+"data_normal.csv")
-	win_df_std=pd.read_csv(WINTER_PATH+"std_normal.csv")
-	what="ankle"
-	RAW_REFERENCE_PATH="../../data/raw_reference.csv"
-
-	df=pd.read_csv(open(RAW_REFERENCE_PATH))
-
-	sub_hip=df.filter(like="hip",axis=1)
-	df[sub_hip.columns]=-df[sub_hip.columns]
-	mean_win=interp_gaitprcent(win_df_data[what],100)
-	std_win=interp_gaitprcent(win_df_std[what],100)
-
-	mean_exp,std_exp=get_mean_std_stride(df,"angles_"+what+"_r",interp=True,stride_choice="stride24")
-	plt.plot(mean_exp)
-	plt.show()"""
-
 	s_df=pd.DataFrame(np.random.randint(0,20,(3,20)))
 	print(interp_gaitprcent_df(s_df,10))
 		
