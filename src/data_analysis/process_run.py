@@ -323,7 +323,7 @@ def main(mode,run_dir):
 		proc=PythonRunProcess(ref_raw)
 	elif mode=="cpp_import_process":
 		fit=import_and_process_from_dir(run_dir)
-		return
+		return fit
 	else:
 		print("[ERROR] Wrong input:\t",mode,"\nShould be py, cpp or cpp_import_process")
 		raise ValueError
