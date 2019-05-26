@@ -176,7 +176,7 @@ class EvolutionController():
 									self.log_paths)
 		self.run_launcher.run_batch("worlds",self.worlds_path,self.log_paths)
 		scores=self.run_launcher.wait_for_fitness(self.log_paths.copy())
-
+		return scores
 	def _eval_pop_cluster(self,population,verbose=True):
 		if verbose:
 			print("\n[INFO]Distributed evaluation, population\n",population)
@@ -185,7 +185,7 @@ class EvolutionController():
 									self.param_paths,
 									self.log_paths)
 		scores=self.run_launcher.wait_for_fitness(self.log_paths.copy())
-
+		return scores
 	def is_stop(self):
 		if self.nb_gen>self.max_nb_gen:
 			print("\n[INFO]Finished after",self.nb_gen,"generations in",np.round(time.time()-self.start_time),"s")

@@ -3,11 +3,29 @@ import numpy as np
 import utils.file_utils as fu
 import pandas as pd
 
+LOG_DEBUG=1
+LOG_INFO=2
+LOG_WARNING=3
+LOG_ERROR=4
 
+LOG_LEVEL=LOG_DEBUG
 def get_uid_result(ind_path,verbose=False):
 	processed_file=fu.assert_one_dim(fu.file_list(ind_path,file_format=".csv",pattern="result"),\
 									critical=False,verbose=verbose)
-	res=pd.read_csv(processed_file).to_dict('records')[0]
+	try:
+		res=pd.read_csv(processed_file).to_dict('records')[0]
+	except:
+		try:
+			if LOG_LEVEL<=LOG_WARNING:
+				print("\n[WARNING]Processed file has no columns\n")
+			val=float(pd.read_csv(processed_file).columns[1])
+			res=pd.DataFrame(index=pd.RangeIndex(1),columns=["fitness","uid"])
+			res["fitness"]=val
+			if LOG_LEVEL<=LOG_WARNING:
+				print("\n[WARNING]Extracted results\n",res)
+
+		except Exception as e:
+			raise e
 
 	meta_file=fu.assert_one_dim(fu.file_list(ind_path,file_format=".yaml",pattern="meta"),\
 								critical=True,verbose=verbose)

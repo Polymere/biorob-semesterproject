@@ -62,8 +62,10 @@ class runLauncher:
 	def __init__(self,worlds_dir, **kwargs):
 		self.time_start = time.time()
 		#mode = args[0]
-
-		self.worlds = fu.file_list(worlds_dir, file_format=".wbt")
+		try:
+			self.worlds = fu.file_list(worlds_dir, file_format=".wbt")
+		except FileNotFoundError:
+			print("\n[WARNING]No world file in\n",worlds_dir,"\nignore if optimization")
 
 		if "trial_dir" in kwargs.keys():
 			self.trial_dir = kwargs["trial_dir"]
@@ -118,6 +120,13 @@ class runLauncher:
 		raise NotImplementedError
 	def wait_for_fitness(self,log_paths,verbose=True):
 		raise NotImplementedError
+
+	def dump_meta(self,dct):
+		run_suffix="_w"+str(self.world_counter)+"_f"+str(self.fold_counter+1)               
+		meta_file_path=os.path.join(self.cdir, "meta"+run_suffix+".yaml")
+		with open(meta_file_path, 'a+') as meta:
+			yaml.dump(dct,meta)
+
 class PythonLauncher(runLauncher):
 	def __init__(self,worlds=DEFAULT_PYTHON_WORLD,**kwargs):
 		runLauncher.__init__(self,worlds,**kwargs)
