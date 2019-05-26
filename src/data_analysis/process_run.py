@@ -37,13 +37,17 @@ MAP_CPP_WINTER={'joints_angle1_ANGLE_ANKLE_LEFT':'ankle',
 
 INCLUDE_FILES=["distance1","energy1","footfall1","joints_angle1"]
 
-def import_and_process_from_dir(result_dir,verbose=True):
+def import_and_process_from_dir(result_dir,save=True,verbose=False):
 	if type(result_dir) is not list:
 		run_df=cpp_import_run(result_dir,save_to_single=False,include_files=INCLUDE_FILES)
 		proc=CppRunProcess(compare_files="../../data/winter_data/data_normal.csv")
+		if verbose:
+			print("\n[DEBUG]Run",run_df.head(5))
 		fit=proc.get_fitness(run_df)
 		if verbose:
 			print("\n[INFO]Fitness:\t",fit,"for run in:\n\t",result_dir)
+		if save:
+			fit.to_csv(os.path.join(result_dir,"result.csv"))
 		return fit
 	else:
 		fit=[]
@@ -221,6 +225,7 @@ class CppRunProcess(runProcess):
 				"corankle",
 				"corhip",
 				"corknee"]
+	fitnesses=["fit_cor","fit_stable"]
 	def __init__(self,compare_files):
 		#print("\n[DEBUG]Init CPP process",compare_files)
 		compare_kind="winter_to_cpp"
@@ -247,12 +252,19 @@ class CppRunProcess(runProcess):
 
 		#print(metrics)
 		return metrics
-	def get_fitness(self,raw_df):
+	def get_fitness(self,raw_df,verbose=False):
 		metrics=self.get_metrics(raw_df)
-		if metrics.maxtime<19.0:
-			return -1000
+		fit_df=pd.DataFrame(index=pd.RangeIndex(1),columns=self.fitnesses)
+		if verbose:
+			print("\n[DEBUG]Metrics\n",metrics)
+		if metrics.maxtime.values<19.0:
+			fit_df["fit_stable"]=-1000
 		else:
-			return metrics.filter(like="cor").sum(1).values[0]
+			fit_df["fit_stable"]=1
+		fit_df["fit_cor"]=metrics.filter(like="cor").sum(1).values[0]
+		if verbose:
+			print("\n[DEBUG]Fitness\n",fit_df)
+		return fit_df
 
 class PythonRunProcess(runProcess):
 	def __init__(self,compare_files):

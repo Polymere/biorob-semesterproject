@@ -15,6 +15,8 @@ from run_batch_controller.generate_paramfile_range import gen_all_file
 from utils.meta_utils import get_uid_result
 import run_batch_controller.unfold_param as up
 from run_batch_controller.unfold_param import PythonMapper,CppMapper
+
+from data_analysis.process_run import import_and_process_from_dir
 """
 
 """
@@ -94,6 +96,13 @@ class runLauncher:
 			#print(args[0])
 			ind={args[0][0]:float(args[0][1])}
 			self.check_run(ind)
+		elif mode=="worlds":
+			worlds=args[0]
+			logs=args[1]
+			#print("\n[INFO] Running worlds\n",worlds)
+			for world in worlds:
+				subprocess.run(["webots", "--mode=fast", "--batch","--minimize", world])
+			import_and_process_from_dir(logs)
 			
 	def run_ind(self):
 		if self.fold_counter==0:
@@ -103,22 +112,12 @@ class runLauncher:
 		run_suffix="_w"+str(self.world_counter)+"_f"+str(self.fold_counter+1)
 		self.import_run(self.run_import_path,save_path=self.cdir, save_name="raw"+run_suffix)
 		
-
-	def dump_meta(self,dct):
-		print("Dumping",dct)
-		run_suffix="_w"+str(self.world_counter)+"_f"+str(self.fold_counter+1)
-		meta_file_path=os.path.join(self.cdir, "meta"+run_suffix+".yaml")
-		with open(meta_file_path, 'a+') as meta:
-			yaml.dump(dct,meta)
-	def check_run(self,param_name,param_value):
+	def create_pop(self,population,param_paths,log_paths,verbose=False):
 		raise NotImplementedError
-		#if self.mapper.is_parameter_valid(param_file):
-			
-	def _get_meta_dct(self,**kwargs):
-		return {"gen_id":kwargs["gen_id"],
-				"worlds":self.cworld,
-				"ind":self.individual_counter}
-
+	def run_gen(self, gen_id, **opt_args):
+		raise NotImplementedError
+	def wait_for_fitness(self,log_paths,verbose=True):
+		raise NotImplementedError
 class PythonLauncher(runLauncher):
 	def __init__(self,worlds=DEFAULT_PYTHON_WORLD,**kwargs):
 		runLauncher.__init__(self,worlds,**kwargs)
@@ -218,7 +217,7 @@ class CppLauncher(runLauncher):
 		print("\n**************************")
 		return self.gen_dir
 
-	def create_pop(self,population,param_paths,log_paths,verbose=True):
+	def create_pop(self,population,param_paths,log_paths,verbose=False):
 		if len(population)!=len(param_paths) or len(population)!=len(log_paths):
 			print("\n[ERROR]Should have has much valid param_paths as ind:\n\tpop",
 					len(population),"params",len(param_paths),"logs",len(log_paths))
@@ -232,7 +231,6 @@ class CppLauncher(runLauncher):
 				print("\n[INFO] Created param at",param_path,"for ind",ind_uid,"with params\n",ind)
 
 	def wait_for_fitness(self,log_paths,verbose=True):
-
 		evaluations_terminated=False
 		cnt=0
 		nb_ind=len(log_paths)
