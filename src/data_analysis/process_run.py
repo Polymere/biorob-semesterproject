@@ -23,6 +23,12 @@ from utils.meta_utils import get_run_files
 
 TIME_STEP=1e-3 #ms
 
+LOG_DEBUG=1
+LOG_INFO=2
+LOG_WARNING=3
+LOG_ERROR=4
+
+
 MAP_PYTHON_CPP={'angles_ankle_l':'ANKLE_LEFT',	'angles_ankle_r':'ANKLE_RIGHT',
 				'angles_hip_l':'HIP_LEFT',		'angles_hip_r':'HIP_RIGHT',
 				'angles_knee_l':'KNEE_LEFT',	'angles_knee_r':'KNEE_RIGHT'}
@@ -37,20 +43,38 @@ MAP_CPP_WINTER={'joints_angle1_ANGLE_ANKLE_LEFT':'ankle',
 
 INCLUDE_FILES=["distance1","energy1","footfall1","joints_angle1"]
 
-def import_and_process_from_dir(result_dir,verbose=True):
+LOG_LEVEL=LOG_INFO
+
+def import_and_process_from_dir(result_dir,single_val=True,save=False):
+	""" Result dir is the log directory or a list of log directories.
+		It must contain all files in INCLUDE_FILES
+		Will create a processed.csv file containing the computed fitness metrics in the 
+		log directory if save is set to True
+		Will return a single fitness value/list of fitnesses values if single value is set to true
+		WIP -> can't ahve single_val and save true at the same time (index issue with result df)
+	"""
 	if type(result_dir) is not list:
 		run_df=cpp_import_run(result_dir,save_to_single=False,include_files=INCLUDE_FILES)
 		proc=CppRunProcess(compare_files="../../data/winter_data/data_normal.csv")
-		fit=proc.get_fitness(run_df)
-		if verbose:
+		if LOG_LEVEL<=LOG_DEBUG:
+			print("\n[DEBUG]Run",run_df.head(5))
+		fit=proc.get_fitness(run_df,single_val=single_val)
+		if LOG_LEVEL<=LOG_INFO:
 			print("\n[INFO]Fitness:\t",fit,"for run in:\n\t",result_dir)
-		return fit
+		if save:
+			fit.to_csv(os.path.join(result_dir,"result.csv"))
+		if single_val:
+			return fit.values[0]
+		else:
+			return fit
 	else:
 		fit=[]
-		if verbose:
-			print("\n[INFO]Processing runs:\n\t",result_dir)
+		if LOG_LEVEL<=LOG_INFO:
+			print("\n[INFO]Processing runs:\n\t",result_dir,"\n Params",single_val,save)
 		for single_run in result_dir:
-			fit.append(import_and_process_from_dir(single_run))
+			fit.append(import_and_process_from_dir(single_run,single_val,save))
+		if LOG_LEVEL<=LOG_INFO:
+			print("\n[INFO]All fitnesses\n",fit)
 		return fit
 
 def import_and_process_from_data(data):
@@ -172,7 +196,7 @@ class runProcess:
 		if compare_files is not None:
 			self.ref=reference_compare(compare_kind,compare_files)
 		else:
-			print("\n[WARNING] NO init ref run process")
+			print("\n[WARNING]No init ref run process")
 			self.ref=None
 		
 	def process_gen(self,gen_dir):
@@ -221,6 +245,7 @@ class CppRunProcess(runProcess):
 				"corankle",
 				"corhip",
 				"corknee"]
+	fitnesses=["fit_cor","fit_energy","fit_stable","single"]
 	def __init__(self,compare_files):
 		#print("\n[DEBUG]Init CPP process",compare_files)
 		compare_kind="winter_to_cpp"
@@ -247,12 +272,24 @@ class CppRunProcess(runProcess):
 
 		#print(metrics)
 		return metrics
-	def get_fitness(self,raw_df):
+	def get_fitness(self,raw_df,single_val,verbose=False):
 		metrics=self.get_metrics(raw_df)
-		if metrics.maxtime<19.0:
-			return -1000
+		fit_df=pd.DataFrame(index=pd.RangeIndex(1),columns=self.fitnesses)
+		if verbose:
+			print("\n[DEBUG]Metrics\n",metrics)
+		if metrics.maxtime.values<19.0:
+			fit_df["fit_stable"]=-1000
 		else:
-			return metrics.filter(like="cor").sum(1).values[0]
+			fit_df["fit_stable"]=1
+		fit_df["fit_cor"]=metrics.filter(like="cor").sum(1).values[0]*2
+		fit_df["fit_energy"]=-metrics["energy_to_dist"]/100
+		if verbose:
+			print("\n[DEBUG]Fitness\n",fit_df)
+		if not single_val:
+			return fit_df
+		else:
+			fit_df["single"]=fit_df.sum(1)
+			return fit_df.single
 
 class PythonRunProcess(runProcess):
 	def __init__(self,compare_files):
@@ -286,7 +323,7 @@ def main(mode,run_dir):
 		proc=PythonRunProcess(ref_raw)
 	elif mode=="cpp_import_process":
 		fit=import_and_process_from_dir(run_dir)
-		return
+		return fit
 	else:
 		print("[ERROR] Wrong input:\t",mode,"\nShould be py, cpp or cpp_import_process")
 		raise ValueError
