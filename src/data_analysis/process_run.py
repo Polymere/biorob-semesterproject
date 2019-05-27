@@ -70,9 +70,9 @@ def import_and_process_from_dir(result_dir,single_val=True,save=False):
 	else:
 		fit=[]
 		if LOG_LEVEL<=LOG_INFO:
-			print("\n[INFO]Processing runs:\n\t",result_dir)
+			print("\n[INFO]Processing runs:\n\t",result_dir,"\n Params",single_val,save)
 		for single_run in result_dir:
-			fit.append(import_and_process_from_dir(single_run))
+			fit.append(import_and_process_from_dir(single_run,single_val,save))
 		if LOG_LEVEL<=LOG_INFO:
 			print("\n[INFO]All fitnesses\n",fit)
 		return fit
@@ -283,12 +283,12 @@ class CppRunProcess(runProcess):
 			fit_df["fit_stable"]=1
 		fit_df["fit_cor"]=metrics.filter(like="cor").sum(1).values[0]*2
 		fit_df["fit_energy"]=-metrics["energy_to_dist"]/100
-		fit_df["single"]=fit_df.sum(1)
 		if verbose:
 			print("\n[DEBUG]Fitness\n",fit_df)
 		if not single_val:
 			return fit_df
 		else:
+			fit_df["single"]=fit_df.sum(1)
 			return fit_df.single
 
 class PythonRunProcess(runProcess):

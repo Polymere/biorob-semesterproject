@@ -240,7 +240,7 @@ class CppEvolutionController(EvolutionController):
 			self.eval_pop=self._eval_pop_cluster
 
 if __name__ == '__main__':
-	config_file="../../data/references/ev_config_template.yaml"
+	config_file="../../data/references/ev_2ind_asym.yaml"
 	model="cpp"
 	mode="local"
 

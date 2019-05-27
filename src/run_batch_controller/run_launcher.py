@@ -95,16 +95,22 @@ class runLauncher:
 			gen_counter=args[1]
 			return self.run_gen("gen"+str(gen_counter),**kwargs)
 		elif mode=="check":
-			#print(args[0])
-			ind={args[0][0]:float(args[0][1])}
+			print(args[0],len(args[0]))
+			ind={}
+			for par_idx in range(0,len(args[0]),2):
+				print(par_idx)
+				ind[args[0][par_idx]]=float(args[0][par_idx+1])
+				#ind={args[0][0]:float(args[0][1])}
+			print(ind)
 			self.check_run(ind)
 		elif mode=="worlds":
 			worlds=args[0]
 			logs=args[1]
-			#print("\n[INFO] Running worlds\n",worlds)
 			for world in worlds:
 				subprocess.run(["webots", "--mode=fast", "--batch","--minimize", world])
-			import_and_process_from_dir(logs)
+			import_and_process_from_dir(logs,single_val=False,save=True)
+		else:
+			raise KeyError
 			
 	def run_ind(self):
 		if self.fold_counter==0:
@@ -112,7 +118,7 @@ class runLauncher:
 
 		subprocess.run(["webots", "--mode=fast", "--batch","--minimize", self.world_path])
 		run_suffix="_w"+str(self.world_counter)+"_f"+str(self.fold_counter+1)
-		self.import_run(self.run_import_path,save_path=self.cdir, save_name="raw"+run_suffix)
+		self.import_run(self.run_import_path,save_to_single=True,save_path=self.cdir, save_name="raw"+run_suffix)
 		
 	def create_pop(self,population,param_paths,log_paths,verbose=False):
 		raise NotImplementedError
@@ -216,8 +222,7 @@ class CppLauncher(runLauncher):
 				self.fold_counter = 0
 				for self.fold_counter in range(self.max_folds):
 					self.dump_meta({"opt_params":dict(ind),
-									"uid":ind_uid,
-									"info":self._get_meta_dct(gen_id=gen_id)})
+									"uid":ind_uid})
 					#self.dump_meta({"uid":ind_uid})
 					#self.dump_meta(self._get_meta_dct(gen_id=gen_id))
 					self.run_ind()
