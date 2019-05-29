@@ -52,12 +52,21 @@ CPP_WORLD_PATH = "/data/prevel/repos/humanWebotsNmm/webots/worlds/current.wbt"
 
 DEFAULT_CPP_WORLD="/data/prevel/worlds_folder/cpp_worlds"
 
+LOG_DEBUG=1
+LOG_INFO=2
+LOG_WARNING=3
+LOG_ERROR=4
+LOG_LEVEL=LOG_INFO
+
 class runLauncher:
 	world_counter = 1
 	fold_counter=0
 	individual_counter = 1
 	max_folds = 1
 	online_processing=False
+	on_cluster=False
+	nb_eval=4
+
 
 	def __init__(self,worlds_dir, **kwargs):
 		self.time_start = time.time()
@@ -65,18 +74,29 @@ class runLauncher:
 		try:
 			self.worlds = fu.file_list(worlds_dir, file_format=".wbt")
 		except FileNotFoundError:
-			print("\n[WARNING]No world file in\n",worlds_dir,"\nignore if optimization")
-
+			if LOG_LEVEL<=LOG_WARNING:
+				print("\n[WARNING]No world file in\n",worlds_dir,"\nignore if optimization")
 		if "trial_dir" in kwargs.keys():
 			self.trial_dir = kwargs["trial_dir"]
 		else:
 			self.trial_dir = os.path.join(ROOT_RESULT_DIR, time.strftime("%j_%H:%M"))
+		if "on_cluster" in kwargs.keys():
+			self.on_cluster=kwargs["on_cluster"]
+		if "nb_eval" in kwargs.keys():
+			self.nb_eval=kwargs["nb_eval"]
+		if self.on_cluster:
+			if LOG_LEVEL<=LOG_INFO:
+				print("\n[INFO]Running on cluster with ",self.nb_eval,"parallel evals  \n",)
+		else:	
+			if LOG_LEVEL<=LOG_INFO:
+				print("\n[INFO]Running locally with ",self.nb_eval,"parallel evals  \n",)
 
 
 	def run_batch(self,mode,*args,**kwargs):
 		if mode == "param_fixed_values":
 			param_values_file = args[0][0]
-			print(param_values_file)
+			if LOG_LEVEL<=LOG_INFO:
+				print("\n[INFO]Parameters taken from\n",param_values_file)
 			self.gens=gen_all_file(param_values_file, standalone=True)
 			gen_count=1
 			for gen in self.gens:
@@ -106,8 +126,19 @@ class runLauncher:
 		elif mode=="worlds":
 			worlds=args[0]
 			logs=args[1]
-			for world in worlds:
-				subprocess.run(["webots", "--mode=fast", "--batch","--minimize", world])
+			tstart=time.time()
+			nb_ind=len(worlds)
+			part_worlds=[worlds[sl:sl+self.nb_eval] for sl in range(0,nb_ind,self.nb_eval)]
+			for slice_world in part_worlds:
+				if LOG_LEVEL<=LOG_INFO:
+					print("\n[INFO]Running slice\n",slice_world)
+				if self.on_cluster:
+					subprocess.run(["../run_batch_controller/launchAllWebots_cluster.sh"] + slice_world)
+				else:
+					subprocess.run(["../run_batch_controller/launchAllWebots.sh"] + slice_world)
+			if LOG_LEVEL<=LOG_INFO:
+				print("\n[INFO]Time elapsed (",len(worlds),"evals):\t",time.time()-tstart,"s\n")
+			
 			import_and_process_from_dir(logs,single_val=False,save=True)
 		else:
 			raise KeyError
@@ -130,6 +161,8 @@ class runLauncher:
 	def dump_meta(self,dct):
 		run_suffix="_w"+str(self.world_counter)+"_f"+str(self.fold_counter+1)               
 		meta_file_path=os.path.join(self.cdir, "meta"+run_suffix+".yaml")
+		if LOG_LEVEL<=LOG_DEBUG:
+			print("\n[DEBUG]Dumping\n",dct,"at\n",meta_file_path)
 		with open(meta_file_path, 'a+') as meta:
 			yaml.dump(dct,meta)
 
@@ -194,6 +227,7 @@ class CppLauncher(runLauncher):
 		self.param_write_path=os.path.join(CPP_CONFIG_PATH,"gaits/current")
 		self.run_import_path=CPP_LOG_PATH
 
+
 	def run_gen(self, gen_id, **opt_args):
 		tot_ind = len(self.individuals)
 		if gen_id is not None:
@@ -232,17 +266,19 @@ class CppLauncher(runLauncher):
 		return self.gen_dir
 
 	def create_pop(self,population,param_paths,log_paths,verbose=False):
-		if len(population)!=len(param_paths) or len(population)!=len(log_paths):
-			print("\n[ERROR]Should have has much valid param_paths as ind:\n\tpop",
+		if len(log_paths)!=len(param_paths) or len(population)!=len(log_paths):
+			if LOG_LEVEL<=LOG_ERROR:
+				print("\n[ERROR]Should have has much valid param_paths as ind:\n\tpop",
 					len(population),"params",len(param_paths),"logs",len(log_paths))
+
 			raise ValueError
 		for ind, ind_uid, param_path, log_path in zip(population.values(), population.keys(),param_paths,log_paths):
 			self.cdir=log_path
 			self.dump_meta({"opt_params":ind,
 				"uid":ind_uid})
 			self.mapper.complete_and_save(ind, param_path)
-			if verbose:
-				print("\n[INFO] Created param at",param_path,"for ind",ind_uid,"with params\n",ind)
+			if LOG_LEVEL<=LOG_DEBUG:
+				print("\n[DEBUG]Created param at",param_path,"for ind",ind_uid,"with params\n",ind)
 
 	def wait_for_fitness(self,log_paths,verbose=True):
 		evaluations_terminated=False
@@ -253,8 +289,9 @@ class CppLauncher(runLauncher):
 			for log_path in log_paths:
 				res_path=os.path.join(log_path,"result.csv")
 				if fu.assert_file_exists(res_path,should_exist=True):
-					if verbose:
+					if LOG_LEVEL<=LOG_INFO:
 						print("\n[INFO]Run in \n",log_path,"has finished")
+						
 					result=get_uid_result(log_path)
 					if cnt==0:
 						result_df=pd.DataFrame(columns=result.keys(),
@@ -262,6 +299,14 @@ class CppLauncher(runLauncher):
 					result_df.loc[cnt]=result
 					cnt+=1
 					log_paths.remove(log_path)
+					yamls=fu.file_list(log_path,file_format=".yaml")
+					csvs=fu.file_list(log_path,file_format=".csv")
+					if LOG_LEVEL<=LOG_DEBUG:
+						print("\n[DEBUG]Removing\n",yamls,"\n",csvs)
+					if yamls:
+						os.unlink(yamls[0])
+					if csvs:
+						os.unlink(csvs[0])
 
 			if cnt==nb_ind:
 				evaluations_terminated=True
@@ -276,11 +321,12 @@ if __name__ == '__main__':
 	#python run_launcher.py cpp param_fixed_values /data/prevel
 
 	if sys.argv[1]=="cpp":
-		#print(sys.argv[2],sys.argv[3:])
 		r=CppLauncher()
 	elif sys.argv[1]=="py":
 		r=PythonLauncher()
 	else:
-		print("\n[ERROR] arg",sys.argv[1])
+		if LOG_LEVEL<=LOG_ERROR:
+			print("\n[ERROR] arg",sys.argv[1])
+		
 		raise ValueError
 	r.run_batch(sys.argv[2],sys.argv[3:])
