@@ -271,7 +271,7 @@ def get_rep_var_from_contact(contact,metric,joints,drop_n_first_strides=3):
 
 	fy_df=split_stride_contact(contact)
 	spl_stride=split_stride(joints,fy_df,metric)
-	spl_stride.drop(spl_stride.iloc[:,0:drop_n_first_strides], axis=1, inplace=True)
+	spl_stride.drop(spl_stride.iloc[:,0:drop_n_first_strides-1], axis=1, inplace=True)
 
 
 	for stride in spl_stride.columns:
@@ -288,7 +288,8 @@ def get_rep_var_from_contact(contact,metric,joints,drop_n_first_strides=3):
 		try:
 			y=spl_stride[rep_max_idx[0]]#.iloc[:,0]
 		except IndexError:
-			y=None 
+			print("\n[WARNING]No repmax stride\n",spl_stride)
+			y=pd.Series(np.zeros(100)) 
 	elif stride_choice=="mean":
 		rep_index=su[su.values>su.mean()].index
 		rep_strides=spl_stride.filter(items=rep_index)
