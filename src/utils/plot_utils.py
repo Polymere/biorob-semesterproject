@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 import seaborn as sns
 
 def plot_correlation_window(s1,s2,nwind,save=False):
@@ -32,9 +33,12 @@ def plot_mean_std_fill(mean,std,color,ax=None,ratio=1):
 		ax=plt.axes()
 	if ratio>1:
 		ratio=1
+
 	max_idx=int(len(mean)*ratio)
 	x_range=range(max_idx)
 	mean_smp=mean[0:max_idx]
+	if std is None:
+		std=np.zeros_like(mean_smp)
 	std_smp=std[0:max_idx]
 	ax.plot(x_range,mean_smp,color=color)
 	ax.fill_between(x_range,mean_smp-std_smp,mean_smp+std_smp,alpha=0.4,color=color)

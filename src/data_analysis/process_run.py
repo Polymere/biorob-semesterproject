@@ -17,10 +17,11 @@ import pandas as pd
 import sys
 import os
 import utils.file_utils as fu
+from utils.plot_utils import plot_mean_std_fill
 import data_analysis.event_detection as ed
 from data_analysis.import_run import cpp_import_run
 from utils.meta_utils import get_run_files
-
+import matplotlib.pyplot as plt
 TIME_STEP=1e-3 #ms
 
 LOG_DEBUG=1
@@ -41,11 +42,18 @@ MAP_CPP_WINTER={'joints_angle1_ANGLE_ANKLE_LEFT':'ankle',
 				'joints_angle1_ANGLE_HIP_LEFT':'hip',
 				'joints_angle1_ANGLE_KNEE_LEFT':'knee'}
 
+MAP_CPP_C3D={'joints_angle1_ANGLE_ANKLE_LEFT':'LANKLE',
+				'joints_angle1_ANGLE_HIP_LEFT':'LHIP',
+				'joints_angle1_ANGLE_KNEE_LEFT':'LKNEE',
+				'joints_angle1_ANGLE_ANKLE_RIGHT':'RANKLE',
+				'joints_angle1_ANGLE_HIP_RIGHT':'RHIP',
+				'joints_angle1_ANGLE_KNEE_RIGHT':'RKNEE'}
+
 INCLUDE_FILES=["distance1","energy1","footfall1","joints_angle1"]
 
-LOG_LEVEL=LOG_INFO
+LOG_LEVEL=LOG_WARNING
 
-def import_and_process_from_dir(result_dir,single_val=True,save=False):
+def import_and_process_from_dir(result_dir,single_val=False,save=True):
 	""" Result dir is the log directory or a list of log directories.
 		It must contain all files in INCLUDE_FILES
 		Will create a processed.csv file containing the computed fitness metrics in the 
@@ -55,7 +63,7 @@ def import_and_process_from_dir(result_dir,single_val=True,save=False):
 	"""
 	if type(result_dir) is not list:
 		run_df=cpp_import_run(result_dir,save_to_single=False,include_files=INCLUDE_FILES)
-		proc=CppRunProcess(compare_files="../../data/winter_data/data_normal.csv")
+		proc=CppRunProcess(compare_files="../../data/patient1.csv",compare_kind="c3d_to_cpp")
 		if LOG_LEVEL<=LOG_DEBUG:
 			print("\n[DEBUG]Run",run_df.head(5))
 		fit=proc.get_fitness(run_df,single_val=single_val)
@@ -124,6 +132,11 @@ class reference_compare:
 			ref_file=files
 			ref_df=pd.read_csv(ref_file)
 			self.set_repstrides_raw(ref_df)
+		elif kind=="c3d_to_cpp":
+			ref_file=files
+			ref_df=pd.read_csv(ref_file)
+			self.set_repstrides_c3d_for_cpp(ref_df)
+
 
 	def set_repstrides_winter(self,win_df):
 		"""
@@ -134,6 +147,16 @@ class reference_compare:
 			if key_win=="hip": # inversed angle orientation
 				mean_ref=-mean_ref
 			self.rep_strides[key_gen]=mean_ref
+
+	def set_repstrides_c3d_for_cpp(self,win_df):
+		"""
+		hip angle is defined in the opposed direction
+		"""
+		for key_gen,key_c3d in MAP_CPP_C3D.items():
+			mean_ref=ed.interp_gaitprcent(win_df[key_c3d],100)
+			#if key_win=="hip": # inversed angle orientation
+			#	mean_ref=-mean_ref
+			self.rep_strides[key_gen]=mean_ref*(3.1415/180)
 
 	def set_repstrides_winter_cpp(self,win_df):
 		"""
@@ -181,6 +204,10 @@ class reference_compare:
 		for met in self.rep_strides.keys():
 			mean_cur,std_cur=ed.get_rep_var_from_contact(contact_df(cmp_df),met,cmp_df)
 			all_cor[met]=mean_cur.corr(self.rep_strides[met])
+			#ax=plot_mean_std_fill(mean_cur, std_cur, 'b')
+			#plot_mean_std_fill(self.rep_strides[met], None, 'g',ax)
+			#plt.title(met)
+			#plt.show()
 		return all_cor
 
 def contact_df(full_df):
@@ -246,9 +273,8 @@ class CppRunProcess(runProcess):
 				"corhip",
 				"corknee"]
 	fitnesses=["fit_cor","fit_energy","fit_stable","single"]
-	def __init__(self,compare_files):
+	def __init__(self,compare_files,compare_kind):
 		#print("\n[DEBUG]Init CPP process",compare_files)
-		compare_kind="winter_to_cpp"
 
 		super().__init__(compare_kind,compare_files)
 	def get_metrics(self,raw_df,verbose=True):
@@ -268,9 +294,7 @@ class CppRunProcess(runProcess):
 		if self.ref is not None:
 			corr_dct=self.ref.get_all_corr_cpp(raw_df)
 			for met,corrval in corr_dct.items():
-				metrics["cor"+MAP_CPP_WINTER[met]]=corrval
-
-		#print(metrics)
+				metrics["cor"+MAP_CPP_C3D[met]]=corrval
 		return metrics
 	def get_fitness(self,raw_df,single_val,verbose=False):
 		metrics=self.get_metrics(raw_df)
