@@ -3,11 +3,13 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 
-def plot_correlation_window(s1,s2,nwind,save=False):
+def plot_correlation_window(s1,s2,nwind,ax=None,save=False):
+	if ax is None:
+		ax=plt.axes()
 	if len(s1)!=len(s2):
-		print("Series don't have the same size")
+		print("Series don't have the same size\t",len(s1),"\t",len(s2))
 		s=min((len(s1),len(s2)))
-		raise('RuntimeWarning')
+		print(s)
 	else:
 		s=len(s1)
 	wind_size=int(s/nwind)
@@ -25,8 +27,9 @@ def plot_correlation_window(s1,s2,nwind,save=False):
 		a=abs(r)
 		if a<0.25:
 			a=0.5
-	plt.bar((start+stop)/2,r,wind_size*0.95,color=c,alpha=a)
-	plt.show()
+		ax.bar((start+stop)/2,r,wind_size*0.95,color=c,alpha=a)
+	return ax
+
 
 def plot_mean_std_fill(mean,std,color,ax=None,ratio=1):
 	if ax is None:

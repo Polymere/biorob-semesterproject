@@ -52,7 +52,8 @@ def file_list(path,recursive=False,file_format="any_file",pattern="",verbose=Fal
 			path_lst=path_lst[0] # unfold path (result from filter was a list)
 			is_dir=False
 		elif len(path_lst)==0:
-			print("No file with extension",file_format,"in",path_lst)
+			if verbose:
+				print("No file with extension",file_format,"in",path_lst)
 			is_dir=False
 			is_file=False
 		else:
@@ -75,7 +76,8 @@ def file_list(path,recursive=False,file_format="any_file",pattern="",verbose=Fal
 	elif is_file:
 		return [path_lst]  # formating to list to avoid iter errors
 	else:
-		print("Nothing in ", path)
+		if verbose:
+			print("Nothing in ", path)
 		return None
 def dir_list(path,pattern,recursive=False):
 	if recursive:
