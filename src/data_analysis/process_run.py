@@ -16,8 +16,10 @@ all
 import pandas as pd
 import sys
 import os
+import yaml
 import utils.file_utils as fu
-from utils.plot_utils import plot_mean_std_fill
+from math import sqrt
+from utils.plot_utils import plot_mean_std_fill,plot_correlation_window
 import data_analysis.event_detection as ed
 from data_analysis.import_run import cpp_import_run
 from utils.meta_utils import get_run_files
@@ -48,6 +50,22 @@ MAP_CPP_C3D={'joints_angle1_ANGLE_ANKLE_LEFT':'LANKLE',
 				'joints_angle1_ANGLE_ANKLE_RIGHT':'RANKLE',
 				'joints_angle1_ANGLE_HIP_RIGHT':'RHIP',
 				'joints_angle1_ANGLE_KNEE_RIGHT':'RKNEE'}
+
+MAP_CPP_SHORT={'joints_angle1_ANGLE_ANKLE_LEFT':'ankle_left',
+				'joints_angle1_ANGLE_HIP_LEFT':'hip_left',
+				'joints_angle1_ANGLE_KNEE_LEFT':'knee_left',
+				'joints_angle1_ANGLE_ANKLE_RIGHT':'ankle_right',
+				'joints_angle1_ANGLE_HIP_RIGHT':'hip_right',
+				'joints_angle1_ANGLE_KNEE_RIGHT':'knee_right'}
+
+C3D_KEYS=["LANKLE","LHIP","LKNEE","RANKLE","RHIP","RKNEE"]
+
+CPP_KEYS=[	"joints_angle1_ANGLE_ANKLE_LEFT","joints_angle1_ANGLE_HIP_LEFT","joints_angle1_ANGLE_KNEE_LEFT",
+			"joints_angle1_ANGLE_ANKLE_RIGHT","joints_angle1_ANGLE_HIP_RIGHT","joints_angle1_ANGLE_KNEE_RIGHT"]
+
+
+SHORT_KEYS=["ankle_left","hip_left","knee_left","ankle_right","hip_right","knee_right"]
+	
 
 INCLUDE_FILES=["distance1","energy1","footfall1","joints_angle1"]
 
@@ -89,53 +107,62 @@ def import_and_process_from_data(data):
 	# directly for data logged in input files -> see format and if possible
 	raise NotImplementedError
 
-class reference_compare:
-	rep_strides={}
+class referenceCompare:
+	kinematics_compare_file=None
+	kinematics_compare_kind=None
+	do_plot=False
+	def __init__(self,args):
+		for arg_name,arg_value in args.items():
+			if hasattr(self, arg_name):
+				setattr(self, arg_name, arg_value)
+		if self.kinematics_compare_kind is None or self.kinematics_compare_file is None:
+			if LOG_LEVEL<=LOG_WARNING:
+				print("\n[WARNING]Missing arguments for kinematic compare in:\n",args,"\nIt will not be performed ! \n")
+				return None
 
-	def __init__(self,kind,files=None):
-		if kind=='cpp_to_python': # cpp to raw  !
-			""" directions :
-				ankle -
-				knee +
-				hip +
-			""" 
-			contact_file=files[0]
-			joints_file=files[1]
-			contact=pd.read_csv(contact_file,sep=" ")
-			joints=pd.read_csv(joints_file,sep=" ")
-			self.set_repstrides_florin(contact, joints)
-		elif kind=='winter_to_python': # winter to raw (python) !
-			""" directions :
-				ankle + 
-				knee +
-				hip -
-			""" 
-			winter_file=files
-			win_df=pd.read_csv(winter_file)
-			self.set_repstrides_winter(win_df)
-
-		elif kind=='winter_to_cpp': # winter to cpp (florin) !
-			""" directions :
-				ankle -
-				knee +
-				hip -
-			""" 
-			winter_file=files
-			win_df=pd.read_csv(winter_file)
-			self.set_repstrides_winter_cpp(win_df)
-		elif kind=='python_to_python': # raw to raw (florin) !
-			""" directions :
-				ankle + 
-				knee +
-				hip +
-			""" 
-			ref_file=files
-			ref_df=pd.read_csv(ref_file)
+		if LOG_LEVEL<=LOG_INFO:
+			print("\n[INFO]",self.__class__.__name__," initialized with\n",self.__dict__)
+		ref_df=pd.read_csv(self.kinematics_compare_file)
+		self.rep_strides={}
+		if self.kinematics_compare_kind=="winter_to_python":
+			self.set_repstrides_winter(ref_df)
+			self.get_corr=self._get_all_corr_python
+		elif self.kinematics_compare_kind=="cpp_to_python":
+			if LOG_LEVEL<=LOG_ERROR:
+				print("\n[ERROR]No longer suported with initial florin format, preprocess before (see comment below for reference)\n",)
+				"""	#directions :
+						#	ankle -
+						#	knee +
+						#	hip +
+ 
+						contact_file=files[0]
+						joints_file=files[1]
+						contact=pd.read_csv(contact_file,sep=" ")
+						joints=pd.read_csv(joints_file,sep=" ")
+						self.set_repstrides_florin(contact, joints)
+						def set_repstrides_florin(self,contact,joints):
+						# ankle angle is defined in the opposed direction
+							for key_gen,key_flor in MAP_MET_FLORIN.items():
+								mean_ref,std_ref=ed.get_rep_var_from_contact(contact,key_flor,joints)
+								mean_ref=ed.interp_gaitprcent(mean_ref,100)
+								if "ankle" in key_gen: # inversed angle orientation
+									mean_ref=-mean_ref
+								self.rep_strides[key_gen]=mean_ref
+					"""
+			raise DeprecationWarning
+		elif self.kinematics_compare_kind=="winter_to_cpp":
+			self.set_repstrides_winter_cpp(ref_df)
+			self.get_corr=self._get_all_corr_cpp
+		elif self.kinematics_compare_kind=="python_to_python":
 			self.set_repstrides_raw(ref_df)
-		elif kind=="c3d_to_cpp":
-			ref_file=files
-			ref_df=pd.read_csv(ref_file)
+			self.get_corr=self._get_all_corr_python
+		elif self.kinematics_compare_kind=="c3d_to_cpp":
 			self.set_repstrides_c3d_for_cpp(ref_df)
+			self.get_corr=self._get_all_corr_cpp
+		else:
+			if LOG_LEVEL<=LOG_ERROR:
+				print("\n[ERROR]Compare kind ",self.kinematics_compare_kind," not supported\n",)
+			raise KeyError
 
 
 	def set_repstrides_winter(self,win_df):
@@ -152,10 +179,10 @@ class reference_compare:
 		"""
 		hip angle is defined in the opposed direction
 		"""
-		for key_gen,key_c3d in MAP_CPP_C3D.items():
+		for key_gen,key_c3d in zip(SHORT_KEYS,C3D_KEYS):#MAP_CPP_C3D.items():
 			mean_ref=ed.interp_gaitprcent(win_df[key_c3d],100)
-			#if key_win=="hip": # inversed angle orientation
-			#	mean_ref=-mean_ref
+			if key_c3d=="LANKLE"or key_c3d=="RANKLE":  # inversed angle orientation
+				mean_ref= - mean_ref
 			self.rep_strides[key_gen]=mean_ref*(3.1415/180)
 
 	def set_repstrides_winter_cpp(self,win_df):
@@ -170,16 +197,7 @@ class reference_compare:
 				mean_ref=-mean_ref
 			self.rep_strides[key_gen]=mean_ref
 
-	def set_repstrides_florin(self,contact,joints):
-		"""
-		ankle angle is defined in the opposed direction
-		"""
-		for key_gen,key_flor in MAP_MET_FLORIN.items():
-			mean_ref,std_ref=ed.get_rep_var_from_contact(contact,key_flor,joints)
-			mean_ref=ed.interp_gaitprcent(mean_ref,100)
-			if "ankle" in key_gen: # inversed angle orientation
-				mean_ref=-mean_ref
-			self.rep_strides[key_gen]=mean_ref
+
 
 	def set_repstrides_raw(self,ref_df):
 		angles=ref_df.filter(like="angle")
@@ -188,44 +206,53 @@ class reference_compare:
 			mean_ref=ed.interp_gaitprcent(mean_ref,100)
 			self.rep_strides[key_gen]=mean_ref
 
-	def get_corre(self,cmp_df,met):
-		mean_cur,std_cur=ed.get_mean_std_stride(cmp_df,met,stride_choice="repmax")
-		return mean_cur.corr(self.rep_strides[met])
+	def get_corr(self,cmp_df):
+		if LOG_LEVEL<=LOG_ERROR:
+			print("\n[ERROR]See class initialization\n")
+		raise NotImplementedError
 
-	def get_all_corr(self,cmp_df):
+	def _get_all_corr_python(self,cmp_df):
 		all_cor={}
 		for met in self.rep_strides.keys():
 			mean_cur,std_cur=ed.get_mean_std_stride(cmp_df,met,stride_choice="repmax")
 			all_cor[met]=mean_cur.corr(self.rep_strides[met])
 		return all_cor
 
-	def get_all_corr_cpp(self,cmp_df):
-		all_cor={}
-		for met in self.rep_strides.keys():
-			mean_cur,std_cur=ed.get_rep_var_from_contact(contact_df(cmp_df),met,cmp_df)
-			all_cor[met]=mean_cur.corr(self.rep_strides[met])
-			#ax=plot_mean_std_fill(mean_cur, std_cur, 'b')
-			#plot_mean_std_fill(self.rep_strides[met], None, 'g',ax)
-			#plt.title(met)
-			#plt.show()
-		return all_cor
+	def _get_all_corr_cpp(self,cmp_df):
 
-def contact_df(full_df):
-	contact=full_df.filter(like="footfall1")
-	contact.columns=["left","right"]
-	return contact
+		corr_dist={}
+		contact=cmp_df.filter(like="footfall1")
+		contact.columns=["left","right"]
+		for met in self.rep_strides.keys():
+			mean_cur,std_cur=ed.get_rep_var_from_contact(contact,met,cmp_df,how="strike_to_liftoff")
+			correl=mean_cur.corr(self.rep_strides[met])
+			dist=sqrt(((self.rep_strides[met]-mean_cur)**2).sum())
+			corr_dist[met]=[correl,dist]
+			if self.do_plot:
+				ax=plot_correlation_window(mean_cur,self.rep_strides[met],10)
+				plot_mean_std_fill(mean_cur, std_cur, "b",ax)
+				plot_mean_std_fill(self.rep_strides[met], None, "k",ax)
+				tit=met+"(cor:"+str(round(correl,1))+", rms:"+str(round(dist,1))+")"
+				plt.title(tit)
+				plt.show()
+				#print("Correlation:\t",round(correl,3),"\nDistance\t",round(dist,3))
+		return corr_dist
+
 
 
 class runProcess:
 	metrics=["maxtime","corankle","corknee"]
 
-	def __init__(self,compare_kind,compare_files):
-		if compare_files is not None:
-			self.ref=reference_compare(compare_kind,compare_files)
-		else:
-			print("\n[WARNING]No init ref run process")
-			self.ref=None
-		
+
+	def __init__(self,args):
+		for arg_name,arg_value in args.items():
+			if hasattr(self, arg_name):
+				setattr(self, arg_name, arg_value)
+		if LOG_LEVEL<=LOG_INFO:
+			print("\n[INFO]Run processor ",self.__class__.__name__," initialized with\n",self.__dict__)
+
+		self.ref=referenceCompare(args)
+
 	def process_gen(self,gen_dir):
 		ind_dirs=fu.dir_list(gen_dir,pattern="ind")
 		cols=self.metrics.copy()
@@ -243,7 +270,7 @@ class runProcess:
 		return scores
 
 
-	def process_run(self,ind_dir,save=False,verbose=False):
+	def process_run(self,ind_dir,save=False):
 
 		raws=fu.file_list(ind_dir,file_format=".csv",pattern="raw")
 
@@ -263,28 +290,43 @@ class runProcess:
 	def get_metrics(self):
 		raise NotImplementedError
 
+	def get_fitness_from_dir(self,logdir,save=False):
+		if type(logdir) is not list:
+			run_df,run_uid=self.import_run(logdir)
+			if LOG_LEVEL<=LOG_DEBUG:
+				print("\n[DEBUG]Run",run_df.head(5))
+			fit=self.get_fitness(run_df)
+			fit["uid"]=run_uid
+			if LOG_LEVEL<=LOG_INFO:
+				print("\n[INFO]Fitness:\t",fit,"for run in:\n\t",logdir)
+			if save:
+				fit.to_csv(os.path.join(logdir,"result.csv"))
+			return fit.dropna(axis='columns')
+		else: # recursive
+			gen_fit=pd.DataFrame()
+			if LOG_LEVEL<=LOG_INFO:
+				print("\n[INFO]Processing runs:\n\t",logdir,"\n Save:",save)
+			for single_run in logdir:
+				ind_fit=self.get_fitness_from_dir(single_run,save)
+				gen_fit=gen_fit.append(	ind_fit,ignore_index=True)
+			if LOG_LEVEL<=LOG_INFO:
+				print("\n[INFO]All fitnesses\n",gen_fit)
+			return gen_fit.dropna(axis='columns').set_index('uid')
+
 class CppRunProcess(runProcess):
-	metrics=[	"maxtime",
-				"distance",
-				"mean_speed",
-				"energy",
-				"energy_to_dist",
-				"corankle",
-				"corhip",
-				"corknee"]
-	fitnesses=["fit_cor","fit_energy","fit_stable","single"]
-	def __init__(self,compare_files,compare_kind):
-		#print("\n[DEBUG]Init CPP process",compare_files)
+	fitnesses=["fit_cor","fit_energy","fit_stable","fit_rms"]
+	include_files=[	"distance1",
+					"energy1",
+					"footfall1",
+					"joints_angle1"]
+	def __init__(self,args):
+		super(CppRunProcess,self).__init__(args)
+	def get_metrics(self,raw_df):
 
-		super().__init__(compare_kind,compare_files)
-	def get_metrics(self,raw_df,verbose=True):
-
-		#print("\nGetting metrics CPP")
-		#if os.path.isfile(raw_df):
-		#	raw_df=pd.read_csv(open(raw_df))
-		# Metrics computed during the run
+		if LOG_LEVEL<=LOG_DEBUG:
+			print("\n[DEBUG]Raw\n",raw_df)
 		metrics=pd.DataFrame(["value"])
-		metrics["maxtime"]=max(raw_df.index*TIME_STEP)
+		metrics["maxtime"]=len(raw_df.index)*TIME_STEP
 		metrics["distance"]=raw_df["distance1_distance"].max()
 
 		metrics["mean_speed"]=metrics["distance"]/metrics["maxtime"]
@@ -292,28 +334,100 @@ class CppRunProcess(runProcess):
 		metrics["energy_to_dist"]=metrics["energy"]/metrics["distance"]
 
 		if self.ref is not None:
-			corr_dct=self.ref.get_all_corr_cpp(raw_df)
-			for met,corrval in corr_dct.items():
-				metrics["cor"+MAP_CPP_C3D[met]]=corrval
+			corr_dist_dct=self.ref.get_corr(raw_df)
+			for met,vals in corr_dist_dct.items():
+				metrics["cor_"+met]=vals[0]
+				metrics["rms_"+met]=vals[1]
 		return metrics
-	def get_fitness(self,raw_df,single_val,verbose=False):
+	def get_fitness(self,raw_df):
 		metrics=self.get_metrics(raw_df)
-		fit_df=pd.DataFrame(index=pd.RangeIndex(1),columns=self.fitnesses)
-		if verbose:
+		fit_df=pd.DataFrame(index=pd.RangeIndex(1))#,columns=self.fitnesses)
+		if LOG_LEVEL<=LOG_DEBUG:
 			print("\n[DEBUG]Metrics\n",metrics)
 		if metrics.maxtime.values<19.0:
 			fit_df["fit_stable"]=-1000
 		else:
 			fit_df["fit_stable"]=1
-		fit_df["fit_cor"]=metrics.filter(like="cor").sum(1).values[0]*2
-		fit_df["fit_energy"]=-metrics["energy_to_dist"]/100
-		if verbose:
+		fit_df["fit_cor"]= 100 *	(metrics.filter(like="cor").sum(1).values[0])/\
+								len(metrics.filter(like="cor").columns)						#Total correlation with reference (%)
+		fit_df["fit_rms"]= - metrics.filter(like="rms_").sum(1).values[0]
+		fit_df["fit_energy"]= - metrics["energy_to_dist"]/10 # arbitrary scaling, (typical range is [-50, -20], doesn't matter if multi obj, must be scaled for single obj (sum)
+		fit_df["fit_corhip"]= 100 *		(metrics.filter(like="cor_hip").sum(1).values[0])/\
+									len(metrics.filter(like="cor_hip").columns)				#Hip correlation with reference (%)
+		fit_df["fit_corknee"]= 100 *	(metrics.filter(like="cor_knee").sum(1).values[0])/\
+									len(metrics.filter(like="cor_knee").columns)			#Knee correlation with reference (%)
+		fit_df["fit_corankle"]= 100 *	(metrics.filter(like="cor_ankle").sum(1).values[0])/\
+									len(metrics.filter(like="cor_ankle").columns)			#Ankle correlation with reference (%)
+
+		fit_df["fit_rmship"]= - metrics.filter(like="rms_hip").sum(1).values[0]
+			#Hip correlation with reference (%)
+		fit_df["fit_rmsknee"]= - metrics.filter(like="rms_knee").sum(1).values[0]
+				#Knee correlation with reference (%)
+		fit_df["fit_rmsankle"]= - metrics.filter(like="rms_ankle").sum(1).values[0]
+		if LOG_LEVEL<=LOG_DEBUG:
 			print("\n[DEBUG]Fitness\n",fit_df)
-		if not single_val:
-			return fit_df
-		else:
-			fit_df["single"]=fit_df.sum(1)
-			return fit_df.single
+
+		return fit_df
+
+	def get_fitness_param(self,run_path):
+		raw=self.get_raw(run_path)
+		fit=self.get_fitness(raw)
+	def import_run(self,run_path,do_save=False,save_name="run.csv",save_path="."):
+		meta_file=fu.assert_one_dim(fu.file_list(run_path,file_format=".yaml",pattern="meta"),\
+								critical=True)
+		dict_meta=yaml.load(open(meta_file))
+		try:
+			uid=dict_meta["uid"]
+		except KeyError:
+			print("\n[ERROR] Missing uid in",meta_file,"\nkeys are\t",dict_meta.keys())
+			raise RuntimeError
+		if LOG_LEVEL<=LOG_INFO:
+			print ("\n[INFO]Importing files in",run_path,"\n")
+			if do_save:
+				print("\n[INFO]Saving as",save_name," in",save_path,"\n")
+
+		run_df=self.get_raw(run_path)
+
+		if do_save:
+			run_df.to_csv(os.path.join(save_path,save_name))
+
+		yamls=fu.file_list(run_path,file_format=".yaml")
+		csvs=fu.file_list(run_path,file_format=".csv")
+		if LOG_LEVEL<=LOG_DEBUG:
+			print("\n[DEBUG]Removing\n",yamls,"\n",csvs)
+		if yamls:
+			os.unlink(yamls[0])
+		if csvs:
+			os.unlink(csvs[0])
+		return run_df,uid
+	def get_raw(self,run_path):
+		first_call=True
+		for file_path in fu.file_list(run_path): # could filter before iter
+			if os.path.basename(file_path) in self.include_files:
+				if LOG_LEVEL<=LOG_INFO:
+					print("\n[INFO]Importing\n",os.path.basename(file_path))
+				data=pd.read_csv(file_path,sep=" ",error_bad_lines=False)
+				file=os.path.basename(file_path) # just the file name
+				file=os.path.splitext(file)[0] # remove extension
+				data=data.loc[:, ~data.columns.str.match('Unnamed')] # remove columns due to trailing seps
+				data.columns=fu.concat_field(file, data.columns)
+				if first_call:
+					run_df=data
+				else:
+					run_df=pd.concat([run_df,data],axis=1)
+				first_call=False
+		if LOG_LEVEL<=LOG_DEBUG:
+			print("\n[DEBUG]Initial columns\n",run_df.columns)
+		run_df.rename(columns=MAP_CPP_SHORT,inplace=True)
+		if LOG_LEVEL<=LOG_DEBUG:
+			print("\n[DEBUG]Renamed columns\n",run_df.columns)
+
+		return run_df
+
+
+
+
+
 
 class PythonRunProcess(runProcess):
 	def __init__(self,compare_files):

@@ -262,7 +262,7 @@ class timer:
 		self.t1=time.time_ns()
 	def end(self):
 		print("\n[TIMER]",(time.time_ns()-self.t1)/1e6)
-def get_rep_var_from_contact(contact,metric,joints,drop_n_first_strides=3):
+def get_rep_var_from_contact(contact,metric,joints,drop_n_first_strides=3,how="strike_to_strike"):
 	if metric not in joints.columns:
 		print('\n[ERROR] Metric:\t',metric)
 		print('\n[ERROR] Columns:\t',joints.columns)
@@ -270,12 +270,12 @@ def get_rep_var_from_contact(contact,metric,joints,drop_n_first_strides=3):
 	stride_choice='repmax'
 
 	fy_df=split_stride_contact(contact)
-	spl_stride=split_stride(joints,fy_df,metric)
+	spl_stride=split_stride(joints,fy_df,metric,how=how)
 	spl_stride.drop(spl_stride.iloc[:,0:drop_n_first_strides-1], axis=1, inplace=True)
 
 
 	for stride in spl_stride.columns:
-		spl_stride[stride]=interp_gaitprcent(spl_stride[stride],100)
+		spl_stride[stride]=interp_gaitprcent(spl_stride[stride],101)
 	spl_stride=spl_stride.dropna()
 
 	cor=spl_stride.corr() # computes correlation
