@@ -245,6 +245,8 @@ class runProcess:
 
 
 	def __init__(self,args):
+		if args is None:
+			return
 		for arg_name,arg_value in args.items():
 			if hasattr(self, arg_name):
 				setattr(self, arg_name, arg_value)
@@ -292,7 +294,7 @@ class runProcess:
 
 	def get_fitness_from_dir(self,logdir,save=False):
 		if type(logdir) is not list:
-			run_df,run_uid=self.import_run(logdir)
+			run_df,run_uid,_=self.import_run(logdir)
 			if LOG_LEVEL<=LOG_DEBUG:
 				print("\n[DEBUG]Run",run_df.head(5))
 			fit=self.get_fitness(run_df)
@@ -312,6 +314,32 @@ class runProcess:
 			if LOG_LEVEL<=LOG_INFO:
 				print("\n[INFO]All fitnesses\n",gen_fit)
 			return gen_fit.dropna(axis='columns').set_index('uid')
+
+	def import_runs_from_dir(self,logdir,save=True):
+		if type(logdir) is not list:
+			run_df,run_uid,meta=self.import_run(logdir)
+
+			for k,v in meta.items():
+				if type(v) is dict:
+					for k1,v1 in v.items():
+						run_df[k1]=v1
+				else:
+					run_df[k]=v
+			if LOG_LEVEL<=LOG_DEBUG:
+				print("\n[DEBUG]Run",run_df.head(5))
+			if save:
+				run_df.to_csv(os.path.join(logdir,"raw"+run_uid+".csv"))
+			return run_df
+		else: # recursive
+			run_list=[]
+			if LOG_LEVEL<=LOG_INFO:
+				print("\n[INFO]Processing runs:\n\t",logdir,"\n Save:",save)
+			for single_run in logdir:
+				run_list.append(self.import_runs_from_dir(single_run,save))
+			return run_list
+
+
+
 
 class CppRunProcess(runProcess):
 	fitnesses=["fit_cor","fit_energy","fit_stable","fit_rms"]
@@ -399,7 +427,7 @@ class CppRunProcess(runProcess):
 			os.unlink(yamls[0])
 		if csvs:
 			os.unlink(csvs[0])
-		return run_df,uid
+		return run_df,uid,dict_meta
 	def get_raw(self,run_path):
 		first_call=True
 		for file_path in fu.file_list(run_path): # could filter before iter

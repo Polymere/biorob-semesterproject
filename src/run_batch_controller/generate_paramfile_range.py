@@ -40,13 +40,15 @@ def gen_all_file(all_params_file,output_dir=None,standalone=False,nested=False,s
 
 		if parameters[0]=="single":
 			files.append(gen_single(parameters[1:], name, output_dir=rdir,save=save))
+
 		elif parameters[0]=="range":
 			files.append(gen_range(parameters[1:], name, output_dir=rdir,save=save))
+
 		elif parameters[0]=="modrange":
 			files.append(gen_modrange(parameters[1:], name, output_dir=rdir,save=save))
 		elif parameters[0]=="dual_modrange":
 			files.append(gen_dual_modrange(parameters[1:], name, output_dir=rdir,save=save))
-	return files
+	return files,list(all_params.keys())
 
 def gen_single(values,param_name,output_dir=None,standalone=False,save=False):
 	_check_error_wrn(output_dir, save)
