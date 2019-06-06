@@ -40,9 +40,7 @@ MAP_PYTHON_WINTER={'angles_ankle_l':'ankle',	'angles_ankle_r':'ankle',
 				'angles_hip_l':'hip',		'angles_hip_r':'hip',
 				'angles_knee_l':'knee',		'angles_knee_r':'knee'}
 
-MAP_CPP_WINTER={'joints_angle1_ANGLE_ANKLE_LEFT':'ankle',
-				'joints_angle1_ANGLE_HIP_LEFT':'hip',
-				'joints_angle1_ANGLE_KNEE_LEFT':'knee'}
+
 
 MAP_CPP_C3D={'joints_angle1_ANGLE_ANKLE_LEFT':'LANKLE',
 				'joints_angle1_ANGLE_HIP_LEFT':'LHIP',
@@ -63,7 +61,7 @@ C3D_KEYS=["LANKLE","LHIP","LKNEE","RANKLE","RHIP","RKNEE"]
 CPP_KEYS=[	"joints_angle1_ANGLE_ANKLE_LEFT","joints_angle1_ANGLE_HIP_LEFT","joints_angle1_ANGLE_KNEE_LEFT",
 			"joints_angle1_ANGLE_ANKLE_RIGHT","joints_angle1_ANGLE_HIP_RIGHT","joints_angle1_ANGLE_KNEE_RIGHT"]
 
-
+WINTER_KEYS=["ankle","hip","knee","ankle","hip","knee"]
 SHORT_KEYS=["ankle_left","hip_left","knee_left","ankle_right","hip_right","knee_right"]
 	
 
@@ -111,6 +109,7 @@ class referenceCompare:
 	kinematics_compare_file=None
 	kinematics_compare_kind=None
 	do_plot=False
+	split_how="strike_to_strike"
 	def __init__(self,args):
 		for arg_name,arg_value in args.items():
 			if hasattr(self, arg_name):
@@ -189,13 +188,13 @@ class referenceCompare:
 		"""
 		hip angle is defined in the same direction !
 		"""
-		for key_gen,key_win in MAP_CPP_WINTER.items():
+		for key_gen,key_win in zip(SHORT_KEYS,WINTER_KEYS):
 			mean_ref=ed.interp_gaitprcent(win_df[key_win],100)
 			if "ankle" in key_win: # inversed angle orientation
 				mean_ref=-mean_ref
 			if "hip" in key_win: # inversed angle orientation
 				mean_ref=-mean_ref
-			self.rep_strides[key_gen]=mean_ref
+			self.rep_strides[key_gen]=mean_ref*(3.1415/180)
 
 
 
@@ -224,7 +223,7 @@ class referenceCompare:
 		contact=cmp_df.filter(like="footfall1")
 		contact.columns=["left","right"]
 		for met in self.rep_strides.keys():
-			mean_cur,std_cur=ed.get_rep_var_from_contact(contact,met,cmp_df,how="strike_to_liftoff")
+			mean_cur,std_cur=ed.get_rep_var_from_contact(contact,met,cmp_df,how=self.split_how)
 			correl=mean_cur.corr(self.rep_strides[met])
 			dist=sqrt(((self.rep_strides[met]-mean_cur)**2).sum())
 			corr_dist[met]=[correl,dist]
@@ -367,9 +366,12 @@ class CppRunProcess(runProcess):
 				metrics["cor_"+met]=vals[0]
 				metrics["rms_"+met]=vals[1]
 		return metrics
-	def get_fitness(self,raw_df):
+	def get_fitness(self,raw_df,keep_metrics=False):
 		metrics=self.get_metrics(raw_df)
-		fit_df=pd.DataFrame(index=pd.RangeIndex(1))#,columns=self.fitnesses)
+		if keep_metrics:
+			fit_df=metrics
+		else:
+			fit_df=pd.DataFrame(index=pd.RangeIndex(1))#,columns=self.fitnesses)
 		if LOG_LEVEL<=LOG_DEBUG:
 			print("\n[DEBUG]Metrics\n",metrics)
 		if metrics.maxtime.values<19.0:

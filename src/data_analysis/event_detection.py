@@ -288,7 +288,7 @@ def get_rep_var_from_contact(contact,metric,joints,drop_n_first_strides=3,how="s
 		try:
 			y=spl_stride[rep_max_idx[0]]#.iloc[:,0]
 		except IndexError:
-			print("\n[WARNING]No repmax stride\n",spl_stride)
+			#print("\n[WARNING]No repmax stride\n",spl_stride)
 			y=pd.Series(np.zeros(100)) 
 	elif stride_choice=="mean":
 		rep_index=su[su.values>su.mean()].index
