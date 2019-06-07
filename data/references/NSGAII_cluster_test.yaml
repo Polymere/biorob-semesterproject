@@ -1,0 +1,38 @@
+max_nb_gen: 2
+nb_ind: 4
+nb_parents: 2
+cross_rate: 0.2
+mut_rate: 0.2
+mut_amp: 0.1
+
+nb_eval: 20
+on_cluster: True
+
+initial_pop: {solsol_wf: 2.0,
+              solta_wf: 1.0}
+
+objectives_metrics : ["fit_cor","fit_energy","fit_rms"]
+init_pop_mode: "one_parent"
+
+dofs: {solsol_wf: [0, 5.0],
+      solta_wf: [0,20]} # degrees of freedom for optimization and boundaries
+
+kinematics_compare_file: "../../data/patient1.csv"
+kinematics_compare_kind: "c3d_to_cpp"
+world_dir: "../../data/worlds/cpp_worlds"
+
+param_paths: ["/data/prevel/repos/humanWebotsNmm/config/2D_ind1/gaits/current",
+              "/data/prevel/repos/humanWebotsNmm/config/2D_ind2/gaits/current",
+              "/data/prevel/repos/humanWebotsNmm/config/2D_ind3/gaits/current",
+              "/data/prevel/repos/humanWebotsNmm/config/2D_ind4/gaits/current"]
+
+
+worlds_path: ["/data/prevel/repos/humanWebotsNmm/webots/worlds/tmp_2D_noObstacle_GA_2Dind1.wbt",
+              "/data/prevel/repos/humanWebotsNmm/webots/worlds/tmp_2D_noObstacle_GA_2Dind2.wbt",
+              "/data/prevel/repos/humanWebotsNmm/webots/worlds/tmp_2D_noObstacle_GA_2Dind3.wbt",
+              "/data/prevel/repos/humanWebotsNmm/webots/worlds/tmp_2D_noObstacle_GA_2Dind4.wbt"]
+
+log_paths: ["/data/prevel/repos/humanWebotsNmm/log/log_ind1",
+            "/data/prevel/repos/humanWebotsNmm/log/log_ind2",
+            "/data/prevel/repos/humanWebotsNmm/log/log_ind3",
+            "/data/prevel/repos/humanWebotsNmm/log/log_ind4"]
