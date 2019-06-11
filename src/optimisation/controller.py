@@ -125,7 +125,7 @@ class EvolutionController():
 				candidates=pd.concat([eval_pop,parents],axis=0)
 			else:
 				candidates=eval_pop
-			parents=self.opti.select(self.opti.sort_pop(candidates))
+			parents=self.opti.select(self.opti.sort_pop(candidates),self.gen_nb)
 			if LOG_LEVEL<=LOG_INFO:
 				print("\n[INFO]Gen",self.nb_gen," Parents\n",parents)
 			self.nb_gen+=1
