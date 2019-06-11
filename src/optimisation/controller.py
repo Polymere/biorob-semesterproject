@@ -146,13 +146,13 @@ class EvolutionController():
 		self.run_launcher.run_batch("worlds",self.worlds_path,self.log_paths)
 
 		scores=self.run_processor.get_fitness_from_dir(self.log_paths)
-
+		population["gen"]=self.nb_gen
 		if LOG_LEVEL<=LOG_DEBUG:
 			print("\n[DEBUG]Pop\n",population)
 			print("\n[DEBUG]scores\n",scores)
 
 		saved_df=pd.concat([population,scores],axis=1)
-		saved_df["gen"]=self.nb_gen
+		#saved_df["gen"]=self.nb_gen
 		saved_df.to_csv(os.path.join(self.trial_dir,"gen"+str(self.nb_gen)+".csv"))
 
 		if self.opti.is_single_obj:
