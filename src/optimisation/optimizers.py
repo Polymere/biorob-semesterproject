@@ -265,7 +265,7 @@ class GAOptimizer(Optimizer):
 		super(GAOptimizer, self).__init__(arg)
 		self.is_single_obj=True
 	def select(self,sorted_pop,gen_nb):
-		cliped=self.check_age(pop, current_gen)
+		cliped=self.check_age(sorted_pop, gen_nb)
 		return cliped.head(self.nb_parents)
 	def check_age(self,pop,current_gen):
 		if self.drop_age is None:
