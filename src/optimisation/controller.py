@@ -130,8 +130,10 @@ class EvolutionController():
 				print("\n[INFO]Gen",self.nb_gen," Parents\n",parents)
 			self.nb_gen+=1
 			childrens=self.opti.get_next_gen(parents,self.nb_gen) # drop fitnesses and cr_dist for check_bound
-			if self.is_stop():
-				parents.to_csv(os.path.join(self.trial_dir,"parents_gen"+str(self.nb_gen)+".csv"))
+
+			parents.to_csv(os.path.join(self.trial_dir,"parents_gen"+str(self.nb_gen)+".csv"))
+			if self.nb_gen>2:
+				os.unlink(os.path.join(self.trial_dir,"parents_gen"+str(self.nb_gen-1)+".csv"))
 
 
 	def eval_pop(self,population,verbose=False):
@@ -154,7 +156,8 @@ class EvolutionController():
 		saved_df.to_csv(os.path.join(self.trial_dir,"gen"+str(self.nb_gen)+".csv"))
 
 		if self.opti.is_single_obj:
-			scores["fitness"]=scores.filter(like="fit_").sum(1)
+			scores=scores.add(scores.fit_stable,axis='index')
+			scores["fitness"]=scores.filter(self.objectives_metrics).sum(1)
 			evaluated=pd.concat([population,scores.fitness],axis=1)
 		else:
 			scores=scores.add(scores.fit_stable,axis='index')
