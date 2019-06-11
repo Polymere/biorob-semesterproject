@@ -103,6 +103,7 @@ class Optimizer:
 			gen_counter+=1
 			current_pop=self.get_next_gen(parents,gen_counter)
 		performance_df.to_csv("perf_"+problem+self.__class__.__name__+".csv")
+		self.sort_pop(eval_pop).to_csv("sorted_pop_"+problem+self.__class__.__name__+".csv")
 	def _eval_rastrigin(self,pop):
 		fit=10*self.n+(pop.values**2-10*np.cos(pop.values.astype(np.float32)*2*np.pi)).sum(1)
 		pop["fit"]= - fit
@@ -259,16 +260,20 @@ class GAOptimizer(Optimizer):
 	mut_amp=None
 	mut_rate=None
 	cross_rate=None
-	drop_age=None
+	drop_age=5
 	def __init__(self, arg):
 		super(GAOptimizer, self).__init__(arg)
 		self.is_single_obj=True
-
+	def select(self,sorted_pop,gen_nb):
+		cliped=self.check_age(pop, current_gen)
+		return cliped.head(self.nb_parents)
 	def check_age(self,pop,current_gen):
 		if self.drop_age is None:
 			return pop
 		else:
-			raise NotImplementedError
+			too_old=pop[current_gen-pop["gen"]>self.drop_age]
+			print("Dropping",too_old)
+			return pop.drop(too_old.index)
 	def get_uid(self,gen_nb,new_gen):
 		return ["gen"+str(gen_nb)+"ind"+str(i+1) for i in range(self.nb_ind)]
 	def set_uid(self,gen_nb,new_gen):
@@ -349,7 +354,7 @@ class NSGAIIOptimizer(GAOptimizer):
 				print("\n[INFO]",current_front)
 				print("\n[INFO]Missing",len(other),"inds\n")
 				print("\n[INFO]",other)
-			pop_in_fronts+=len(current_front.index)
+			#pop_in_fronts+=len(current_front.index)
 			if pop_in_fronts>=self.nb_parents:
 				if LOG_LEVEL<=LOG_INFO:
 					print("\n[INFO]early stop (front",nb_front,")\n")
@@ -425,11 +430,12 @@ if __name__ == '__main__':
 		pars={	"mut_amp":0.1,
 				"mut_rate":0.5,
 				"cross_rate": 0.5,
-				"nb_ind":50,
-				"nb_parents":5}
+				"nb_ind":200,
+				"nb_parents":20}
 
 		opti=NSGAIIOptimizer(pars)
 	else:
 		print(arg)
 		raise KeyError
-	opti.benchmark("fonseca_fleming", 20, 2)
+	opti.benchmark("fonseca_fleming", 2, 2)
+	
