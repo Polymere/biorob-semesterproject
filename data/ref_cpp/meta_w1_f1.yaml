@@ -1,0 +1,698 @@
+opt_params:
+  G_SOL: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    6XLFD1Dm/j8=
+uid: '1'
+opt_params:
+  G_SOL: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    kGbrFgT7tD8=
+uid: '1'
+opt_params:
+  G_SOL: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    gN8sbGZugz8=
+uid: '1'
+opt_params:
+  G_SOL: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    IOKfGDTu0j8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    bJUrDpiu/T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    dk1k4wUZ+z8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    cxS+3xRw/T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    ANtn4f/v3D8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    s8P7cV+M8T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    JKrAe4uS2z8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    Pn+cD3p78D8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    jNpGpJ6X9z8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    aCWLCiPE6D8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    YCBgSNVs0T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    CFdx+2qs0T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    0qr8PKcZ6T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    pwCasnl19j8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    GHxdeY/Q2j8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    eqDHmlV45T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    YE0IfZLI5D8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    UGRFMsjSsj8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    VMbNT9kF+D8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    k6tU/1bf+z8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    1MWeHg6l+z8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    ztoq8V/g4T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    4NlXfEnn5j8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    ynqrBs1s9D8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    MGU0XtMJ9z8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    RAkLOYKb8T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    uNnPXJdf2T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    KFTq7+vM7z8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    NdIj6g989j8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    mDYWDA4SwT8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    XMMsYFti3z8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    NguT6QKe8T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    +t3Dd+gU6D8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    lB0iGOKD+T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    1P8vg0Zo7j8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    KATKs1oK1j8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    dWuJMg9K9z8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    6BHBkebLzT8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    nXkrRjIg+j8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    OagnVzX99D8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    LdU0EHnm/z8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    sBqApLoi0D8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    QB9+JrI/qD8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    YDdzjYJg5D8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    TIZfTRcp1D8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    NEMU3QQY5j8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    GMdEWmDKzD8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    gqhyz73C+T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    9OxNrSxq2D8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    jK1L/hdu2z8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    pD40gPSR+z8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    vPS/Lxt86z8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    0IXagTcr+j8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    di69xDGz9T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    Dr+IA3/J5D8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    iE5hovCf5T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    XgBsNGHk8j8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    GvgJqYQ/9D8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    9Oq/KJK84j8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    fFCgoPwH2j8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    DKGI2eas/D8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    GGdjNxFB4z8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    JXFA13/w+j8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    3mnegxEk5j8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    cIh/Q+kc+T8=
+uid: '1'
+opt_params:
+  solsol_wf: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    4IvwbZe+6j8=
+uid: '1'
+opt_params: {solsol_wf: 0.5479006826868167, tata_wf: 0.9750941864276621}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.43395094876583085, tata_wf: 1.0223812228447813}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.3717164287404826, tata_wf: 1.0350201858055335}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.382038748864657, tata_wf: 1.8447239865352025}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.36750684936029154, tata_wf: 0.25733604264158205}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.474248680616334, tata_wf: 0.9510405568694653}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.8099467105463254, tata_wf: 1.7880007622782137}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.9306654268708006, tata_wf: 0.5668894526153228}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.6848418956289226, tata_wf: 0.23968092616568848}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.6384630120774906, tata_wf: 1.3575534614314406}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.879018260828655, tata_wf: 0.07565231303586373}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.066330564204145, tata_wf: 0.3804173029258062}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.4379290655046502, tata_wf: 0.7105460074554157}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.25453572064242724, tata_wf: 0.19754604672078924}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.10554762932807482, tata_wf: 0.4896241842398019}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.4575335203452293, tata_wf: 1.3406162248089675}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.1577414297558986, tata_wf: 0.6280666144670515}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.0822245930404346, tata_wf: 0.7995149475199652}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.3983391182079512, tata_wf: 0.13273918362463122}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.2761735980854336, tata_wf: 1.822566769872623}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.3269715429063482, tata_wf: 1.4415975519698467}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.059468492566122, tata_wf: 0.771022542167672}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.7736152378898671, tata_wf: 1.4409095254831448}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.5053723745791923, tata_wf: 1.7418070023231744}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.7016211489747808, tata_wf: 1.1346801461995148}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.7558040150799534, tata_wf: 1.4864696523016527}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.6319284561240115, tata_wf: 1.6026073214427172}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.41467772196721686, tata_wf: 1.8703502207017904}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.5148064085200725, tata_wf: 1.054156030888975}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.858267673908503, tata_wf: 1.0785085189267687}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.1595844354865195, tata_wf: 1.9354399500182167}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.9392598505099294, tata_wf: 0.9352944386795539}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.44767205057961124, tata_wf: 1.7566169733280785}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.001956913742146238, tata_wf: 0.9233735662679308}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.115875235335446, tata_wf: 2.0}
+uid: gen1ind1
+opt_params: {solsol_wf: 1.2035603629154876, tata_wf: 1.7327605990085908}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.0, tata_wf: 1.8926313389981253}
+uid: gen1ind1
+opt_params: {solsol_wf: 0.6482787076569336, tata_wf: 1.7779824084904148}
+uid: gen0ind1
+opt_params: {solsol_wf: 2.0, tata_wf: 0.08585123722810784}
+uid: gen1ind1
+opt_params: {solsol_wf: 0.1678531159625316, tata_wf: 0.14746139882935627}
+uid: gen0ind1
+opt_params: {solsol_wf: 2.0, tata_wf: 0.13761966617227084}
+uid: gen1ind1
+opt_params: {solsol_wf: 0.6794567488615959, tata_wf: 0.873901416109645}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.16890934772820632, tata_wf: 0.0}
+uid: gen1ind1
+opt_params: {solsol_wf: 0.1049047599954418, tata_wf: 1.4036910050250848}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.18028921575970655, tata_wf: 1.2943250837089866}
+uid: gen1ind1
+opt_params: {solsol_wf: 1.9656898804226985, tata_wf: 2.0}
+uid: gen1ind1
+opt_params: {solsol_wf: 1.9080657370094212, tata_wf: 1.5090695710072395}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.33655422339398977, tata_wf: 1.5710792094546677}
+uid: gen0ind1
+opt_params: {solsol_wf: 2.0, tata_wf: 1.6011373545754872}
+uid: gen1ind1
+opt_params: {solsol_wf: 2.0, tata_wf: 0.0}
+uid: gen1ind1
+opt_params: {solsol_wf: 1.036725209215651, tata_wl: 1.1364570735481}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.6342593193948924, tata_wl: 1.6427178411417485}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.47998394842091896, tata_wl: 0.12067669093762312}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.6420005081014304, tata_wl: 1.43321178493265}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.5342779576227443, tata_wl: 1.6387748171246024}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.021447222085421158, tata_wl: 0.1044348777269446}
+uid: gen0ind1
+opt_params: {solsol_wf: 0.0, tata_wl: 0.11923383303856115}
+uid: gen1ind1
+opt_params: {solsol_wf: 0.0, tata_wl: 0.14605488075901335}
+uid: gen1ind1
+opt_params: {solsol_wf: 1.2585932447914023, tata_wl: 1.5245752219899256}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.2441841485809302, tata_wl: 0.13037461038057602}
+uid: gen1ind1
+opt_params: {solsol_wf: 0.5225685992356042, tata_wl: 0.27941006690095754}
+uid: gen1ind1
+opt_params: {solsol_wf: 2.581156008731992, tata_wl: 0.941399722562381}
+uid: gen0ind1
+opt_params: {solsol_wf: 2.7690162805974112, tata_wl: 1.2171379696044826}
+uid: gen1ind1
+opt_params: {solsol_wf: 1.5280147776211994, tata_wl: 0.38308647849827704}
+uid: gen1ind1
+opt_params: {solsol_wf: 2.4900870810443845, tata_wl: 0.6218937739703576}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.6940843002617199, tata_wl: 0.6293462313493041}
+uid: gen1ind1
+opt_params: {solsol_wf: 1.9105427615023671, tata_wl: 0.9521291205206283}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.761600681549306, tata_wl: 0.9723653840545514}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.7464930957318958, tata_wl: 1.018859303472034}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.7358663594396448, tata_wl: 1.0065551047293}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.9609463383429615, tata_wl: 0.9605807481476161}
+uid: gen0ind1
+opt_params: {solsol_wf: 1.737175882257042, tata_wl: 1.0005609266062871}
+uid: gen1ind1
+opt_params: {solsol_wf: 1.8679183040192948, tata_wl: 0.9626089420045518}
+uid: gen1ind1

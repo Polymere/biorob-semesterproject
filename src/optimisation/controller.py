@@ -100,6 +100,7 @@ class EvolutionController():
 			if self.initial_pop is None:
 				raise ValueError
 			parents=pd.read_csv(self.initial_pop)
+			print(parents)
 			return self.opti.get_next_gen(parents,self.nb_gen)
 		else:
 			raise KeyError
@@ -191,7 +192,9 @@ class CppEvolutionController(EvolutionController):
 	def __init__(self,config_file):
 		params=yaml.load(open(config_file, 'r'))
 		EvolutionController.__init__(self,params)
-
+		if hasattr(self, "trial_dir"):
+			print("PLOP")
+			params["trial_dir"]=self.trial_dir
 		self.run_launcher=CppLauncher(params)
 		self.run_processor=CppRunProcess(params)
 
@@ -199,7 +202,9 @@ class PythonEvolutionController(EvolutionController):
 	def __init__(self,config_file):
 		params=yaml.load(open(config_file, 'r'))
 		EvolutionController.__init__(self,params)
-
+		if hasattr(self, "trial_dir"):
+			print("PLOP")
+			params["trial_dir"]=self.trial_dir
 		self.run_launcher=PythonLauncher(params)
 		self.run_processor=PythonRunProcess(params)
 

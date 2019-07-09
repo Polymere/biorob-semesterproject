@@ -180,6 +180,8 @@ class referenceCompare:
 		"""
 		for key_gen,key_c3d in zip(SHORT_KEYS,C3D_KEYS):#MAP_CPP_C3D.items():
 			mean_ref=ed.interp_gaitprcent(win_df[key_c3d],100)
+			if key_c3d=="LHIP"or key_c3d=="RHIP":  # inversed angle orientation
+				mean_ref= - mean_ref
 			if key_c3d=="LANKLE"or key_c3d=="RANKLE":  # inversed angle orientation
 				mean_ref= - mean_ref
 			self.rep_strides[key_gen]=mean_ref*(3.1415/180)
@@ -228,12 +230,24 @@ class referenceCompare:
 			dist=sqrt(((self.rep_strides[met]-mean_cur)**2).sum())
 			corr_dist[met]=[correl,dist]
 			if self.do_plot:
-				ax=plot_correlation_window(mean_cur,self.rep_strides[met],10)
-				plot_mean_std_fill(mean_cur, std_cur, "b",ax)
-				plot_mean_std_fill(self.rep_strides[met], None, "k",ax)
-				tit=met+"(cor:"+str(round(correl,1))+", rms:"+str(round(dist,1))+")"
-				plt.title(tit)
-				plt.show()
+				#cor_sq=(mean_cur.min()*180/3.14,mean_cur.max()*180/3.14)
+				cor_sq=[-10,10]
+				ax=plot_correlation_window(mean_cur,self.rep_strides[met],10,sq=cor_sq)
+				plot_mean_std_fill(mean_cur*180/3.1415, std_cur*180/3.1415, "b",ax)
+				plot_mean_std_fill(self.rep_strides[met]*180/3.1415, None, "k",ax)
+				tit=met#+"(cor:"+str(round(correl,1))+", rms:"+str(round(dist,1))+")"
+				#plt.title(tit)
+				plt.xlim([0,100])
+				plt.xlabel("stride %")
+				plt.ylabel("Angle [deg] ")
+				plt.legend(["Model","Reference"])
+				#plt.show()
+				plt.tight_layout()
+				plt.savefig(tit+".pdf", dpi=None, facecolor='w', edgecolor='k',
+					orientation='portrait', papertype=None, format="pdf",
+					transparent=False, bbox_inches=None, pad_inches=0.1,
+					frameon=True, metadata=None)
+				plt.close()
 				#print("Correlation:\t",round(correl,3),"\nDistance\t",round(dist,3))
 		return corr_dist
 
