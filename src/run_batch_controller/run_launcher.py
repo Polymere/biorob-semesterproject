@@ -159,6 +159,7 @@ class runLauncher:
 	fold_counter=0
 	individual_counter = 1
 	max_folds = 1
+	trial_dir=None
 
 	on_cluster=False
 	nb_eval=4
@@ -174,8 +175,9 @@ class runLauncher:
 		else:
 			if LOG_LEVEL<=LOG_WARNING:
 				print("\n[WARNING]No args\n")
+				return
 
-		if not hasattr(self,"trial_dir"):
+		if self.trial_dir is None:
 			self.trial_dir = os.path.join(ROOT_RESULT_DIR, time.strftime("%j_%H:%M"))
 			fu.assert_dir(self.trial_dir,should_be_empty=True)
 		try:
@@ -464,11 +466,13 @@ class CppLauncher(runLauncher):
 			print("\n[INFO]Writing \n",ind,"\tto\n",self.param_path)
 			print("\n[INFO]Running \n",self.world_path)
 		subprocess.run(["webots", "--batch","--mode=realtime","--fullscreen", self.world_path])
-		proc=CppRunProcess({"kinematics_compare_kind" :"c3d_to_cpp",
-							"kinematics_compare_file" : "../../data/patient1_striketolift.csv",
+		proc=CppRunProcess({"kinematics_compare_kind" :"winter_to_cpp",
+							"kinematics_compare_file" : "../../data/winter_data/data_normal.csv",
+							"split_how": "strike_to_strike",
 							"do_plot": True})
 		df=proc.get_raw(self.log_path)
 		proc.ref.get_corr(df)
+		df.to_csv("last_run.csv")
 if __name__ == '__main__':
 	#python run_launcher.py cpp param_fixed_values /data/prevel
 

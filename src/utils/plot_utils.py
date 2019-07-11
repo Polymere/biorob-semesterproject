@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 
-def plot_correlation_window(s1,s2,nwind,ax=None,save=False):
+def plot_correlation_window(s1,s2,nwind,ax=None,save=False,sq=None):
 	if ax is None:
 		ax=plt.axes()
 	if len(s1)!=len(s2):
@@ -20,14 +20,19 @@ def plot_correlation_window(s1,s2,nwind,ax=None,save=False):
 		r=s1[start:stop].corr(s2[start:stop])
 		corr_df.corre.loc[wind]=r
 		corr_df.prcent.loc[wind]=(start+stop)/2
-		if r<0:
-			c='r'
-		else:
-			c='g'
 		a=abs(r)
 		if a<0.25:
 			a=0.5
+		if r<0:
+			c='r'
+			if sq is not None:
+				r=r*abs(sq[1])
+		else:
+			c='g'
+			if sq is not None:
+				r=r*abs(sq[0])
 		ax.bar((start+stop)/2,r,wind_size*0.95,color=c,alpha=a)
+
 	return ax
 
 

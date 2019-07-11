@@ -16,7 +16,7 @@ initial_pop: {solsol_wf: 2.0,
               sol_activitybasal: 0.1}
            #}
 #initial_pop: "parents.csv"
-objectives_metrics : ["fit_rmsankle","fit_energy"]
+objectives_metrics : ["fit_rmsankle","fit_rmsknee"]
 init_pop_mode: "one_parent"
 
 dofs: {solsol_wf: [0, 5.0],
@@ -26,8 +26,8 @@ dofs: {solsol_wf: [0, 5.0],
       ta_bl: [0,2.0],
      sol_activitybasal: [0,0.5]} # degrees of freedom for optimization and boundaries
 
-kinematics_compare_file: "../../data/patient2_striketolift.csv"
-split_how: "strike_to_liftoff"
+kinematics_compare_file: "../../data/patient2.csv"
+split_how: "strike_to_strike"
 kinematics_compare_kind: "c3d_to_cpp"
 world_dir: "../../data/worlds/cpp_worlds"
 

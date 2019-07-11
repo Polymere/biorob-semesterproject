@@ -56,7 +56,7 @@ def plt_maxtime(fit_df,param):
 	labels = [item.get_text() for item in ax.get_xticklabels()]
 	ax.set_xticklabels([str(round(float(label), 2)) for label in labels])
 	plt.ylabel(MAP_PARAM_TEX[param],rotation=0,usetex=True,ha='right',va='center');
-	plt.savefig("../../../figures/sym/maxtime_"+param+".pdf", dpi=None, facecolor='w', edgecolor='k',
+	plt.savefig("./figure_sym/maxtime_"+param+".pdf", dpi=None, facecolor='w', edgecolor='k',
 		orientation='portrait', papertype=None, format="pdf",
 		transparent=False, bbox_inches=None, pad_inches=0.1,
 		frameon=True, metadata=None)
@@ -87,12 +87,13 @@ def plt_energytodist(fit_df,param,bounds):
 	labels = [item.get_text() for item in ax.get_xticklabels()]
 	ax.set_xticklabels([str(round(float(label), 2)) for label in labels])
 	plt.ylabel(MAP_PARAM_TEX[param],rotation=0,usetex=True,ha='right',va='center');
-	plt.savefig("../../../figures/sym/energytodist_"+param+".pdf", dpi=None, facecolor='w', edgecolor='k',
+	plt.savefig("./figure_sym/energy_"+param+".pdf", dpi=None, facecolor='w', edgecolor='k',
 		orientation='portrait', papertype=None, format="pdf",
 		transparent=False, bbox_inches=None, pad_inches=0.1,
 		frameon=True, metadata=None)
 
 def plt_similarity(fit_df,param,which,bounds):
+
 	if ASYM:
 		tmp_param=param+"_left"
 	else:
@@ -117,7 +118,7 @@ def plt_similarity(fit_df,param,which,bounds):
 	labels = [item.get_text() for item in ax.get_xticklabels()]
 	ax.set_xticklabels([str(round(float(label), 2)) for label in labels])
 	plt.ylabel(MAP_PARAM_TEX[param],rotation=0,usetex=True,ha='right',va='center');
-	plt.savefig("../../../figures/sym/"+which+"_"+param+".pdf", dpi=None, facecolor='w', edgecolor='k',
+	plt.savefig("./figure_sym/"+which+"_"+param+".pdf", dpi=None, facecolor='w', edgecolor='k',
 		orientation='portrait', papertype=None, format="pdf",
 		transparent=False, bbox_inches=None, pad_inches=0.1,
 		frameon=True, metadata=None)
@@ -137,7 +138,7 @@ if __name__ == '__main__':
 	fit_df=None
 
 
-	all_dirs=fu.dir_list("../../../sensi_asym/",pattern="")
+	all_dirs=fu.dir_list("sensi_sym",pattern="")
 	param_names=[]
 	for cdir in all_dirs:
 		param_names.append(os.path.split(cdir)[-1])
@@ -151,9 +152,9 @@ if __name__ == '__main__':
 			else:
 				fit_df=nrow
 	fit_df.index=fit_df.uid
-	fit_df.to_csv("asym_vs_geyer.csv")"""
+	fit_df.to_csv("sym_vs_geyer.csv")"""
 	fit_df=pd.read_csv("sym_vs_geyer.csv")
-	all_dirs=fu.dir_list("../../../sensi_sym/",pattern="")
+	all_dirs=fu.dir_list("sensi_sym",pattern="")
 	param_names=[]
 	for cdir in all_dirs:
 		param_names.append(os.path.split(cdir)[-1])
@@ -178,7 +179,8 @@ if __name__ == '__main__':
 	for param in param_names:
 		#plt_maxtime(fit_df, param)
 		plt_energytodist(fit_df, param, bounds_ene)
-		#plt_similarity(fit_df, param,"fit_rmsankle",bounds_ankle)
-		#plt_similarity(fit_df, param,"fit_rmship",bounds_hip)
-		#plt_similarity(fit_df, param,"fit_corknee",bounds_knee)
+
+		plt_similarity(fit_df, param,"fit_rmsankle",bounds_ankle)
+		plt_similarity(fit_df, param,"fit_rmship",bounds_hip)
+		plt_similarity(fit_df, param,"fit_corknee",bounds_knee)
 
