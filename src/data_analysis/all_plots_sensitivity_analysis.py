@@ -31,7 +31,7 @@ MAP_PARAM_TEX={"solsol_wf": "$G_{SOL}$",
 "kbodyweight": "$k_{bw}$",
 "kp": "$k_p$",
 "kd": "$k_d$",
-"kref": "$\theta_{ref}$",
+"kref": r'$\theta_{ref}$',
 "klean": "$k_{lean}$"}
 
 
@@ -73,12 +73,14 @@ def plt_energytodist(fit_df,param,bounds):
 	sub=zeroed_not_stab.energy_to_dist.to_frame()
 	plt.rc('text', usetex=False)
 	#plt.rc('font', family='serif')
-	cmap = sns.cubehelix_palette(dark=0.4, light=.85, gamma=0.9,rot=.3,start=1.2,\
+	cmap = sns.cubehelix_palette(dark=0.4, light=.85, gamma=2.9,rot=.3,start=2.0,\
 							n_colors=2,hue=1.,as_cmap=True,reverse=True)
+
+	cmap=sns.color_palette("Purples_r")
 	fig, ax = plt.subplots()
 	sub.index=zeroed_not_stab[tmp_param]
 	sub.sort_index(inplace=True)
-	sns.heatmap(sub.T,square=True,cmap=cmap,linewidths=.1,linecolor='k',vmin=bounds[0],vmax=bounds[1],xticklabels=4,cbar=False,mask=sub.T.isnull())
+	sns.heatmap(sub.T,square=True,cmap=cmap,linewidths=.1,linecolor='k',vmin=bounds[0],vmax=bounds[1],xticklabels=4,cbar=True,mask=sub.T.isnull())
 	plt.xticks(rotation=0)
 	plt.xlabel("")
 	plt.yticks([])
@@ -90,7 +92,7 @@ def plt_energytodist(fit_df,param,bounds):
 		transparent=False, bbox_inches=None, pad_inches=0.1,
 		frameon=True, metadata=None)
 
-def plt_similarity(fit_df,param):
+def plt_similarity(fit_df,param,which,bounds):
 	if ASYM:
 		tmp_param=param+"_left"
 	else:
@@ -98,22 +100,24 @@ def plt_similarity(fit_df,param):
 	fit_df=fit_df[fit_df[tmp_param].notnull()]
 	nostab=fit_df.fit_stable==-1000
 	zeroed_not_stab=fit_df
-	zeroed_not_stab.loc[nostab,"fit_cor"]=np.nan
-	sub=zeroed_not_stab.fit_cor.to_frame()
+	zeroed_not_stab.loc[nostab,which]=np.nan
+	sub=zeroed_not_stab[which].to_frame()
 	plt.rc('text', usetex=False)
 	#plt.rc('font', family='serif')
-	cmap = sns.color_palette("RdYlGn", 10)
+	cmap = sns.cubehelix_palette(dark=0.4, light=.85, gamma=2.9,rot=.3,start=2.0,\
+							n_colors=2,hue=1.,as_cmap=True,reverse=False)
+	cmap=sns.color_palette("Reds")
 	fig, ax = plt.subplots()
 	sub.index=zeroed_not_stab[tmp_param]
 	sub.sort_index(inplace=True)
-	sns.heatmap(sub.T,square=True,cmap=cmap,linewidths=.1,linecolor='k',vmin=-100,vmax=100,xticklabels=4,cbar=False,mask=sub.T.isnull())
+	sns.heatmap(sub.T,square=True,cmap=cmap,linewidths=.1,linecolor='k',vmin=bounds[0],vmax=bounds[1],xticklabels=4,cbar=True,mask=sub.T.isnull())
 	plt.xticks(rotation=0)
 	plt.xlabel("")
 	plt.yticks([])
 	labels = [item.get_text() for item in ax.get_xticklabels()]
 	ax.set_xticklabels([str(round(float(label), 2)) for label in labels])
 	plt.ylabel(MAP_PARAM_TEX[param],rotation=0,usetex=True,ha='right',va='center');
-	plt.savefig("../../../figures/sym/cor_"+param+".pdf", dpi=None, facecolor='w', edgecolor='k',
+	plt.savefig("../../../figures/sym/"+which+"_"+param+".pdf", dpi=None, facecolor='w', edgecolor='k',
 		orientation='portrait', papertype=None, format="pdf",
 		transparent=False, bbox_inches=None, pad_inches=0.1,
 		frameon=True, metadata=None)
@@ -154,13 +158,27 @@ if __name__ == '__main__':
 	for cdir in all_dirs:
 		param_names.append(os.path.split(cdir)[-1])
 	stab=fit_df.fit_stable==1
-	max_ene=fit_df[stab].energy_to_dist.max()
-	min_ene=fit_df[stab].energy_to_dist.min()
-
+	max_ene=fit_df[stab].energy_to_dist.quantile(0.75)
+	min_ene=fit_df[stab].energy_to_dist.quantile(0.25)
 	bounds_ene=(min_ene,max_ene)
-	print(bounds_ene)
+
+	max_ankle=fit_df[stab].fit_corankle.quantile(0.75)
+	min_ankle=fit_df[stab].fit_corankle.quantile(0.25)
+	bounds_ankle=(min_ankle,max_ankle)
+
+	max_hip=fit_df[stab].fit_corhip.quantile(0.75)
+	min_hip=fit_df[stab].fit_corhip.quantile(0.25)
+	bounds_hip=(min_hip,max_hip)
+
+	max_knee=fit_df[stab].fit_corknee.quantile(0.75)
+	min_knee=fit_df[stab].fit_corknee.quantile(0.25)
+	bounds_knee=(min_knee,max_knee)
+
+	print(bounds_ankle)
 	for param in param_names:
-		plt_maxtime(fit_df, param)
+		#plt_maxtime(fit_df, param)
 		plt_energytodist(fit_df, param, bounds_ene)
-		plt_similarity(fit_df, param)
+		#plt_similarity(fit_df, param,"fit_rmsankle",bounds_ankle)
+		#plt_similarity(fit_df, param,"fit_rmship",bounds_hip)
+		#plt_similarity(fit_df, param,"fit_corknee",bounds_knee)
 
