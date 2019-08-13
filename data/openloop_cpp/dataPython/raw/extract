@@ -1,3 +1,0 @@
-cat raw.csv| awk -F ',' '{print $69,0,$71,$67,$70,0,$72,$68}' > angles
-cat raw.csv| awk -F ',' '{print $2, $24}' > grfs
-

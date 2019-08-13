@@ -1,5 +1,4 @@
 ENVS=$(conda env list | awk '{print $1}' )
-echo $(pwd)
 if [[ $ENVS = *"bio"* ]]; then
 	echo "Activating conda env (bio)"
 	conda activate bio

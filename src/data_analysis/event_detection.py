@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+""" @package event_detection
+Detects gait events and split accordingly
+"""
 import utils.file_utils as fu
 import pandas as pd
 import numpy as np
@@ -6,61 +10,85 @@ from scipy.signal import argrelextrema
 
 import time
 
-def add_strike_lift(df,correction=True,smooth=True):
-	fy=df.copy()
-	fy=df.filter(like="Fy",axis=1)
-	try:
-		fy.columns=['left','right']
-	except:
-		print(df)
-		return None
-	smooth_size=10
-	offset_lift=0
-	offset_strike=0
+LOG_DEBUG=1
+LOG_INFO=2
+LOG_WARNING=3
+LOG_ERROR=4
+LOG_LEVEL=LOG_INFO
+def events_from_grf(fy,smooth=True):
+	""" Processing of GRF data to detect strike and lift off timestamps
+
+		Moving average smoothing, local extrema detection and false positive 
+		removal (based on expected event succession order)
+		
+		Note :
+		Equivalent to events_from_contact for the python implementation
+		of the reflex controller (different available data)""
+	"""
+
+
 	if smooth:
-		offset_strike=smooth_size
-		r=fy.rolling(smooth_size) #smooting (sum with 10 neighbours)
+		smooth_size=10
+		r=fy.rolling(smooth_size) #smoothing (sum with 10 neighbours)
 		fy=r.sum()  
-	n=50 # number of points to be checked before and after 
+	# number of points to check before and after for local extremas detection
+	n=50 
+
+
 	left_swing = argrelextrema(fy.left.values, np.less_equal, order=n)
 	s=left_swing[0]
-	offset_lift=0
-	offset_strike=0
-	
-	s_filter=[s[idx+1]-offset_lift for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
-
+	s_filter=[s[idx+1] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
 	fy['leftlift']=fy.iloc[s_filter]['left']
 	fy['leftoff']=fy.iloc[s]['left']
-	
 	s_filter=[s[idx] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
 	fy["leftstrike"]=fy.iloc[s_filter]['left']
-	
-	
-	
-	right_swing=argrelextrema(fy.right.values, np.less_equal, order=n)#[0]['right']
+
+	right_swing=argrelextrema(fy.right.values, np.less_equal, order=n)
 	s=right_swing[0]
 	s_filter=[s[idx+1] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
 	fy['rightlift']=fy.iloc[s_filter]['right']
 	fy['rightoff']=fy.iloc[s]['right']
 	s_filter=[s[idx] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
 	fy['rightstrike']=fy.iloc[s_filter]['right']
-	
-	#fy['r_strike'] = fy.iloc[argrelextrema(fy.right.values, np.greater_equal, order=n)[0]-smooth_size]['right']
-	#fy['l_strike'] = fy.iloc[argrelextrema(fy.left.values, np.greater_equal, order=n)[0]-smooth_size]['left']
-	
-	
-	if correction:
-		return fp_correction(fy)
-	else:
-		return fy
 
-def fp_correction(fy_df,side='left',what="strike"):
-	corr_df=fy_df.copy()
+	return fp_correction(fy)
 
-	idx_lift=fy_df[fy_df[side+'lift'].notnull()].index.to_list()
-	idx_strike=fy_df[fy_df[side+'strike'].notnull()].index.to_list()
-	#print(idx_lift)
-	#print(idx_strike)
+def events_from_contact(contact):
+	"""	Processing of contact data to extract strike and lift off timestamps
+		
+		Note :
+		Equivalent to events_from_grf for the cpp implementation
+		of the reflex controller (different available data)"""
+	fy=contact.copy()
+	s=contact[contact.left==0].index
+
+	s_filter=[s[idx+1] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
+	fy['leftlift']=contact.iloc[s_filter]['left']
+	s_filter=[s[idx] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
+	fy['leftstrike']=contact.iloc[s_filter]['left']
+	
+	s=contact[contact.right==0].index
+
+	s_filter=[s[idx+1] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
+	fy['rightlift']=contact.iloc[s_filter]['right']
+	s_filter=[s[idx] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
+	fy['rightstrike']=contact.iloc[s_filter]['right']
+	
+	return fp_correction(fy)
+
+def fp_correction(event_df,side='left',what="strike"):
+	""" False positive correction
+
+		Dropping first all the strikes that are not followed by a lift off, 
+		then all the lift off that are not followed by a strike
+		Needed when using force feedback on the feet to split strides 
+		(python controller) as the signal may be noisy
+	"""
+	corr_df=event_df.copy()
+
+	idx_lift=event_df[event_df[side+'lift'].notnull()].index.to_list()
+	idx_strike=event_df[event_df[side+'strike'].notnull()].index.to_list()
+
 	if what=="strike":
 		"""
 		Checks that there is only one strike before the next lift detection.
@@ -74,7 +102,6 @@ def fp_correction(fy_df,side='left',what="strike"):
 				c_strike=idx_strike[n]
 				n_strike=idx_strike[n+1]
 				c_lift=idx_lift[n]
-				#print("C_strike",c_strike,"n_strike",n_strike,"c_lift",c_lift,"\n")
 				if n_strike<c_lift:
 					strike=idx_strike.pop(n+1)
 					print("Removing strike",strike)
@@ -94,7 +121,6 @@ def fp_correction(fy_df,side='left',what="strike"):
 				c_lift=idx_lift[n]
 				n_lift=idx_lift[n+1]
 				c_strike=idx_strike[n]
-				#print("C_strike",c_strike,"n_strike",n_strike,"c_lift",c_lift,"\n")
 				if n_lift<c_strike:
 					lift=idx_lift.pop(n+1)
 					print("Removing lift",lift)
@@ -103,6 +129,7 @@ def fp_correction(fy_df,side='left',what="strike"):
 		return corr_df
 
 def get_max_event_duration(idx_event1,idx_event2):
+	""" Maximum stride size for preallocation """
 	dur=[]
 	for idx in range(len(idx_event1)-1):
 		idx1=idx_event1[idx]
@@ -112,49 +139,79 @@ def get_max_event_duration(idx_event1,idx_event2):
 		dur.append(idx2-idx1)
 	return max(dur)
 
-def split_stride(df,fy_df,column,side='smart',how="strike_to_strike",with_timestamps=False):
+def split_stride(data_df,event_df,metric,side='smart',how="strike_to_strike",
+	with_timestamps=False):
+	""" Splits data according to gait events 
+
+			Input :
+			data_df -- trial dataframe, containing metric as one of the columns
+				(typically kinematics data), see import_raw in process_run.py
+			event_df -- Output of one of the event detection methods (grf or
+				contact)
+			metric -- column of data_df to be considered
+			side -- leg to consider for the gait events. Can be extracted from 
+				metric string in our implementation (side = 'smart',default 
+				value). This works if the metric contains 'left' or 'right' 
+				(case insensitive) or ends with '_r' / '_l'. 
+				Otherwise 'right' or 'left'
+			how -- start and end event to consider, either 'strike_to_strike' 
+				(default), 'strike_to_liftoff','liftoff_to_liftoff' or 
+				'liftoff_to_strike'
+			with_timestamps -- Include or not selected events timestamps to the 
+				output (False by default)
+
+			Output :
+			stride_df -- dataframe, with each column containing a different
+				stride. Temporal relations are kept.
+			(time_stamps) --  Optional, dict of tuples 
+				{stride#:(start_idx,end_idx)...} containing the index for
+				each stride. Depends on sampling rate
+
+	"""
 	if side=='smart':
-		lwr=column.lower()
+		lwr=metric.lower()
 		if 'left' in lwr or lwr[-2:]=='_l':
 			side='left'
 		elif 'right' in lwr or lwr[-2:]=='_r':
 			side='right'
 		else:
-			print("No side found in ",column,'taking right as default')
+			print("No side found in ",metric,'taking right as default')
 			side='right'
 	if how=="strike_to_strike":
-		idx_event1=fy_df[fy_df[side+'strike'].notnull()].index.to_list()
+		idx_event1=event_df[event_df[side+'strike'].notnull()].index.to_list()
 		idx_event2=idx_event1[1:]
 	elif how=="liftoff_to_liftoff":
-		idx_event1=fy_df[fy_df[side+'lift'].notnull()].index.to_list()
+		idx_event1=event_df[event_df[side+'lift'].notnull()].index.to_list()
 		idx_event2=idx_event1[1:]
 	elif how=="liftoff_to_strike":
-		idx_event1=fy_df[fy_df[side+'lift'].notnull()].index.to_list()
-		idx_event2=fy_df[fy_df[side+'strike'].notnull()].index.to_list()
+		idx_event1=event_df[event_df[side+'lift'].notnull()].index.to_list()
+		idx_event2=event_df[event_df[side+'strike'].notnull()].index.to_list()
 	elif how=="strike_to_liftoff":
-		idx_event1=fy_df[fy_df[side+'strike'].notnull()].index.to_list()
-		idx_event2=fy_df[fy_df[side+'lift'].notnull()].index.to_list()
+		idx_event1=event_df[event_df[side+'strike'].notnull()].index.to_list()
+		idx_event2=event_df[event_df[side+'lift'].notnull()].index.to_list()
 	
 	stride_index=pd.RangeIndex(0,int(get_max_event_duration(idx_event1,idx_event2)*100.0))
-	df_out=pd.DataFrame(index=stride_index)
+	stride_df=pd.DataFrame(index=stride_index)
 	time_stamps={}
 	for idx in range(len(idx_event1)-1):
 		idx1=idx_event1[idx]
 		idx2=idx_event2[idx]
 		if idx2<idx1:
 			idx2=idx_event2[idx+1]
-		st=df[column][idx1:idx2]
+		st=data_df[metric][idx1:idx2]
 		st.index=pd.RangeIndex(0,len(st))
 		st_newindex=st.reindex(stride_index)
 		st_name="stride"+str(idx)
 		time_stamps[st_name]=(idx1,idx2)
-		df_out[st_name]=st_newindex    
+		stride_df[st_name]=st_newindex    
 	if not with_timestamps:
-		return df_out
+		return stride_df
 	else:
-		return df_out,time_stamps
+		return stride_df,time_stamps
 
 def interp_gaitprcent(s,n_goal):
+	""" Interpolates  serie s to lenght n_goal, either by subsambling or 
+	downsampling """
 	if s is None:
 		print("Empty stride interpolate")
 		return pd.Series(np.zeros(n_goal))
@@ -176,133 +233,168 @@ def interp_gaitprcent(s,n_goal):
 		fr=s
 	return fr
 
-def interp_gaitprcent_df(s_df,n_goal):
-	n_strides,n_init=s_df.shape
-	interp_df=pd.DataFrame(np.full((n_strides,n_goal),np.nan))
-	if n_init>n_goal:
-		downsample_idx=np.linspace(0,n_init,n_goal,endpoint=False,dtype=int)
-		interp_df=s_df.loc[:,downsample_idx]
-		return interp_df
-	elif n_init<n_goal:
-		subsamble_idx=np.linspace(0,n_goal,n_init,endpoint=False,dtype=int)
-		interp_df.loc[:,subsamble_idx]=s_df
-		return interp_df.interpolate(axis=1) # linear interpolation
-	else:
-		return s_df.dropna()
 
 
-def get_all_stride(full_df,metric,interp=True,how="strike_to_strike",with_timestamps=False):
+def get_repr_from_grf(data_df,metric,stride_choice="repmax",
+						drop_n_first_strides=0,how="strike_to_strike"):
+	""" Returns value and variance for metric in data according to stride_choice
 
-	 # event detection
-	fy_df=add_strike_lift(full_df)
-	if with_timestamps:
-		spl_stride,ts=split_stride(full_df,fy_df,metric,how,with_timestamps=with_timestamps) # split by stride
-	else:
-		spl_stride=split_stride(full_df,fy_df,metric,how,with_timestamps=with_timestamps)
-	if interp:
-		for stride in spl_stride.columns:
-			spl_stride[stride]=interp_gaitprcent(spl_stride[stride],100)
-		spl_stride=spl_stride.dropna()
+		Gets the trial events thanks to contact data and splits the values of
+		metric in joints data according to these events.
+		Gets and returns the representative values and std of metric over the 
+		splitted strides
+
+		Input :
+			data_df -- Dataframe containing both ground reaction force (GRFy)
+				and kinematics information, typically output of get_raw in 
+				process_run.py
+			metric -- column of data_df to be considered
+			stride_choice -- method used to compute the representative stride
+				- repmax (default) : most representative stride for metric in 
+				 the trial (highest correlation with other strides)
+				- mean : mean over 'good strides' (above average correlation 
+				with other strides) 
+				- strideX : single stride, with X being the stride number
+			drop_n_first_strides -- number of initial strides to be dropped when
+			 	we use a launching gait, 0 by default
+			how -- start and end event to consider, either 'strike_to_strike' 
+				(default), 'strike_to_liftoff','liftoff_to_liftoff' or 
+				'liftoff_to_strike'
 		
-	if with_timestamps:
-		return spl_stride,ts# split by stride
-	else:
-		return spl_stride
+		Output :
+			y -- value of metric for the chosen representative stride
+			var -- variance of metric over all the strides of the trial 
+				(excluding dropped initial strides)
 
-def get_mean_std_stride(full_df,metric,fy_df=None,interp=True,how="strike_to_strike",stride_choice="repmax"):
-	if fy_df is None:
-		fy_df=add_strike_lift(full_df)
-	
-	spl_stride=split_stride(full_df,fy_df,metric,how=how) # split by stride
-	for stride in spl_stride.columns:
-		spl_stride[stride]=interp_gaitprcent(spl_stride[stride],100)
-	
-	spl_stride=spl_stride.dropna()
-	cor=spl_stride.corr() # computes correlation
-	
-	su=cor.sum(axis=1)
-	rep_index=su[su.values>su.mean()].index
-	rep_strides=spl_stride.filter(items=rep_index)
-	
-	var=spl_stride.std(axis=1)
-	if stride_choice=="repmax":
-		rep_max_idx=su[su.values==su.max()].index
-		#print("repmax:",rep_max_idx)
-		y=rep_strides[rep_max_idx].iloc[:,0]
-	elif stride_choice=="mean":
-		 y=rep_strides.mean(axis=1)
-	elif stride_choice in spl_stride.columns:
-		y=spl_stride[stride_choice]
-	else:
-		raise ValueError('stride_choice',stride_choice)
-	if interp:
-		var=interp_gaitprcent(var,100)
-		y=interp_gaitprcent(y,100)
-	return y,var
-# ALTERNATES TO HANDLE FLORIN FORMAT
-def split_stride_contact(contact):
-	fy=contact.copy()
-	s=contact[contact.left==0].index
 
-	s_filter=[s[idx+1] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
-	fy['leftlift']=contact.iloc[s_filter]['left']
-	s_filter=[s[idx] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
-	fy['leftstrike']=contact.iloc[s_filter]['left']
-	
-	s=contact[contact.right==0].index
-
-	s_filter=[s[idx+1] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
-	fy['rightlift']=contact.iloc[s_filter]['right']
-	s_filter=[s[idx] for idx in range(len(s)-1) if s[idx+1]-s[idx]>10 ]
-	fy['rightstrike']=contact.iloc[s_filter]['right']
-	
-	return fp_correction(fy)
-class timer:
-	def __init__(self):
-		self.t1=time.time_ns()
-	def end(self):
-		print("\n[TIMER]",(time.time_ns()-self.t1)/1e6)
-def get_rep_var_from_contact(contact,metric,joints,drop_n_first_strides=3,how="strike_to_strike"):
-	if metric not in joints.columns:
-		print('\n[ERROR] Metric:\t',metric)
-		print('\n[ERROR] Columns:\t',joints.columns)
+		Note : 
+		Equivalent to get_repr_from_contact for the cpp implementation
+		of the reflex controller (different available data)"""
+	if metric not in data_df.columns:
+		if LOG_LEVEL<=LOG_ERROR:
+			print("\n[ERROR] Desired metric (",metric,") is not available \
+				in input data\n",data_df.columns)
 		raise KeyError 
-	stride_choice='repmax'
+	try:
+		grf_df=data_df.filter(like="Fy",axis=1)
+		grf_df.columns=['left','right']
+	except ValueError:
+		if LOG_LEVEL<=LOG_ERROR:
+			print("[ERROR]Missing grf data:\n",data_df.columns)
+		raise ValueError
+	event_df=events_from_grf(grf_df)
+	
+	spl_stride=split_stride(data_df,event_df,metric,how=how) # split by stride
+	return _get_repr_std(spl_stride,stride_choice,drop_n_first_strides)
+	
 
-	fy_df=split_stride_contact(contact)
-	spl_stride=split_stride(joints,fy_df,metric,how=how)
-	spl_stride.drop(spl_stride.iloc[:,0:drop_n_first_strides-1], axis=1, inplace=True)
 
+def get_repr_from_contact(data_df,metric,stride_choice="repmax",
+							drop_n_first_strides=3,how="strike_to_strike"):
+	""" Returns value and variance for metric in data according to stride_choice
+
+		Gets the trial events thanks to contact data and splits the values of
+		metric in joints data according to these events.
+		Gets and returns the representative values and std of metric over the 
+		splitted strides
+
+		Input :
+			data_df -- Dataframe containing both contact information (footfall)
+				and kinematics information, typically output of get_raw in 
+				process_run.py
+			metric -- column of data_df to be considered
+			stride_choice -- method used to compute the representative stride
+				- repmax (default) : most representative stride for metric in 
+				 the trial (highest correlation with other strides)
+				- mean : mean over 'good strides' (above average correlation with 
+				other strides) 
+				- strideX : single stride, with X being the stride number
+			drop_n_first_strides -- number of initial strides to be dropped when
+			 	we use a launching gait, 3 by default 
+				see settings.xml file used for the simulation (in humanWebotsNmm/config)
+			how -- start and end event to consider, either 'strike_to_strike' 
+				(default), 'strike_to_liftoff','liftoff_to_liftoff' or 
+				'liftoff_to_strike'
+		
+		Output :
+			y -- value of metric for the chosen representative stride
+			var -- variance of metric over all the strides of the trial 
+				(excluding dropped initial strides)
+
+
+		Note : 
+		Equivalent to get_repr_from_grf for the python implementation
+		of the reflex controller (different available data)"""
+	if metric not in data_df.columns:
+		if LOG_LEVEL<=LOG_ERROR:
+			print("\n[ERROR] Desired metric (",metric,") is not available \
+				in input data\n",data_df.columns)
+		raise KeyError 
+	try:
+		contact_df=data_df.filter(like="footfall1")
+		contact_df.columns=["left","right"]
+	except ValueError:
+		if LOG_LEVEL<=LOG_ERROR:
+			print("[ERROR]Missing contact data:\n",data_df.columns)
+		raise ValueError
+
+	event_df=events_from_contact(contact_df)
+	spl_stride=split_stride(data_df,event_df,metric,how=how)
+	return _get_repr_std(spl_stride,stride_choice,drop_n_first_strides)
+	
+
+def _get_repr_std(spl_stride,stride_choice,drop_n_first_strides):
+	""" Computes value and variance for input strides
+
+		Input :
+			spl_stride -- dataframe, with each column corresponding to a 
+				different stride
+
+			stride_choice -- method used to compute the representative stride
+				- repmax : most representative stride for metric in 
+				 the trial (highest correlation with other strides)
+				- mean : mean over 'good strides' (above average correlation with 
+				other strides) 
+				- strideX : single stride, with X being the stride number
+			drop_n_first_strides -- number of initial strides to be dropped when
+			 	we use a launching gait		
+		Output :
+			y -- value of metric for the chosen representative stride
+			var -- variance of metric over all the strides of the trial 
+				(excluding dropped initial strides)	"""
+	spl_stride.drop(spl_stride.iloc[:,0:drop_n_first_strides-1], axis=1, 
+		inplace=True)
 
 	for stride in spl_stride.columns:
 		spl_stride[stride]=interp_gaitprcent(spl_stride[stride],101)
 	spl_stride=spl_stride.dropna()
 
 	cor=spl_stride.corr() # computes correlation
-	su=cor.sum(axis=1)
+	su=cor.sum(axis=1) # summed correlation with all the other strides
 
 	var=spl_stride.std(axis=1)
 
 	if stride_choice=="repmax":
 		rep_max_idx=su[su.values==su.max()].index
 		try:
-			y=spl_stride[rep_max_idx[0]]#.iloc[:,0]
+			y=spl_stride[rep_max_idx[0]]
 		except IndexError:
-			#print("\n[WARNING]No repmax stride\n",spl_stride)
+			if LOG_LEVEL<=LOG_WARNING:
+				print("[WARNING]No representative stride, \
+					setting values to zero")
 			y=pd.Series(np.zeros(100)) 
 	elif stride_choice=="mean":
-		rep_index=su[su.values>su.mean()].index
+		rep_index=su[su.values>su.mean()].index 
+		""" mean value over the "good strides" (correlation greater than mean 
+		correlation) to avoid artifacts due to a "bad stride" (typically 
+		triping) """
 		rep_strides=spl_stride.filter(items=rep_index)
 		y=rep_strides.mean(axis=1)
 	elif stride_choice in spl_stride.columns:
 		y=spl_stride[stride_choice]
 	else:
-		print("\n[ERROR]Stride choice:\t",stride_choice)
+		if LOG_LEVEL<=LOG_ERROR:
+			print("[ERROR]Stride choice:\t",stride_choice,
+				"\n Available strides:",spl_stride.columns)
 		raise ValueError
 	return y,var
-
-
-if __name__ == '__main__':
-	s_df=pd.DataFrame(np.random.randint(0,20,(3,20)))
-	print(interp_gaitprcent_df(s_df,10))
-		

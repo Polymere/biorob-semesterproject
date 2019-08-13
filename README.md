@@ -1,19 +1,16 @@
 # Repository for semester project : Sensitity analysis on reflex parameters using a sensory driven bio-inspired controller for human locomotion
 
- -> Project summary
 
- [FOR FLORIN (fitness computation)](#fitness-computation)
- 
-## Running the code
+## Setup
 REQUIRED : conda
 
-### Scripts
-
-`source env.sh`
+`source env.sh` in each shell session
 
 - Installs the conda environment (see dependencies) if not installed
 - Activates the env
 - Appends ./src to PYTHONPATH 
+
+Otherwise, install manually dependencies and env as follows
 
 ### Dependencies
 
@@ -22,7 +19,7 @@ Additional python packages dependencies are :
 - pandas (handling the data)
 - pyyaml (yaml file read/write)
 - jupyter notebook (not required, used for prototyping)
-- seaborn (nicer plots for notebooks)
+- seaborn (nicer plots)
 
 These dependencies were installed in a conda environment, which can be installed with:
   
@@ -34,15 +31,13 @@ The src folder should be added to the PYTHONPATH
 
 `export PYTHONPATH=$PYTHONPATH:path/to/repo/src`
 
-### Fitness computation
 
- Either :
 
- 1. Call `import_and_process_from_dir` (located in src/data_analysis/process_run.py) with the log folder (/humanWebotsNmm/log/folder) or a list of log folders
- 2. Run `python process_run.py cpp_import_process logfolders`
+## Documentation 
 
-Result is a fitness value / list of fitness values
-
+Requires `doxygen` and `doxypypy`, then run 
+	`doxygen config_dox.bak`
+Open doc/html/index.html with web browser
 
 
 ## Milestones
@@ -172,12 +167,49 @@ Once the best set of parameters to fit the data is found, evaluate :
  - Weeks 11-13
 	- Setup for the CPP implementation DONE
 	- Refactored the code to handle CPP and Python controller/logging DONE
-	- Speed up run evaluations for GA WIP
-	- Setup to run on the cluster WIP
+	- Speed up run evaluations for GA DONE
+	- Setup to run on the cluster DONE (in theory, could not run in the end because webots)
 	- New sensitivity analysis with CPP model (ranges from Geyer paper) DONE, good results
-	- GA implementation WIP
-	- Extend GA to NSGA-II algo TODO(to do)
+	- GA implementation DONE 
+	- Extend GA to NSGA-II algo TODO (-> week14)
+
+- Week 14
+	- refactor code to separate optimizers from controller DONE
+	- Implement NSGAII sorting DONE
+	- Implement PSO DONE
+	- run benchmarks on implemented methods DONE
+	- run optimizations DONE
+		- Multiple hyper-parameters set tested on two patients
+		- Changed stride plit method 
+	
 
 
+## Scripts
 
+### Webots file generation 
+
+./createGAWorlds 2D_noObstacle_GA.wbt 1 N in webots/worlds
+
+./createGAConfig 2D_ind1 1 N in config
+
+Generates worlds and directories for N individuals (needed for parallel evaluation)
+
+### Sensitivity analysis
+In src/run_batch_controller :
+
+	`python run_launcher.py IMPL cpp parallel_sensitivity_analysis PARAM_FILE`
+	
+with IMPL being either py or cpp (implementation of the reflex controller), and PARAM_FILE
+the parameter file used for sensitivity analysis (see data/sensi_config/sensi_template.yaml)
+
+### Optimization
+
+In src/optimisation :
+
+	`python controller.py EV_CONFIG_FNAME (model)`
+
+with EV_CONFIG_FNAME the name of the configuration file (.yaml),
+located in repo/data/references (see ev_config_template.yaml)
+and model an optional argument specifying which model to use / debug mode
+(cpp model without debug messages by default)
 

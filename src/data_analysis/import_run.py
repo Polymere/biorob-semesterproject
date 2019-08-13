@@ -1,3 +1,5 @@
+# DEPRECATED ??
+
 import numpy as np
 import os
 import sys
@@ -8,19 +10,13 @@ from shutil import copyfile
 
 import utils.file_utils as fu
 
-import argparse
 
-# create the top-level parser
-parser = argparse.ArgumentParser(prog='PYTHON_NMM_OL')
-parser.add_argument("-p", "--path", help="Path to run raw data", default="/data/prevel/human_2d/webots/controllers/GeyerReflex/Raw_files")
-parser.add_argument("-op", "--output_path", help="Output path for csv file", default="/data/prevel/repos/biorob-semesterproject/data")
+CSV_SAVE_DIR="/data/prevel/repos/biorob-semesterproject/data" # PATH
 
-CSV_SAVE_DIR="/data/prevel/repos/biorob-semesterproject/data" # remove
-
-DEFAULT_PATH="/data/prevel/human_2d/webots/controllers/GeyerReflex/Raw_files"
+DEFAULT_PATH="/data/prevel/human_2d/webots/controllers/GeyerReflex/Raw_files" # PATH
 
 IGNORE_FILES=["f_ce.txt","f_se.txt","l_ce.txt","stim.txt","v_ce.txt"]
-IGNORE_FILES=[]
+IGNORE_FILES=[] # PATH
 
 DEFAULT_INCLUDE_FILES=["distance1","energy1","footfall1","joints_angle1"]
 

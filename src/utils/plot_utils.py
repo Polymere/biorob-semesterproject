@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 
-def plot_correlation_window(s1,s2,nwind,ax=None,save=False,sq=None):
+def plot_correlation_window(s1,s2,nwind,ax=None,save=False,scale=None):
 	if ax is None:
 		ax=plt.axes()
 	if len(s1)!=len(s2):
@@ -25,12 +25,12 @@ def plot_correlation_window(s1,s2,nwind,ax=None,save=False,sq=None):
 			a=0.5
 		if r<0:
 			c='r'
-			if sq is not None:
-				r=r*abs(sq[1])
+			if scale is not None:
+				r=r*abs(scale[1])
 		else:
 			c='g'
-			if sq is not None:
-				r=r*abs(sq[0])
+			if scale is not None:
+				r=r*abs(scale[0])
 		ax.bar((start+stop)/2,r,wind_size*0.95,color=c,alpha=a)
 
 	return ax

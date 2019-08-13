@@ -1,0 +1,49 @@
+# Template for sensitivity analysis parameters
+# syntax : {param_name : [mode, values] }
+  # param_name -- name of the parameter to test (used names depends on the 
+  #   controller implementation, see data/geyer_cpp_default.yaml or 
+  #   data/map_geyer_syme.yaml for reference
+  # mode -- either single, range, modrange,dual_modrange 
+  #   (see generate_paramfile_range.py)
+  # values -- values used, meaning depends on mode
+
+# EXAMPLES (CPP)
+{deltas : [ single,0,1,2,3,4]}
+# Delta S offset, mode = single, values to test = 0,1,2,3,4
+
+
+{hamham_wf: [range,0,10,3]}
+# Hamstring gain, mode = range, min value = 0, max value = 10,
+# number of points = 3 
+
+{solsol_wf: [modrange, 0,4,1,10]}
+# Soleus gain, mode = modrange, min value = 0, max value = 4, center value = 1
+# number of points = 10 -> 5 points between 0 and 1, 5 points between 1 and 4
+{sol_gas: [dual_modrange, [solsol_wf, 0,4,1,10], [gasgas_wf, 0,4,1,10] }
+# 2 parameter variation (soleus and gastrocnemius gains), param_name (sol_gas)
+# is not important (only used as a folder name). Generates all the combinations
+# of soleus and gastroncnemius gains in the specified ranges (here 100 pairs !)
+
+# EXAMPLES (PYTHON)
+  # Similar, only parameter names changes. As  there is not a one to one
+  # relation between parameters (as defined in the geyer reflex model original 
+  # paper) and the parameter file read by the python controller (example in
+  # data/geyer_python_default.yaml), a mapping is performed 
+  # ( see data/map_geyer_syme.yaml and PythonMapper in 
+  # run_batch_controller/unfold_param.py)
+
+{Delta_S : [ single,0,1,2,3,4]}
+# Delta S offset, mode = single, values to test = 0,1,2,3,4
+{G_SOL: [modrange, 0,4,1,10]}
+# Soleus gain, mode = modrange, min value = 0, max value = 4, center value = 1
+# number of points = 10 -> 5 points between 0 and 1, 5 points between 1 and 4
+
+{G_HAM: [range,0,10,3]}
+# Hamstring gain, mode = range, min value = 0, max value = 10,
+# number of points = 3 
+
+{sol_gas: [dual_modrange, [G_SOL, 0,4,1,10], [G_GAS, 0,4,1,10] }
+# 2 parameter variation (soleus and gastrocnemius gains), param_name (sol_gas)
+# is not important (only used as a folder name). Generates all the combinations
+# of soleus and gastroncnemius gains in the specified ranges (here 100 pairs !)
+

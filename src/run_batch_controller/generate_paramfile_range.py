@@ -1,35 +1,35 @@
+#!/usr/bin/env python
+""" @package generate_paramfile_range
+File generation for sensitivity analysis
+
+Mutiple methods to generate (minimal) parameter files for sensitivity analysis
+The files generated MUST be unfolded (see unfold_param.py) before simulation
+"""
 import sys
 import os
 import utils.file_utils as fu
 import numpy as np
 import yaml
-"""
-Mutiple methods to generate (minimal) parameter files for sensitivity analysis
-The files generated MUST be unfolded (see unfold_param.py) before simulation
 
-Methods:
-	1. gen_all_file -> meta-method, syntax example in /examples/ex_sensitivity.yaml
-	TODO -> create expale file
+LOG_DEBUG=1
+LOG_INFO=2
+LOG_WARNING=3
+LOG_ERROR=4
+LOG_LEVEL=LOG_WARNING
 
-	2. gen_single :
-	...
-	COMPLETE
-"""
-def _check_error_wrn(output_dir,save):
-	if save and output_dir is None:
-		print("Specify output_dir to save parameter files")
-		raise ValueError
-	if save:
-		print("Parameter file generation should be removed (variable instead)")
-		raise DeprecationWarning
-def gen_all_file(all_params_file,output_dir=None,standalone=False,nested=False,save=False):
-	_check_error_wrn(output_dir, save)
-	if standalone and save:
-		fu.assert_dir(output_dir,should_be_empty=True)
-	all_params=yaml.load(open(all_params_file,'r'))
+def gen_all_file(param_file,output_dir=None,standalone=False,nested=False,
+	save=False):
+	""" Generates all pairs {param_name:value} required by param_file 
+	(see data/sensi_template,yaml for reference)
+
+	"""
+	_check_error_dir(output_dir, save,standalone)
+	all_params=yaml.load(open(param_file,'r'),Loader=yaml.FullLoader)
 	file_counter=1
 	files=[]
 	for name,parameters in all_params.items():
+		if LOG_LEVEL<=LOG_DEBUG:
+			print("[DEBUG] Reading:\t Name:",name,"\nParameters:",parameters)
 		if nested and save:
 			rdir=os.path.join(output_dir,name)
 			fu.assert_dir(rdir,should_be_empty=True)
@@ -39,21 +39,28 @@ def gen_all_file(all_params_file,output_dir=None,standalone=False,nested=False,s
 			rdir=None
 
 		if parameters[0]=="single":
-			files.append(gen_single(parameters[1:], name, output_dir=rdir,save=save))
+			files.append(gen_single(parameters[1:], name, output_dir=rdir,
+				save=save))
 
 		elif parameters[0]=="range":
-			files.append(gen_range(parameters[1:], name, output_dir=rdir,save=save))
+			files.append(gen_range(parameters[1:], name, output_dir=rdir,
+				save=save))
 
 		elif parameters[0]=="modrange":
-			files.append(gen_modrange(parameters[1:], name, output_dir=rdir,save=save))
+			files.append(gen_modrange(parameters[1:], name, output_dir=rdir,
+				save=save))
 		elif parameters[0]=="dual_modrange":
-			files.append(gen_dual_modrange(parameters[1:], name, output_dir=rdir,save=save))
+			files.append(gen_dual_modrange(parameters[1:], name, 
+				output_dir=rdir,save=save))
 	return files,list(all_params.keys())
 
 def gen_single(values,param_name,output_dir=None,standalone=False,save=False):
-	_check_error_wrn(output_dir, save)
-	if standalone and save:
-		fu.assert_dir(output_dir,should_be_empty=True)
+	""" Generates a pair {param_name: value} for each single value
+
+		Example :
+		values = [0,1,2,3,4 ] val1 = 0, val2= 1 ...
+	"""
+	_check_error_dir(output_dir, save, standalone)
 	file_counter=1
 	files=[]
 	for val in values:
@@ -70,9 +77,13 @@ def gen_single(values,param_name,output_dir=None,standalone=False,save=False):
 		return None
 
 def gen_range(values,param_name,output_dir=None,standalone=False,save=False):
-	_check_error_wrn(output_dir, save)
-	if standalone and save:
-		fu.assert_dir(output_dir,should_be_empty=True)
+	""" Generates pairs {param_name:value} according to range in values
+
+		Example
+		values = [0,10,3] min value = 0, max value = 10,number of points = 3 
+
+	"""
+	_check_error_dir(output_dir, save,standalone)
 	if len(values)!=3:
 		print("Unexpected range format\t",values,"\t Should be min max number")
 	min_bound=float(values[0])
@@ -93,18 +104,19 @@ def gen_range(values,param_name,output_dir=None,standalone=False,save=False):
 	else:
 		return None
 
-def _modlinespace(min_bound,max_bound,center_val,npoints):
-	npoints=int(npoints)
-	nlow=int(npoints/2)
-	nhigh=npoints-nlow
-	lin_low=np.linspace(float(min_bound),float(center_val),nlow,endpoint=False)
-	lin_high=np.linspace(float(center_val),float(max_bound),nhigh)
-	return np.concatenate((lin_low, lin_high))
+
 
 def gen_modrange(values,param_name,output_dir=None,standalone=False,save=False):
-	_check_error_wrn(output_dir, save)
-	if standalone and save:
-		fu.assert_dir(output_dir,should_be_empty=True)
+	""" Generates pairs {param_name:value} according to ranges in values, with 
+	different step sizes
+
+	Example :
+	values = [solsol_wf, 0,4,1,10]
+	 min value = 0, max value = 4, center value = 1
+	 number of points = 10 -> 5 points between 0 and 1, 5 points between 1 and 4
+	"""
+	_check_error_dir(output_dir, save,standalone)
+
 	if len(values)!=4:
 		print("Unexpected range format\t",values,"\t Should be min max center number")
 	file_counter=1
@@ -124,10 +136,13 @@ def gen_modrange(values,param_name,output_dir=None,standalone=False,save=False):
 		return None
 		
 def gen_dual_modrange(values,gen_name,output_dir=None,standalone=False,save=False):
-	_check_error_wrn(output_dir, save)
-	if standalone and save:
-		fu.assert_dir(output_dir,should_be_empty=True)
+	""" Generates combinations of two pairs {param_name1:value1,
+	 param_name2:value2} according to ranges in values, with different step size 
 
+	Example:
+	values = [ [solsol_wf, 0,4,1,10], [gasgas_wf, 0,4,1,10] ]
+	"""
+	_check_error_dir(output_dir, save,standalone)
 	p1=values[0]
 	p2=values[1]
 	name1=p1[0]
@@ -152,6 +167,24 @@ def gen_dual_modrange(values,gen_name,output_dir=None,standalone=False,save=Fals
 		return files
 	else:
 		return None
+def _modlinespace(min_bound,max_bound,center_val,npoints):
+	""" Composite linespace
+	"""
+	npoints=int(npoints)
+	nlow=int(npoints/2)
+	nhigh=npoints-nlow
+	lin_low=np.linspace(float(min_bound),float(center_val),nlow,endpoint=False)
+	lin_high=np.linspace(float(center_val),float(max_bound),nhigh)
+	return np.concatenate((lin_low, lin_high))
+
+def _check_error_dir(output_dir,save,standalone):
+	""" Input consistency check
+	"""
+	if save and output_dir is None:
+		print("Specify output_dir to save parameter files")
+		raise ValueError
+	if standalone and save:
+		fu.assert_dir(output_dir,should_be_empty=True)
 
 if __name__ == '__main__':
 	if len(sys.argv)>1:
